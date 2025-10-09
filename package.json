@@ -4,13 +4,15 @@
   "description": "Minimal user+password demo (Node + SQLite)",
   "main": "index.js",
   "scripts": {
-     "start": "node index.js",
-     "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "start:firebase": "node server-firebase.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "express": "^4.19.2",
+    "firebase": "^12.3.0",
+    "firebase-admin": "^13.5.0",
     "sqlite3": "^5.1.7"
   }
 }
-
