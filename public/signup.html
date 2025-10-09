@@ -49,7 +49,19 @@
             <div class="form-group">
               <label for="password" class="label">Password</label>
               <input id="password" name="password" type="password" placeholder="••••••••" class="input" required>
-              <div id="passwordError" class="error-message">Password must be at least 6 characters.</div>
+              <div id="passwordError" class="error-message"></div>
+              
+              <!-- Password Requirements -->
+              <div class="password-requirements" style="margin-top: 0.5rem; font-size: 0.75rem;">
+                <p style="color: var(--muted-foreground); margin-bottom: 0.25rem;">Password must contain:</p>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                  <li id="req-length" class="requirement">✗ At least 8 characters</li>
+                  <li id="req-uppercase" class="requirement">✗ One uppercase letter</li>
+                  <li id="req-lowercase" class="requirement">✗ One lowercase letter</li>
+                  <li id="req-number" class="requirement">✗ One number</li>
+                  <li id="req-special" class="requirement">✗ One special character (!@#$%^&*)</li>
+                </ul>
+              </div>
             </div>
 
             <div class="form-group">
@@ -75,12 +87,41 @@
   </div>
 
   <script>
+    // Password validation requirements
+    const passwordRequirements = {
+      length: { regex: /.{8,}/, element: document.getElementById('req-length') },
+      uppercase: { regex: /[A-Z]/, element: document.getElementById('req-uppercase') },
+      lowercase: { regex: /[a-z]/, element: document.getElementById('req-lowercase') },
+      number: { regex: /[0-9]/, element: document.getElementById('req-number') },
+      special: { regex: /[!@#$%^&*(),.?":{}|<>]/, element: document.getElementById('req-special') }
+    };
+
+    // Real-time password validation
+    document.getElementById('password').addEventListener('input', function(e) {
+      const password = e.target.value;
+      
+      for (const [key, requirement] of Object.entries(passwordRequirements)) {
+        if (requirement.regex.test(password)) {
+          requirement.element.style.color = 'var(--primary)';
+          requirement.element.innerHTML = '✓ ' + requirement.element.textContent.substring(2);
+        } else {
+          requirement.element.style.color = 'var(--muted-foreground)';
+          requirement.element.innerHTML = '✗ ' + requirement.element.textContent.substring(2);
+        }
+      }
+    });
+
+    // Validate password strength
+    function isPasswordValid(password) {
+      return Object.values(passwordRequirements).every(req => req.regex.test(password));
+    }
+
     // Enhanced client-side validation for signup form
     document.getElementById('signupForm').addEventListener('submit', function (e) {
       const username = document.getElementById('username').value.trim();
       const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const confirmPassword = document.getElementById('confirmPassword').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
 
       const usernameError = document.getElementById('usernameError');
       const emailError = document.getElementById('emailError');
@@ -97,6 +138,7 @@
       // Email validation (required)
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!email || !emailPattern.test(email)) {
+        emailError.textContent = 'Please enter a valid email address.';
         emailError.style.display = 'block';
         isValid = false;
       }
@@ -107,8 +149,9 @@
         isValid = false;
       }
 
-      // Password validation
-      if (!password || password.length < 6) {
+      // Password strength validation
+      if (!isPasswordValid(password)) {
+        passwordError.textContent = 'Password does not meet all requirements.';
         passwordError.style.display = 'block';
         isValid = false;
       }
@@ -121,6 +164,14 @@
 
       if (!isValid) {
         e.preventDefault();
+      } else {
+        e.preventDefault(); // Prevent form submission
+        
+        // Store user email in localStorage
+        localStorage.setItem('userEmail', email);
+        
+        // Redirect to dashboard
+        window.location.href = 'dashboard.html';
       }
     });
   </script>

@@ -58,8 +58,10 @@
   </div>
 
   <script>
-    // Enhanced client-side validation
+    // Enhanced client-side validation and login handling
     document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault(); // Always prevent default to handle with JS
+      
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       const emailError = document.getElementById('emailError');
@@ -73,18 +75,24 @@
       // Email validation
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!email || !emailPattern.test(email)) {
+        emailError.textContent = 'Please enter a valid email address.';
         emailError.style.display = 'block';
         isValid = false;
       }
       
       // Password validation
-      if (!password || password.length < 6) {
+      if (!password || password.length < 8) {
+        passwordError.textContent = 'Password must be at least 8 characters.';
         passwordError.style.display = 'block';
         isValid = false;
       }
 
-      if (!isValid) {
-        e.preventDefault();
+      if (isValid) {
+        // Store user email in localStorage (simple session management)
+        localStorage.setItem('userEmail', email);
+        
+        // Redirect to dashboard
+        window.location.href = 'dashboard.html';
       }
     });
   </script>
