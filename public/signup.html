@@ -2,133 +2,80 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Sign Up</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .signup-container {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      width: 360px;
-    }
-
-    .signup-container h2 {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      color: #333;
-    }
-
-    .form-group {
-      margin-bottom: 1rem;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 0.3rem;
-      font-weight: bold;
-      font-size: 0.9rem;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 1rem;
-    }
-
-    .error-message {
-      color: red;
-      font-size: 0.85rem;
-      margin-top: 0.3rem;
-      display: none;
-    }
-
-    .signup-btn {
-      width: 100%;
-      padding: 0.7rem;
-      border: none;
-      border-radius: 8px;
-      background: #4f46e5;
-      color: white;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .signup-btn:hover {
-      background: #4338ca;
-    }
-
-    .extra-options {
-      text-align: center;
-      margin-top: 1rem;
-    }
-
-    .extra-options a {
-      display: block;
-      margin: 0.4rem 0;
-      text-decoration: none;
-      color: #4f46e5;
-      font-weight: bold;
-      transition: color 0.3s;
-    }
-
-    .extra-options a:hover {
-      color: #4338ca;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Personalized Recommendations Engine</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="signup-container">
-    <h2>Create an account</h2>
-    <form id="signupForm" action="/signup" method="POST">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="Choose a username (optional)">
-        <div id="usernameError" class="error-message">Username must be at least 3 characters if provided.</div>
+  <div class="min-h-screen bg-background flex flex-col">
+    <!-- Header -->
+    <header class="border-b border-border">
+      <div class="container mx-auto px-4 py-4">
+        <a href="index.html" class="flex items-center gap-2 w-fit">
+          <svg class="icon text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+          </svg>
+          <span class="text-xl font-bold font-sans">Personalized Recommendations Engine</span>
+        </a>
       </div>
+    </header>
 
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="Enter your email">
-        <div id="emailError" class="error-message">Please enter a valid email.</div>
+    <!-- Signup Form -->
+    <main class="flex-1 flex items-center justify-center px-4 py-12">
+      <div class="card w-full max-w-md bg-card border-border">
+        <div class="card-header">
+          <h1 class="text-3xl font-bold font-sans">Create an account</h1>
+          <p class="card-description">
+            Start discovering your next favorite music and movies
+          </p>
+        </div>
+        <div class="card-content">
+          <form id="signupForm" action="/signup" method="POST" class="space-y-4">
+            <div class="form-group">
+              <label for="username" class="label">Full Name</label>
+              <input id="username" name="username" type="text" placeholder="John Doe" class="input">
+              <div id="usernameError" class="error-message">Name must be at least 2 characters if provided.</div>
+            </div>
+
+            <div class="form-group">
+              <label for="email" class="label">Email</label>
+              <input id="email" name="email" type="email" placeholder="you@example.com" class="input" required>
+              <div id="emailError" class="error-message">Please enter a valid email.</div>
+            </div>
+
+            <div class="form-group">
+              <label for="password" class="label">Password</label>
+              <input id="password" name="password" type="password" placeholder="••••••••" class="input" required>
+              <div id="passwordError" class="error-message">Password must be at least 6 characters.</div>
+            </div>
+
+            <div class="form-group">
+              <label for="confirmPassword" class="label">Confirm Password</label>
+              <input id="confirmPassword" name="confirmPassword" type="password" placeholder="••••••••" class="input" required>
+              <div id="confirmError" class="error-message">Passwords do not match.</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full btn-lg">Create Account</button>
+          </form>
+
+          <div class="mt-6 text-center text-sm">
+            <span class="text-muted-foreground">Already have an account? </span>
+            <a href="login.html" class="text-primary hover:underline font-medium">Log in</a>
+          </div>
+
+          <p class="mt-6 text-xs text-center text-muted-foreground leading-relaxed">
+            By creating an account, you agree to our Terms of Service and Privacy Policy.
+          </p>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Create a password">
-        <div id="passwordError" class="error-message">Password must be at least 6 characters.</div>
-      </div>
-
-      <div class="form-group">
-        <label for="confirmPassword">Confirm Password</label>
-        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password">
-        <div id="confirmError" class="error-message">Passwords do not match.</div>
-      </div>
-
-      <button type="submit" class="signup-btn">Sign Up</button>
-    </form>
-
-    <div class="extra-options">
-      <a href="login.html">Back to login</a>
-      <a href="guest.html">Continue as Guest</a>
-    </div>
+    </main>
   </div>
 
   <script>
-    // Client-side validation for signup form before POSTing to server (/signup)
+    // Enhanced client-side validation for signup form
     document.getElementById('signupForm').addEventListener('submit', function (e) {
       const username = document.getElementById('username').value.trim();
       const email = document.getElementById('email').value.trim();
@@ -145,36 +92,36 @@
       passwordError.style.display = 'none';
       confirmError.style.display = 'none';
 
-      let ok = true;
+      let isValid = true;
 
-      // email is required for signup in this demo
-      const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,}$/i;
-      if (!email.match(emailPattern)) {
+      // Email validation (required)
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailPattern.test(email)) {
         emailError.style.display = 'block';
-        ok = false;
+        isValid = false;
       }
 
-      if (username.length > 0 && username.length < 3) {
+      // Username validation (optional, but if provided must be valid)
+      if (username.length > 0 && username.length < 2) {
         usernameError.style.display = 'block';
-        ok = false;
+        isValid = false;
       }
 
-      if (password.length < 6) {
+      // Password validation
+      if (!password || password.length < 6) {
         passwordError.style.display = 'block';
-        ok = false;
+        isValid = false;
       }
 
+      // Password confirmation
       if (password !== confirmPassword) {
         confirmError.style.display = 'block';
-        ok = false;
+        isValid = false;
       }
 
-      if (!ok) {
+      if (!isValid) {
         e.preventDefault();
       }
-
-      // If ok, the browser will POST form fields to /signup for server-side processing.
-      // Server should accept fields: username (optional), email, password
     });
   </script>
 </body>

@@ -1,26 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Welcome</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f3f4f6; display:flex; align-items:center; justify-content:center; height:100vh; margin:0 }
-    .card { background:#fff; padding:2rem; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.08); text-align:center; max-width:480px }
-    .card h1 { margin:0 0 0.5rem 0 }
-    .card p { color:#555 }
-    .home-link { display:inline-block; margin-top:1rem; color:#4f46e5; text-decoration:none; font-weight:bold }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome - Personalized Recommendations Engine</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="card">
-    <h1>Welcome!</h1>
-    <p>You have successfully logged in. You will be redirected to the homepage in a moment.</p>
-    <p><a class="home-link" href="/">Go to homepage now</a></p>
+  <div class="min-h-screen bg-background flex items-center justify-center px-4">
+    <div class="card max-w-md text-center p-12">
+      <div class="mb-6">
+        <svg class="icon text-primary mx-auto mb-4" style="width: 3rem; height: 3rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h1 class="text-3xl font-bold font-sans mb-2">Welcome to Personalized Recommendations Engine!</h1>
+      </div>
+      <p class="text-muted-foreground mb-6 leading-relaxed">
+        You have successfully logged in. Get ready to discover amazing music and movies tailored just for you!
+      </p>
+      <div class="space-y-4">
+        <a href="index.html" class="btn btn-primary w-full">Start Exploring</a>
+        <p class="text-sm text-muted-foreground">
+          You'll be redirected to the homepage in <span id="countdown">3</span> seconds...
+        </p>
+      </div>
+    </div>
   </div>
+  
   <script>
-    // Redirect to home after 3 seconds
-    setTimeout(() => window.location.href = '/', 3000);
+    // Countdown and redirect
+    let countdown = 3;
+    const countdownElement = document.getElementById('countdown');
+    
+    const timer = setInterval(() => {
+      countdown--;
+      countdownElement.textContent = countdown;
+      
+      if (countdown <= 0) {
+        clearInterval(timer);
+        window.location.href = '/';
+      }
+    }, 1000);
   </script>
 </body>
 </html>

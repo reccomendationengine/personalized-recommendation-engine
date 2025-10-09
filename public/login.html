@@ -2,120 +2,63 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Sample Login Page</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
- 
-    .login-container {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      width: 320px;
-    }
- 
-    .login-container h2 {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      color: #333;
-    }
- 
-    .form-group {
-      margin-bottom: 1rem;
-    }
- 
-    .form-group label {
-      display: block;
-      margin-bottom: 0.3rem;
-      font-weight: bold;
-      font-size: 0.9rem;
-    }
- 
-    .form-group input {
-      width: 100%;
-      padding: 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 1rem;
-    }
- 
-    .error-message {
-      color: red;
-      font-size: 0.85rem;
-      margin-top: 0.3rem;
-      display: none;
-    }
- 
-    .login-btn {
-      width: 100%;
-      padding: 0.7rem;
-      border: none;
-      border-radius: 8px;
-      background: #4f46e5;
-      color: white;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
- 
-    .login-btn:hover {
-      background: #4338ca;
-    }
- 
-    .extra-options {
-      text-align: center;
-      margin-top: 1rem;
-    }
- 
-    .extra-options a {
-      display: block;
-      margin: 0.4rem 0;
-      text-decoration: none;
-      color: #4f46e5;
-      font-weight: bold;
-      transition: color 0.3s;
-    }
- 
-    .extra-options a:hover {
-      color: #4338ca;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Personalized Recommendations Engine</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="login-container">
-    <h2>Login</h2>
-  <form id="loginForm" action="/login" method="POST">
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="Enter your email">
-        <div id="emailError" class="error-message">Please enter a valid email.</div>
+  <div class="min-h-screen bg-background flex flex-col">
+    <!-- Header -->
+    <header class="border-b border-border">
+      <div class="container mx-auto px-4 py-4">
+        <a href="index.html" class="flex items-center gap-2 w-fit">
+          <svg class="icon text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+          </svg>
+          <span class="text-xl font-bold font-sans">Personalized Recommendations Engine</span>
+        </a>
       </div>
- 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Enter your password">
-        <div id="passwordError" class="error-message">Password must be at least 6 characters.</div>
+    </header>
+
+    <!-- Login Form -->
+    <main class="flex-1 flex items-center justify-center px-4 py-12">
+      <div class="card w-full max-w-md bg-card border-border">
+        <div class="card-header">
+          <h1 class="text-3xl font-bold font-sans">Welcome back</h1>
+          <p class="card-description">Enter your credentials to access your account</p>
+        </div>
+        <div class="card-content">
+          <form id="loginForm" action="/login" method="POST" class="space-y-4">
+            <div class="form-group">
+              <label for="email" class="label">Email</label>
+              <input id="email" name="email" type="email" placeholder="you@example.com" class="input" required>
+              <div id="emailError" class="error-message">Please enter a valid email.</div>
+            </div>
+            <div class="form-group">
+              <div class="flex items-center justify-between">
+                <label for="password" class="label">Password</label>
+                <a href="#" class="text-sm text-primary hover:underline">Forgot password?</a>
+              </div>
+              <input id="password" name="password" type="password" placeholder="••••••••" class="input" required>
+              <div id="passwordError" class="error-message">Password must be at least 6 characters.</div>
+            </div>
+            <button type="submit" class="btn btn-primary w-full btn-lg">Log in</button>
+          </form>
+
+          <div class="mt-6 text-center text-sm">
+            <span class="text-muted-foreground">Don't have an account? </span>
+            <a href="signup.html" class="text-primary hover:underline font-medium">Sign up</a>
+          </div>
+        </div>
       </div>
- 
-      <button type="submit" class="login-btn">Login</button>
-    </form>
- 
-    <div class="extra-options">
-      <a href="signup.html">Sign Up</a>
-      <a href="guest.html">Continue as Guest</a>
-    </div>
+    </main>
   </div>
- 
+
   <script>
-    // Basic client-side validation; let the form POST to the server if valid.
+    // Enhanced client-side validation
     document.getElementById('loginForm').addEventListener('submit', function (e) {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
@@ -125,21 +68,24 @@
       emailError.style.display = 'none';
       passwordError.style.display = 'none';
 
-      let ok = true;
-      const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,}$/i;
-      if (!email.match(emailPattern)) {
+      let isValid = true;
+      
+      // Email validation
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailPattern.test(email)) {
         emailError.style.display = 'block';
-        ok = false;
+        isValid = false;
       }
-      if (password.length < 6) {
+      
+      // Password validation
+      if (!password || password.length < 6) {
         passwordError.style.display = 'block';
-        ok = false;
+        isValid = false;
       }
 
-      if (!ok) {
+      if (!isValid) {
         e.preventDefault();
       }
-      // if ok, allow browser to submit the form to /login (server handles response)
     });
   </script>
 </body>

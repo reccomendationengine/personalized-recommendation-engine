@@ -1,16 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width,initial-scale=1" />
-		<title>User Demo</title>
-	</head>
-	<body>
-		<main>
-			<h1>Welcome to the User Demo</h1>
-			<p>
-				<a href="login.html">Login</a> · <a href="signup.html">Sign up</a>
-			</p>
-		</main>
-	</body>
-	</html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personalized Recommendations Engine - Discover Your Next Favorite</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="min-h-screen bg-background">
+    <!-- Header -->
+    <header class="border-b border-border">
+      <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <svg class="icon text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+          </svg>
+          <span class="text-xl font-bold font-sans">Personalized Recommendations Engine</span>
+        </div>
+        <nav class="flex items-center gap-4">
+          <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
+          <a href="signup.html" class="btn btn-primary btn-sm">Sign up</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="container mx-auto px-4 py-20 md:py-32">
+      <div class="hero">
+        <h1 class="text-5xl md:text-7xl font-bold font-sans mb-6 text-balance">Discover Your Next Favorite</h1>
+        <p class="text-xl md:text-2xl text-muted-foreground mb-8 text-pretty leading-relaxed">
+          AI-powered recommendations for music and movies tailored to your unique taste. Find what you'll love before
+          you even know you're looking for it.
+        </p>
+        <div class="btn-group">
+          <a href="signup.html" class="btn btn-primary btn-lg px-8">Get Started</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="container mx-auto px-4 py-16">
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon primary">
+            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold font-sans mb-2">Music Discovery</h3>
+          <p class="text-muted-foreground leading-relaxed">
+            Explore new artists, albums, and tracks that match your musical preferences with precision.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon accent">
+            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h3a1 1 0 110 2h-1v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6H4a1 1 0 110-2h3zM9 6v10h6V6H9z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold font-sans mb-2">Movie Recommendations</h3>
+          <p class="text-muted-foreground leading-relaxed">
+            Find films that resonate with your taste, from hidden gems to blockbusters you might have missed.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon primary">
+            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold font-sans mb-2">AI-Powered</h3>
+          <p class="text-muted-foreground leading-relaxed">
+            Advanced algorithms learn from your preferences to deliver increasingly accurate suggestions.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon accent">
+            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold font-sans mb-2">Trending Insights</h3>
+          <p class="text-muted-foreground leading-relaxed">
+            Stay updated with what's popular while discovering content that matches your unique style.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon primary">
+            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold font-sans mb-2">Personalized Lists</h3>
+          <p class="text-muted-foreground leading-relaxed">
+            Create and manage custom playlists and watchlists based on your recommendations.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon accent">
+            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold font-sans mb-2">Instant Results</h3>
+          <p class="text-muted-foreground leading-relaxed">
+            Get recommendations in seconds with our lightning-fast recommendation engine.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="container mx-auto px-4 py-20">
+      <div class="cta-section">
+        <h2 class="text-4xl font-bold font-sans mb-4 text-balance">Ready to discover something amazing?</h2>
+        <p class="text-lg text-muted-foreground mb-8 text-pretty leading-relaxed">
+          Join thousands of users who've found their new favorites through our recommendation engine.
+        </p>
+        <a href="signup.html" class="btn btn-primary btn-lg px-8">Start Exploring</a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-border mt-20">
+      <div class="container mx-auto px-4 py-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-2">
+            <svg class="icon text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+            </svg>
+            <span class="font-bold font-sans">Personalized Recommendations Engine</span>
+          </div>
+          <p class="text-sm text-muted-foreground">© 2025 Personalized Recommendations Engine. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
