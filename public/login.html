@@ -1,146 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Sample Login Page</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
- 
-    .login-container {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      width: 320px;
-    }
- 
-    .login-container h2 {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      color: #333;
-    }
- 
-    .form-group {
-      margin-bottom: 1rem;
-    }
- 
-    .form-group label {
-      display: block;
-      margin-bottom: 0.3rem;
-      font-weight: bold;
-      font-size: 0.9rem;
-    }
- 
-    .form-group input {
-      width: 100%;
-      padding: 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 1rem;
-    }
- 
-    .error-message {
-      color: red;
-      font-size: 0.85rem;
-      margin-top: 0.3rem;
-      display: none;
-    }
- 
-    .login-btn {
-      width: 100%;
-      padding: 0.7rem;
-      border: none;
-      border-radius: 8px;
-      background: #4f46e5;
-      color: white;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
- 
-    .login-btn:hover {
-      background: #4338ca;
-    }
- 
-    .extra-options {
-      text-align: center;
-      margin-top: 1rem;
-    }
- 
-    .extra-options a {
-      display: block;
-      margin: 0.4rem 0;
-      text-decoration: none;
-      color: #4f46e5;
-      font-weight: bold;
-      transition: color 0.3s;
-    }
- 
-    .extra-options a:hover {
-      color: #4338ca;
-    }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Log in</title>
+
+  <!-- Styles live under /public/styles/ -->
+  <link rel="stylesheet" href="/styles/main.css">
 </head>
 <body>
-  <div class="login-container">
-    <h2>Login</h2>
-  <form id="loginForm" action="/login" method="POST">
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="Enter your email">
-        <div id="emailError" class="error-message">Please enter a valid email.</div>
+  <header>
+    <h1>Log in</h1>
+  </header>
+
+  <main>
+    <form id="loginForm" action="/login" method="POST" novalidate style="max-width:420px;">
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <label for="email">
+          Email
+          <input id="email" name="email" type="email" autocomplete="username"
+                 placeholder="you@example.com" required>
+        </label>
+
+        <label for="password">
+          Password
+          <input id="password" name="password" type="password" autocomplete="current-password"
+                 placeholder="••••••••" required minlength="6">
+        </label>
+
+        <button type="submit">Log in</button>
+
+        <p style="margin:4px 0 0;">
+          New here? <a href="signup.html">Create an account</a>
+        </p>
+
+        <p id="error" role="alert" style="display:none; color:#b00020; margin-top:4px;"></p>
       </div>
- 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Enter your password">
-        <div id="passwordError" class="error-message">Password must be at least 6 characters.</div>
-      </div>
- 
-      <button type="submit" class="login-btn">Login</button>
     </form>
- 
-    <div class="extra-options">
-      <a href="signup.html">Sign Up</a>
-      <a href="guest.html">Continue as Guest</a>
-    </div>
-  </div>
- 
+  </main>
+
   <script>
-    // Basic client-side validation; let the form POST to the server if valid.
-    document.getElementById('loginForm').addEventListener('submit', function (e) {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const emailError = document.getElementById('emailError');
-      const passwordError = document.getElementById('passwordError');
+    // Utility: very light email check
+    function isValidEmail(v) {
+      // not strict RFC; just enough for client-side UX
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
 
-      emailError.style.display = 'none';
-      passwordError.style.display = 'none';
+    // Prefill email from querystring (?email=...)
+    (function prefillFromQuery() {
+      try {
+        var params = new URLSearchParams(location.search);
+        var qsEmail = params.get('email');
+        if (qsEmail) {
+          var emailInput = document.getElementById('email');
+          if (emailInput) emailInput.value = qsEmail;
+        }
+      } catch (e) { /* ignore */ }
+    })();
 
-      let ok = true;
-      const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,}$/i;
-      if (!email.match(emailPattern)) {
-        emailError.style.display = 'block';
-        ok = false;
-      }
-      if (password.length < 6) {
-        passwordError.style.display = 'block';
-        ok = false;
-      }
+    // Handle submit: validate + remember email for "Returning user"
+    (function attachSubmitHandler() {
+      var form = document.getElementById('loginForm');
+      var emailInput = document.getElementById('email');
+      var passwordInput = document.getElementById('password');
+      var errorEl = document.getElementById('error');
 
-      if (!ok) {
-        e.preventDefault();
-      }
-      // if ok, allow browser to submit the form to /login (server handles response)
-    });
+      if (!form) return;
+
+      form.addEventListener('submit', function (e) {
+        var email = (emailInput && emailInput.value || "").trim();
+        var password = (passwordInput && passwordInput.value || "");
+
+        // Basic client-side validation
+        var messages = [];
+        if (!email) messages.push("Email is required.");
+        else if (!isValidEmail(email)) messages.push("Enter a valid email address.");
+
+        if (!password) messages.push("Password is required.");
+        else if (password.length < 6) messages.push("Password must be at least 6 characters.");
+
+        if (messages.length > 0) {
+          e.preventDefault();
+          if (errorEl) {
+            errorEl.textContent = messages.join(" ");
+            errorEl.style.display = "block";
+          }
+          return;
+        }
+
+        // Store last email so index page can offer "Continue as ..."
+        try { localStorage.setItem('lastEmail', email); } catch (err) { /* ignore */ }
+
+        // Let the form POST to /login; server handles redirect (e.g., to /welcome.html)
+      });
+    })();
   </script>
 </body>
 </html>
