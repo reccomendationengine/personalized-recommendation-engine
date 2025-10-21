@@ -390,7 +390,7 @@ body {
 }
 
 .btn-ghost:hover {
-  background-color: var(--accent);
+  background-color: darkcyan;
   color: var(--accent-foreground);
 }
 
