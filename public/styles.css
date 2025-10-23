@@ -18,6 +18,11 @@
   --input: oklch(0.88 0 0);
   --ring: oklch(0.55 0.18 240);
   --radius: 0.75rem;
+  --primary-hover: oklch(0.48 0.16 240);
+  --accent-hover: oklch(0.58 0.18 30);
+  --muted-bg: oklch(0.96 0 0);
+  --shadow: 0 1px 3px 0 oklch(0 0 0 / 0.08);
+  --shadow-strong: 0 4px 14px 0 oklch(0 0 0 / 0.08);
 }
 
 .dark {
@@ -38,6 +43,11 @@
   --border: oklch(0.24 0 0);
   --input: oklch(0.24 0 0);
   --ring: oklch(0.6 0.2 240);
+  --primary-hover: oklch(0.62 0.22 240);
+  --accent-hover: oklch(0.72 0.24 30);
+  --muted-bg: oklch(0.18 0 0);
+  --shadow: 0 1px 3px 0 oklch(0 0 0 / 0.45);
+  --shadow-strong: 0 6px 20px 0 oklch(0 0 0 / 0.5);
 }
 
 /* Base Styles */
@@ -227,15 +237,15 @@ body {
   padding-right: 2rem;
 }
 
-.space-y-1 > * + * {
+.space-y-1>*+* {
   margin-top: 0.25rem;
 }
 
-.space-y-2 > * + * {
+.space-y-2>*+* {
   margin-top: 0.5rem;
 }
 
-.space-y-4 > * + * {
+.space-y-4>*+* {
   margin-top: 1rem;
 }
 
@@ -366,12 +376,14 @@ body {
 .btn-primary {
   background-color: darkorchid;
   color: var(--primary-foreground);
-  box-shadow: 0 2px 4px -1px darkcyan; ;
+  box-shadow: 0 2px 4px -1px darkcyan;
+  ;
 }
 
 .btn-primary:hover {
   background-color: darkcyan;
 }
+
 .btn-outline {
   background-color: transparent;
   color: var(--foreground);
@@ -379,7 +391,7 @@ body {
 }
 
 .btn-outline:hover {
-  background-color: var(--accent);
+  background-color: darkcyan;
   color: var(--accent-foreground);
 }
 
@@ -389,7 +401,7 @@ body {
 }
 
 .btn-ghost:hover {
-  background-color: var(--accent);
+  background-color: darkorchid;
   color: var(--accent-foreground);
 }
 
@@ -494,26 +506,26 @@ body {
   .md\:grid-cols-2 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
   }
-  
+
   .md\:grid-cols-3 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
   }
-  
+
   .md\:text-7xl {
     font-size: 3rem;
     line-height: 1;
   }
-  
+
   .md\:text-2xl {
     font-size: 1.25rem;
     line-height: 1.75rem;
   }
-  
+
   .md\:py-32 {
     padding-top: 4rem;
     padding-bottom: 4rem;
   }
-  
+
   .md\:flex-row {
     flex-direction: row;
   }
@@ -677,7 +689,7 @@ nav {
 }
 
 /* Additional spacing utilities */
-.space-y-4 > * + * {
+.space-y-4>*+* {
   margin-top: 1rem;
 }
 
@@ -696,17 +708,17 @@ nav {
     font-size: 3rem;
     line-height: 1;
   }
-  
+
   .md\:text-2xl {
     font-size: 1.25rem;
     line-height: 1.75rem;
   }
-  
+
   .md\:py-32 {
     padding-top: 4rem;
     padding-bottom: 4rem;
   }
-  
+
   .md\:flex-row {
     flex-direction: row;
   }

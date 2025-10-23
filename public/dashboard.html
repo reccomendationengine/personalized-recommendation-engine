@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,21 +10,61 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
-  <div class="min-h-screen bg-background">
+  <div id="appRoot" class="min-h-screen bg-background">
     <!-- Header/Navigation -->
     <header class="border-b border-border">
       <div class="container mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <svg class="icon text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
             </svg>
             <span class="text-xl font-bold font-sans">Personalized Recommendations Engine</span>
           </div>
-          <nav class="flex items-center gap-4">
+          <nav class="flex items-center gap-4 header-controls">
+            <!-- Search Bar -->
+            <form id="searchForm" onsubmit="return false;">
+              <input id="searchInput" class="search-input" type="search" placeholder="Search recommendations, topics..."
+                aria-label="Search" />
+            </form>
+
+            <!-- Notifications -->
+            <div class="dropdown">
+              <button id="notifBtn" class="btn btn-ghost btn-sm" aria-haspopup="true" aria-expanded="false"
+                title="Notifications">
+                <div style="position:relative;">
+                  <svg style="width:1.25rem;height:1.25rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    class="icon">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  <span id="notifCount" class="notification-badge bg-accent text-white">3</span>
+                </div>
+              </button>
+
+              <div id="notifMenu" class="dropdown-menu" role="menu" aria-labelledby="notifBtn">
+                <div
+                  style="padding:0.5rem 0.75rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
+                  <strong>Notifications</strong>
+                  <button id="markAllRead" class="btn btn-ghost btn-sm small-text">Mark all read</button>
+                </div>
+                <div id="notifList" style="max-height:14rem; overflow:auto;">
+                  <!-- notifications will be injected here -->
+                </div>
+                <div style="padding:0.5rem; border-top:1px solid var(--border); text-align:center;">
+                  <button id="viewAllNotifs" class="btn btn-outline btn-sm w-full">View all</button>
+                </div>
+              </div>
+            </div>
+
             <span id="userEmail" class="text-sm text-muted-foreground"></span>
             <button id="logoutBtn" class="btn btn-ghost btn-sm">Logout</button>
+
+            <!-- Dark mode toggle -->
+            <button id="themeToggle" class="btn btn-ghost btn-sm" title="Toggle dark mode">🌓</button>
           </nav>
         </div>
       </div>
@@ -45,7 +86,8 @@
             <div class="flex items-center gap-4 mb-4">
               <div class="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                 <svg class="icon text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                 </svg>
               </div>
               <div>
@@ -58,78 +100,246 @@
         </div>
 
         <!-- Recommendations Card -->
-        <div class="card">
+        <div class="card" id="recommendationsCard">
           <div class="card-content p-6">
             <div class="flex items-center gap-4 mb-4">
               <div class="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center">
                 <svg class="icon text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                 </svg>
               </div>
-              <div>
+              <div style="flex:1;">
                 <h3 class="font-bold font-sans text-xl">Recommendations</h3>
                 <p class="text-sm text-muted-foreground">Discover new content</p>
               </div>
             </div>
-            <button class="btn btn-primary w-full">Browse Recommendations</button>
+            <button id="browsRecs" class="btn btn-primary w-full">Browse Recommendations</button>
           </div>
-        </div>
 
-        <!-- Preferences Card -->
-        <div class="card">
-          <div class="card-content p-6">
-            <div class="flex items-center gap-4 mb-4">
-              <div class="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <svg class="icon text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
-                </svg>
-              </div>
-              <div>
-                <h3 class="font-bold font-sans text-xl">Preferences</h3>
-                <p class="text-sm text-muted-foreground">Customize your experience</p>
-              </div>
-            </div>
-            <button class="btn btn-outline w-full">Manage Preferences</button>
+          <!-- Sample recommendations list -->
+          <div id="recList" class="space-y-3">
+            <!-- Items injected by JS -->
+          </div>
+
+          <div class="mt-4">
+            <button id="viewAllRecs" class="btn btn-outline w-full">View all recommendations</button>
           </div>
         </div>
       </div>
 
-      <!-- Recent Activity Section -->
+      <!-- Preferences Card -->
       <div class="card">
-        <div class="card-header">
-          <h2 class="text-2xl font-bold font-sans">Recent Activity</h2>
-          <p class="card-description">Your latest interactions and recommendations</p>
-        </div>
-        <div class="card-content">
-          <div class="text-center py-12">
-            <svg class="icon mx-auto mb-4" style="width: 3rem; height: 3rem; color: var(--muted-foreground);" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
-            </svg>
-            <p class="text-muted-foreground mb-4">No recent activity yet</p>
-            <button class="btn btn-primary">Start Exploring</button>
+        <div class="card-content p-6">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <svg class="icon text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-bold font-sans text-xl">Preferences</h3>
+              <p class="text-sm text-muted-foreground">Customize your experience</p>
+            </div>
           </div>
+          <button class="btn btn-outline w-full">Manage Preferences</button>
         </div>
       </div>
-    </main>
   </div>
 
-  <script>
-    // Check if user is logged in
-    const userEmail = localStorage.getItem('userEmail');
-    
-    if (!userEmail) {
-      // Redirect to login if not authenticated
-      window.location.href = 'login.html';
-    } else {
-      // Display user email
-      document.getElementById('userEmail').textContent = userEmail;
-    }
+  <!-- Recent Activity & Details -->
+  <div class="grid gap-6 mb-8" style="grid-template-columns: 1fr 420px;">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="text-2xl font-bold font-sans">Recent Activity</h2>
+        <p class="card-description">Your latest interactions and recommendations</p>
+      </div>
+      <div class="card-content">
+        <div id="activityList" class="space-y-4 py-4">
+          <!-- sample activity items injected by JS -->
+        </div>
+        <div class="text-center">
+          <button id="clearActivity" class="btn btn-ghost btn-sm">Clear activity</button>
+        </div>
+      </div>
+    </div>
 
-    // Logout functionality
-    document.getElementById('logoutBtn').addEventListener('click', function() {
-      localStorage.removeItem('userEmail');
-      window.location.href = 'index.html';
-    });
-  </script>
+    <!-- Activity / Stats Column -->
+    <div>
+      <div class="card mb-6">
+        <div class="card-content p-6">
+          <h3 class="font-bold font-sans text-xl mb-2">Profile Summary</h3>
+          <p class="small-text mb-3">You're making progress — keep exploring new content to improve your feed.</p>
+          <div class="text-sm">
+            <div class="flex justify-between"><span>Recommendations</span><strong id="statRecs">0</strong></div>
+            <div class="flex justify-between"><span>Saved</span><strong id="statSaved">0</strong></div>
+            <div class="flex justify-between"><span>Interactions (30d)</span><strong id="statInteractions">0</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+      </main>
+    </div>
+
+    <script>
+      // Check if user is logged in
+      const userEmail = localStorage.getItem('userEmail');
+
+      if (!userEmail) {
+        // Redirect to login if not authenticated
+        window.location.href = 'login.html';
+      } else {
+        // Display user email
+        document.getElementById('userEmail').textContent = userEmail;
+      }
+
+      // Logout functionality
+      document.getElementById('logoutBtn').addEventListener('click', function () {
+        localStorage.removeItem('userEmail');
+        window.location.href = 'index.html';
+      });
+
+      // --- Theme toggle (dark mode) ---
+      const root = document.documentElement;
+      const themeToggle = document.getElementById('themeToggle');
+      const THEME_KEY = 'prefersDark';
+      function applyTheme(dark) {
+        if (dark) {
+          document.getElementById('appRoot').classList.add('dark');
+        } else {
+          document.getElementById('appRoot').classList.remove('dark');
+        }
+      }
+      const savedTheme = localStorage.getItem(THEME_KEY);
+      applyTheme(savedTheme === 'true');
+      themeToggle.addEventListener('click', () => {
+        const now = document.getElementById('appRoot').classList.toggle('dark');
+        localStorage.setItem(THEME_KEY, now);
+      });
+
+      // --- Search ---
+      const searchForm = document.getElementById('searchForm');
+      const searchInput = document.getElementById('searchInput');
+      searchForm.addEventListener('submit', () => {
+        const q = searchInput.value.trim();
+        // navigate to recommendations with query param
+        window.location.href = 'recommendations.html' + (q ? `?q=${encodeURIComponent(q)}` : '');
+      });
+      document.getElementById('browseRecs').addEventListener('click', () => {
+        window.location.href = 'recommendations.html';
+      });
+
+      // --- Notifications (basic) ---
+      const notifBtn = document.getElementById('notifBtn');
+      const notifMenu = document.getElementById('notifMenu');
+      const notifList = document.getElementById('notifList');
+      const notifCountEl = document.getElementById('notifCount');
+      let notifications = [
+        { id: 1, text: 'New recommendation based on your interest: "Reactive JS Patterns"', time: '2h', read: false },
+        { id: 2, text: 'Your saved item "Intro to GraphQL" has 5 new comments', time: '1d', read: false },
+        { id: 3, text: 'Weekly digest: top picks for you', time: '3d', read: false }
+      ];
+
+      function renderNotifications() {
+        notifList.innerHTML = '';
+        if (!notifications.length) {
+          notifList.innerHTML = '<div style="padding:0.75rem;" class="small-text">No notifications</div>';
+          notifCountEl.style.display = 'none';
+          return;
+        }
+        notifCountEl.style.display = 'inline-flex';
+        const unread = notifications.filter(n => !n.read).length;
+        notifCountEl.textContent = unread || notifications.length;
+        notifications.forEach(n => {
+          const item = document.createElement('div');
+          item.style.padding = '0.6rem';
+          item.style.borderBottom = '1px solid var(--border)';
+          item.style.display = 'flex';
+          item.style.justifyContent = 'space-between';
+          item.innerHTML = `<div style="max-width:75%"><div style="font-size:0.95rem">${n.text}</div><div class="small-text">${n.time}</div></div>
+          <div style="display:flex;flex-direction:column;gap:0.4rem;align-items:flex-end">
+            <button class="btn btn-ghost btn-sm" data-id="${n.id}">${n.read ? 'Read' : 'Open'}</button>
+            <button class="btn btn-ghost btn-sm" data-action="dismiss" data-id="${n.id}" title="Dismiss">✕</button>
+          </div>`;
+          notifList.appendChild(item);
+        });
+      }
+      renderNotifications();
+
+      notifBtn.addEventListener('click', (e) => {
+        const expanded = notifMenu.classList.toggle('show');
+        notifBtn.setAttribute('aria-expanded', expanded);
+      });
+
+      document.getElementById('markAllRead').addEventListener('click', () => {
+        notifications = notifications.map(n => ({ ...n, read: true }));
+        renderNotifications();
+      });
+
+      notifList.addEventListener('click', (e) => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        const id = Number(btn.dataset.id);
+        if (btn.dataset.action === 'dismiss') {
+          notifications = notifications.filter(n => n.id !== id);
+        } else {
+          // open notification: mark read and simulate opening
+          notifications = notifications.map(n => n.id === id ? { ...n, read: true } : n);
+          window.location.href = 'recommendations.html'; // example behaviour
+        }
+        renderNotifications();
+      });
+
+      // Close dropdown on outside click
+      document.addEventListener('click', (e) => {
+        if (!notifMenu.contains(e.target) && !notifBtn.contains(e.target)) {
+          notifMenu.classList.remove('show');
+          notifBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // --- Recommendations sample list (simple, client-side) ---
+      const recListEl = document.getElementById('recList');
+      const sampleRecommendations = [
+        { id: 'r1', title: 'Reactive JS Patterns', excerpt: 'Best practices for building reactive UI.' },
+        { id: 'r2', title: 'GraphQL vs REST: A practical guide', excerpt: 'How to choose the right API style.' },
+        { id: 'r3', title: 'Intro to Feature Flags', excerpt: 'Roll out features safely and experiment.' }
+      ];
+      function renderRecommendations() {
+        recListEl.innerHTML = '';
+        sampleRecommendations.forEach(r => {
+          const card = document.createElement('div');
+          card.className = 'p-3 rounded-lg border';
+          card.style.display = 'flex';
+          card.style.justifyContent = 'space-between';
+          card.innerHTML = `<div>
+                            <div style="font-weight:600;">${r.title}</div>
+                            <div class="small-text">${r.excerpt}</div>
+                          </div>
+                          <div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end">
+                            <button class="btn btn-primary btn-sm" onclick="openRecommendation('${r.id}')">Open</button>
+                            <button class="btn btn-ghost btn-sm" onclick="saveRecommendation('${r.id}')">Save</button>
+                          </div>`;
+          recListEl.appendChild(card);
+        });
+        // stats
+        document.getElementById('statRecs').textContent = sampleRecommendations.length;
+      }
+      function openRecommendation(id) {
+        // placeholder: navigate to recommendation detail
+        window.location.href = `recommendation.html?id=${encodeURIComponent(id)}`;
+      }
+      function saveRecommendation(id) {
+        // simulate saving — increment "saved" stat
+        const savedEl = document.getElementById('statSaved');
+        const cur = Number(savedEl.textContent) || 0;
+        savedEl.textContent = cur + 1;
+        alert('Saved to your collection.');
+      }
+      renderRecommendations();
+
+    </script>
 </body>
+
 </html>
