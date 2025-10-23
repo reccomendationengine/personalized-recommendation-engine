@@ -257,6 +257,11 @@
 
       if (!isValid) {
         e.preventDefault();
+      } else {
+        // Save user info to localStorage
+        const userNameToSave = username.trim() || email.split('@')[0];
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('userName', userNameToSave);
       }
     });
   </script>

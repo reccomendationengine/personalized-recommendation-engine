@@ -86,20 +86,12 @@
       if (!isValid) {
         e.preventDefault();
       } else {
-        // Store email in localStorage for dashboard use
+        // Store email and extract user name from email for localStorage
         localStorage.setItem('userEmail', email);
+        const userName = email.split('@')[0]; // Extract name from email
+        localStorage.setItem('userName', userName);
         
         // The form will submit normally and redirect to dashboard
-        // The dashboard will load user info from localStorage
-      }
-    });
-
-    // Check if user is already logged in
-    document.addEventListener('DOMContentLoaded', function() {
-      const userEmail = localStorage.getItem('userEmail');
-      if (userEmail) {
-        // User is already logged in, redirect to dashboard
-        window.location.href = '/dashboard.html';
       }
     });
   </script>
