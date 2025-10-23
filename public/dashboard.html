@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Personalized Recommendations Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+      padding: 2rem;
+    }
+
+    .dashboard-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      color: white;
+    }
+
+    .dashboard-header h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .dashboard-header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    .recommendation-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .option-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 3rem;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .option-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+    }
+
+    .option-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      display: block;
+    }
+
+    .option-card h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+
+    .option-card p {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .option-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .option-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+
+    .quick-actions {
+      text-align: center;
+    }
+
+    .logout-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .action-icon {
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-header h1 {
+        font-size: 2rem;
+      }
+      
+      .recommendation-options {
+        grid-template-columns: 1fr;
+      }
+      
+      .option-card {
+        padding: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="dashboard-header">
+      <h1>Welcome to Your Dashboard</h1>
+      <p>Choose your recommendation type to get started</p>
+    </div>
+
+    <div class="recommendation-options">
+      <div class="option-card" onclick="selectOption('music')">
+        <div class="option-icon">🎵</div>
+        <h2>Music Recommendations</h2>
+        <p>Get personalized music suggestions based on your taste and listening history</p>
+        <button class="option-btn">Choose Music</button>
+      </div>
+
+      <div class="option-card" onclick="selectOption('movie')">
+        <div class="option-icon">🎬</div>
+        <h2>Movie Recommendations</h2>
+        <p>Discover movies you'll love based on your preferences and viewing history</p>
+        <button class="option-btn">Choose Movies</button>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <a href="/logout" class="logout-btn">
+        <span class="action-icon">🚪</span>
+        <span class="action-text">Logout</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    function selectOption(type) {
+      if (type === 'music') {
+        window.location.href = '/music-recommendations.html';
+      } else if (type === 'movie') {
+        alert('Movie recommendations coming soon! 🎬');
+      }
+    }
+
+    // Load user info
+    document.addEventListener('DOMContentLoaded', function() {
+      // This would normally fetch from session
+      console.log('Dashboard loaded');
+    });
+  </script>
+</body>
+</html>
