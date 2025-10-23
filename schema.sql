@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS users (
 	username TEXT,
 	email TEXT UNIQUE NOT NULL,
 	password_hash TEXT NOT NULL,
+	date_of_birth DATE,
+	phone_number TEXT,
 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
