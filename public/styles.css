@@ -364,14 +364,14 @@ body {
 }
 
 .btn-primary {
-  background-color: var(--primary);
+  background-color: darkorchid;
   color: var(--primary-foreground);
+  box-shadow: 0 2px 4px -1px darkcyan; ;
 }
 
 .btn-primary:hover {
-  background-color: oklch(from var(--primary) calc(l - 0.05) c h);
+  background-color: darkcyan;
 }
-
 .btn-outline {
   background-color: transparent;
   color: var(--foreground);
