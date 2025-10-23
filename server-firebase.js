@@ -1,4 +1,5 @@
 // Firebase-enabled Express server for the recommendation engine
+require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
 const express = require('express');
@@ -13,14 +14,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Initialize Firebase Admin SDK
-// You'll need to download your service account key from Firebase Console
-// and place it as 'firebase-service-account.json' in your project root
 let serviceAccount;
 try {
-  serviceAccount = require('./firebase-service-account.json');
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } else {
+    // Fallback to file for local development
+    serviceAccount = require('./personalizedreceng-firebase-adminsdk-fbsvc-21cc18d3fc.json');
+  }
 } catch (error) {
-  console.error('Firebase service account key not found. Please add firebase-service-account.json to your project root.');
-  console.error('You can download this from Firebase Console > Project Settings > Service Accounts');
+  console.error('Firebase service account configuration not found.');
+  console.error('Please set FIREBASE_SERVICE_ACCOUNT environment variable or add service account JSON file.');
 }
 
 if (serviceAccount) {
