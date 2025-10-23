@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music History & Recommendations - Personalized Recommendations Engine</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="min-h-screen bg-background">
+    <!-- Navigation Header -->
+    <header class="bg-card border-b border-border">
+      <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <h1 class="text-2xl font-bold text-primary">Recommendation Engine</h1>
+          <nav class="hidden md:flex space-x-4">
+            <a href="dashboard.html" class="text-muted-foreground hover:text-primary">Dashboard</a>
+            <a href="music-history.html" class="text-primary font-medium">Music History</a>
+          </nav>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="text-muted-foreground">Welcome, <span id="username">User</span>!</span>
+          <form method="POST" action="/logout" class="inline">
+            <button type="submit" class="btn btn-outline btn-sm">Logout</button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Music Statistics -->
+        <div class="lg:col-span-1">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="text-xl font-semibold">📊 Music Statistics</h2>
+            </div>
+            <div class="card-content">
+              <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm font-medium">Total Tracks</span>
+                  <span class="text-lg font-bold" id="totalTracks">-</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm font-medium">Total Duration</span>
+                  <span class="text-lg font-bold" id="totalDuration">-</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm font-medium">Average Duration</span>
+                  <span class="text-lg font-bold" id="avgDuration">-</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm font-medium">Unique Genres</span>
+                  <span class="text-lg font-bold" id="uniqueGenres">-</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm font-medium">Unique Artists</span>
+                  <span class="text-lg font-bold" id="uniqueArtists">-</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm font-medium">Year Range</span>
+                  <span class="text-lg font-bold" id="yearRange">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Genre Breakdown -->
+          <div class="card mt-6">
+            <div class="card-header">
+              <h3 class="text-lg font-semibold">🎵 Genre Breakdown</h3>
+            </div>
+            <div class="card-content">
+              <div id="genreBreakdown" class="space-y-2">
+                <!-- Genre data will be loaded here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Artists -->
+          <div class="card mt-6">
+            <div class="card-header">
+              <h3 class="text-lg font-semibold">🎤 Top Artists</h3>
+            </div>
+            <div class="card-content">
+              <div id="topArtists" class="space-y-2">
+                <!-- Artist data will be loaded here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+    <!-- Enhanced Recommendations -->
+    <div class="lg:col-span-2">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="text-xl font-semibold">🎯 Personalized Recommendations</h2>
+          <p class="card-description">Top 5 music tracks recommended just for you using our 2-tower algorithm</p>
+        </div>
+        <div class="card-content">
+          <div id="recommendationsContainer" class="space-y-4">
+            <div class="text-center py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p class="text-muted-foreground mt-2">Loading recommendations...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Music Player -->
+    <div id="musicPlayer" style="position: fixed; bottom: 20px; right: 20px; width: 320px; height: 400px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); z-index: 1000; display: none; resize: both; overflow: hidden; min-width: 280px; min-height: 200px;">
+      <div id="playerHeader" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid rgba(0, 0, 0, 0.1); cursor: move; user-select: none;">
+        <span style="font-size: 14px; font-weight: 600; color: #333;">Music Player</span>
+        <div style="display: flex; gap: 8px;">
+          <button id="fullscreenBtn" style="width: 24px; height: 24px; border: none; background: none; cursor: pointer; border-radius: 4px;" title="Toggle Fullscreen">⛶</button>
+          <button id="minimizeBtn" style="width: 24px; height: 24px; border: none; background: none; cursor: pointer; border-radius: 4px;" title="Minimize">−</button>
+          <button id="closeBtn" style="width: 24px; height: 24px; border: none; background: none; cursor: pointer; border-radius: 4px;" title="Close">×</button>
+        </div>
+      </div>
+      
+      <div id="playerContent" style="padding: 16px; height: calc(100% - 60px); overflow: auto;">
+        <div id="trackInfo" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+          <img id="trackThumbnail" style="width: 48px; height: 48px; border-radius: 8px; object-fit: cover;" src="" alt="Track thumbnail">
+          <div style="flex: 1; min-width: 0;">
+            <h3 id="trackTitle" style="font-size: 14px; font-weight: 600; color: #333; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">No track selected</h3>
+            <p id="trackArtist" style="font-size: 12px; color: #666; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Select a track to play</p>
+          </div>
+        </div>
+        
+        <iframe id="youtubePlayer" style="width: 100%; height: 180px; border-radius: 8px; border: none;" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <button id="openYouTubeBtn" style="flex: 1; padding: 8px 12px; border: 1px solid #007bff; background: #007bff; color: white; border-radius: 6px; font-size: 12px; cursor: pointer;">Open in YouTube</button>
+        </div>
+      </div>
+    </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let currentUserId = 1; // This would come from session in a real app
+    
+    // Load page data
+    document.addEventListener('DOMContentLoaded', function() {
+      loadMusicHistory();
+      loadEnhancedRecommendations();
+    });
+
+    // Load music history and statistics
+    function loadMusicHistory() {
+      fetch('/api/music-history')
+        .then(response => response.json())
+        .then(data => {
+          if (data.statistics) {
+            displayStatistics(data.statistics);
+          }
+          if (data.genres) {
+            displayGenreBreakdown(data.genres);
+          }
+          if (data.topArtists) {
+            displayTopArtists(data.topArtists);
+          }
+        })
+        .catch(error => {
+          console.error('Error loading music history:', error);
+        });
+    }
+
+    // Display statistics
+    function displayStatistics(stats) {
+      document.getElementById('totalTracks').textContent = stats.total_tracks;
+      document.getElementById('totalDuration').textContent = formatDuration(stats.total_duration);
+      document.getElementById('avgDuration').textContent = formatDuration(stats.avg_duration);
+      document.getElementById('uniqueGenres').textContent = stats.unique_genres;
+      document.getElementById('uniqueArtists').textContent = stats.unique_artists;
+      document.getElementById('yearRange').textContent = `${stats.oldest_year} - ${stats.newest_year}`;
+    }
+
+    // Display genre breakdown
+    function displayGenreBreakdown(genres) {
+      const container = document.getElementById('genreBreakdown');
+      container.innerHTML = '';
+      
+      genres.forEach(genre => {
+        const genreElement = document.createElement('div');
+        genreElement.className = 'flex justify-between items-center';
+        genreElement.innerHTML = `
+          <span class="text-sm">${genre.genre}</span>
+          <span class="text-sm font-medium">${genre.count} tracks</span>
+        `;
+        container.appendChild(genreElement);
+      });
+    }
+
+    // Display top artists
+    function displayTopArtists(artists) {
+      const container = document.getElementById('topArtists');
+      container.innerHTML = '';
+      
+      artists.forEach(artist => {
+        const artistElement = document.createElement('div');
+        artistElement.className = 'flex justify-between items-center';
+        artistElement.innerHTML = `
+          <span class="text-sm">${artist.artist}</span>
+          <span class="text-sm font-medium">${artist.track_count} tracks</span>
+        `;
+        container.appendChild(artistElement);
+      });
+    }
+
+    // Load enhanced recommendations with YouTube
+    function loadEnhancedRecommendations() {
+      fetch(`/api/recommendations-with-youtube/${currentUserId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.recommendations && data.recommendations.length > 0) {
+            displayEnhancedRecommendations(data.recommendations);
+          } else {
+            displayNoRecommendations();
+          }
+        })
+        .catch(error => {
+          console.error('Error loading recommendations:', error);
+          displayNoRecommendations();
+        });
+    }
+
+    // Display enhanced recommendations with explanations
+    function displayEnhancedRecommendations(recommendations) {
+      const container = document.getElementById('recommendationsContainer');
+      container.innerHTML = '';
+      
+      recommendations.forEach((track, index) => {
+        const trackElement = document.createElement('div');
+        trackElement.className = 'border border-border rounded-lg p-6 hover:bg-card/50 transition-colors';
+        
+        trackElement.innerHTML = `
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-2">
+                <span class="bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-full">#${index + 1}</span>
+                <h3 class="text-lg font-semibold">${track.title}</h3>
+              </div>
+              <p class="text-muted-foreground mb-2">by <span class="font-medium">${track.artist}</span></p>
+              <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                <span>Genre: ${track.genre}</span>
+                <span>Similarity: ${(track.similarity_score * 100).toFixed(1)}%</span>
+                <span>Popularity: ${(track.popularity_score * 100).toFixed(0)}%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-muted/50 rounded-lg p-4">
+            <h4 class="font-medium text-sm mb-2">Why you should listen to this:</h4>
+            <p class="text-sm text-muted-foreground leading-relaxed">${track.explanation}</p>
+          </div>
+          
+          <div class="mt-4 flex gap-2">
+            <button class="btn btn-primary btn-sm" onclick="playTrack(${JSON.stringify(track).replace(/"/g, '&quot;')})">Play</button>
+            <button class="btn btn-outline btn-sm">Add to Playlist</button>
+            <button class="btn btn-outline btn-sm">Rate</button>
+          </div>
+        `;
+        
+        container.appendChild(trackElement);
+      });
+    }
+
+    // Display no recommendations message
+    function displayNoRecommendations() {
+      const container = document.getElementById('recommendationsContainer');
+      container.innerHTML = `
+        <div class="text-center py-12">
+          <div class="text-6xl mb-4">🎵</div>
+          <h3 class="text-lg font-semibold mb-2">No recommendations available</h3>
+          <p class="text-muted-foreground mb-4">Upload music data and rate some tracks to get personalized recommendations!</p>
+          <a href="dashboard.html" class="btn btn-primary">Go to Dashboard</a>
+        </div>
+      `;
+    }
+
+    // Format duration helper
+    function formatDuration(seconds) {
+      if (!seconds) return '0:00';
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      
+      if (hours > 0) {
+        return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      }
+      return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // Play track function
+    function playTrack(track) {
+      if (track.youtube && track.youtube.id) {
+        // Show the music player
+        const musicPlayer = document.getElementById('musicPlayer');
+        musicPlayer.style.display = 'block';
+        
+        // Ensure player is in default position when opened
+        musicPlayer.style.position = 'fixed';
+        musicPlayer.style.bottom = '20px';
+        musicPlayer.style.right = '20px';
+        musicPlayer.style.left = 'auto';
+        musicPlayer.style.top = 'auto';
+        musicPlayer.style.width = '320px';
+        musicPlayer.style.height = '400px';
+        musicPlayer.style.resize = 'both';
+        musicPlayer.style.zIndex = '1000';
+        
+        // Update track info
+        document.getElementById('trackTitle').textContent = track.title;
+        document.getElementById('trackArtist').textContent = track.artist;
+        
+        if (track.youtube.thumbnail) {
+          document.getElementById('trackThumbnail').src = track.youtube.thumbnail;
+          document.getElementById('trackThumbnail').alt = track.title;
+        }
+        
+        // Load YouTube video with better parameters
+        const youtubePlayer = document.getElementById('youtubePlayer');
+        const videoUrl = `https://www.youtube.com/embed/${track.youtube.id}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1`;
+        youtubePlayer.src = videoUrl;
+        youtubePlayer.style.height = '180px';
+        
+        // Store current video ID for controls
+        window.currentVideoId = track.youtube.id;
+        
+        // Reset fullscreen and minimize states
+        window.isFullscreen = false;
+        window.isMinimized = false;
+        document.getElementById('playerContent').style.display = 'block';
+        document.getElementById('minimizeBtn').textContent = '−';
+        document.getElementById('fullscreenBtn').textContent = '⛶';
+        
+        // Add error handling for YouTube player
+        youtubePlayer.onerror = function() {
+          console.error('YouTube video failed to load');
+          document.getElementById('trackTitle').textContent = 'Video Error';
+          document.getElementById('trackArtist').textContent = 'Try searching manually on YouTube';
+        };
+        
+      } else {
+        alert('YouTube video not available for this track. You can search for it manually on YouTube.');
+      }
+    }
+
+    // Show music player when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set up music player controls
+      const minimizeBtn = document.getElementById('minimizeBtn');
+      const closeBtn = document.getElementById('closeBtn');
+      const fullscreenBtn = document.getElementById('fullscreenBtn');
+      const openYouTubeBtn = document.getElementById('openYouTubeBtn');
+      const musicPlayer = document.getElementById('musicPlayer');
+      const playerHeader = document.getElementById('playerHeader');
+      const playerContent = document.getElementById('playerContent');
+      const youtubePlayer = document.getElementById('youtubePlayer');
+      
+      let isMinimized = false;
+      let isFullscreen = false;
+      let isDragging = false;
+      let currentVideoId = null;
+      let dragOffset = { x: 0, y: 0 };
+      let originalSize = { width: 320, height: 400 };
+      let originalPosition = { x: 0, y: 0 };
+      
+      // Dragging functionality
+      playerHeader.addEventListener('mousedown', (e) => {
+        if (e.target.tagName === 'BUTTON') return; // Don't drag when clicking buttons
+        isDragging = true;
+        const rect = musicPlayer.getBoundingClientRect();
+        dragOffset.x = e.clientX - rect.left;
+        dragOffset.y = e.clientY - rect.top;
+        musicPlayer.style.cursor = 'grabbing';
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const x = e.clientX - dragOffset.x;
+        const y = e.clientY - dragOffset.y;
+        
+        // Keep player within viewport bounds and avoid overlapping with main content
+        const maxX = window.innerWidth - musicPlayer.offsetWidth;
+        const maxY = window.innerHeight - musicPlayer.offsetHeight;
+        
+        // Prevent going over the main content area (left side of the page)
+        const minX = Math.max(0, window.innerWidth * 0.3); // Keep at least 30% from left edge
+        
+        musicPlayer.style.left = Math.max(minX, Math.min(x, maxX)) + 'px';
+        musicPlayer.style.top = Math.max(0, Math.min(y, maxY)) + 'px';
+        musicPlayer.style.right = 'auto';
+        musicPlayer.style.bottom = 'auto';
+      });
+
+      document.addEventListener('mouseup', () => {
+        isDragging = false;
+        musicPlayer.style.cursor = 'default';
+      });
+
+      // Fullscreen functionality
+      fullscreenBtn.addEventListener('click', () => {
+        if (!isFullscreen) {
+          // Store original size and position
+          originalSize.width = musicPlayer.offsetWidth;
+          originalSize.height = musicPlayer.offsetHeight;
+          const rect = musicPlayer.getBoundingClientRect();
+          originalPosition.x = rect.left;
+          originalPosition.y = rect.top;
+          
+          // Make fullscreen within the page
+          musicPlayer.style.position = 'fixed';
+          musicPlayer.style.top = '10px';
+          musicPlayer.style.left = '10px';
+          musicPlayer.style.right = '10px';
+          musicPlayer.style.bottom = '10px';
+          musicPlayer.style.width = 'calc(100vw - 20px)';
+          musicPlayer.style.height = 'calc(100vh - 20px)';
+          musicPlayer.style.resize = 'none';
+          musicPlayer.style.zIndex = '9999';
+          
+          // Resize YouTube player for fullscreen
+          youtubePlayer.style.height = 'calc(100vh - 200px)';
+          
+          fullscreenBtn.textContent = '⛶';
+          isFullscreen = true;
+        } else {
+          // Restore original size and position
+          musicPlayer.style.position = 'fixed';
+          musicPlayer.style.top = originalPosition.y + 'px';
+          musicPlayer.style.left = originalPosition.x + 'px';
+          musicPlayer.style.right = 'auto';
+          musicPlayer.style.bottom = 'auto';
+          musicPlayer.style.width = originalSize.width + 'px';
+          musicPlayer.style.height = originalSize.height + 'px';
+          musicPlayer.style.resize = 'both';
+          musicPlayer.style.zIndex = '1000';
+          
+          // Restore YouTube player size
+          youtubePlayer.style.height = '180px';
+          
+          fullscreenBtn.textContent = '⛶';
+          isFullscreen = false;
+        }
+      });
+
+      minimizeBtn.addEventListener('click', () => {
+        isMinimized = !isMinimized;
+        if (isMinimized) {
+          playerContent.style.display = 'none';
+          musicPlayer.style.width = '60px';
+          musicPlayer.style.height = '60px';
+          musicPlayer.style.resize = 'none';
+          minimizeBtn.textContent = '+';
+        } else {
+          playerContent.style.display = 'block';
+          musicPlayer.style.width = '320px';
+          musicPlayer.style.height = '400px';
+          musicPlayer.style.resize = 'both';
+          minimizeBtn.textContent = '−';
+        }
+      });
+      
+      closeBtn.addEventListener('click', () => {
+        musicPlayer.style.display = 'none';
+        // Reset player to default position and size when closed
+        musicPlayer.style.position = 'fixed';
+        musicPlayer.style.bottom = '20px';
+        musicPlayer.style.right = '20px';
+        musicPlayer.style.left = 'auto';
+        musicPlayer.style.top = 'auto';
+        musicPlayer.style.width = '320px';
+        musicPlayer.style.height = '400px';
+        musicPlayer.style.resize = 'both';
+        musicPlayer.style.zIndex = '1000';
+        youtubePlayer.style.height = '180px';
+        isFullscreen = false;
+        isMinimized = false;
+        playerContent.style.display = 'block';
+        minimizeBtn.textContent = '−';
+        fullscreenBtn.textContent = '⛶';
+      });
+      
+      
+      openYouTubeBtn.addEventListener('click', () => {
+        if (window.currentVideoId) {
+          window.open(`https://www.youtube.com/watch?v=${window.currentVideoId}`, '_blank');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

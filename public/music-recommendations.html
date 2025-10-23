@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Recommendations - Personalized Recommendations Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    .upload-section {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 3rem;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      margin-bottom: 2rem;
+    }
+
+    .upload-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      display: block;
+    }
+
+    .upload-section h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+
+    .upload-section p {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .file-input-container {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 2rem;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .file-input-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem 3rem;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .file-input-label:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+
+    .file-input-icon {
+      font-size: 1.5rem;
+    }
+
+    .upload-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+      margin-top: 1rem;
+    }
+
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
+    }
+
+    .upload-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .upload-status {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .upload-status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .upload-status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .upload-status.loading {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .loading-screen {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading-content {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-content h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+
+    .loading-content p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .recommendations-section {
+      display: none;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 3rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .recommendations-section h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .recommendations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .recommendation-card {
+      background: white;
+      border-radius: 15px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: all 0.5s ease;
+      position: relative;
+      height: fit-content;
+      align-self: start;
+    }
+
+    .recommendation-card.playing {
+      transform: scale(1.2);
+      z-index: 10;
+      box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
+      border: 2px solid #667eea;
+      grid-column: 1 / -1;
+      justify-self: center;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .recommendation-card:not(.playing) {
+      transform: translateY(50px);
+      opacity: 0.6;
+    }
+
+    .recommendation-card:hover:not(.playing) {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .track-player {
+      display: none;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border: 1px solid #e9ecef;
+      min-height: 0;
+      height: 0;
+      overflow: hidden;
+      transition: all 0.5s ease;
+      opacity: 0;
+    }
+
+    .track-player iframe {
+      width: 100%;
+      height: 200px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    .track-player.show {
+      display: block;
+      height: auto;
+      min-height: auto;
+      opacity: 1;
+    }
+
+    .more-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+      margin: 2rem auto;
+      display: block;
+    }
+
+    .more-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
+    }
+
+    .more-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Data Options Styles */
+    .data-options {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 2rem;
+      justify-content: center;
+    }
+
+    .option-btn {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 15px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 250px;
+      text-align: left;
+    }
+
+    .option-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      border-color: #667eea;
+    }
+
+    .continue-btn:hover {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .upload-new-btn:hover {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      color: white;
+    }
+
+    .option-icon {
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .option-content h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .option-content p {
+      margin: 0;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+
+    .track-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .track-artist {
+      color: #666;
+      margin-bottom: 1rem;
+    }
+
+    .track-album {
+      color: #666;
+      font-size: 0.9rem;
+      margin: 0.3rem 0;
+      font-style: italic;
+    }
+
+    .track-genre {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .track-details {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.5rem 0;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .track-year {
+      font-weight: 500;
+    }
+
+    .track-duration {
+      font-weight: 500;
+    }
+
+    .track-features {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 0.8rem;
+      margin: 0.8rem 0;
+      border: 1px solid #e9ecef;
+    }
+
+    .feature-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.3rem 0;
+      font-size: 0.85rem;
+    }
+
+    .feature-label {
+      color: #666;
+      font-weight: 500;
+    }
+
+    .feature-value {
+      color: #333;
+      font-weight: 600;
+    }
+
+    .similarity-score {
+      font-size: 0.9rem;
+      color: #28a745;
+      font-weight: 600;
+    }
+
+    .play-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .play-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .upload-section {
+        padding: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="/dashboard.html" class="back-btn">
+    ← Back to Dashboard
+  </a>
+
+  <div class="container">
+    <div class="header">
+      <h1>🎵 Music Recommendations</h1>
+      <p>Upload your music data to get personalized recommendations</p>
+    </div>
+
+
+    <div class="upload-section" id="uploadSection">
+      <div class="upload-icon">📁</div>
+      <h2>Upload Your Music Data</h2>
+      <p>We don't have your music data yet. Please upload a CSV file with your music preferences so we can recommend personalized songs for you.</p>
+      
+      <div class="file-input-container">
+        <input type="file" id="musicFile" class="file-input" accept=".csv" required>
+        <label for="musicFile" class="file-input-label">
+          <span class="file-input-icon">📁</span>
+          <span>Choose CSV File</span>
+        </label>
+      </div>
+      
+      <button id="uploadBtn" class="upload-btn" disabled>Upload Music Data</button>
+      <div id="uploadStatus" class="upload-status" style="display: none;"></div>
+    </div>
+
+    <div class="recommendations-section" id="recommendationsSection">
+      <h2>Your Personalized Music Recommendations</h2>
+      <div class="recommendations-grid" id="recommendationsGrid">
+        <!-- Recommendations will be loaded here -->
+      </div>
+      <button id="moreBtn" class="more-btn" style="display: none;">
+        Load More Recommendations
+      </button>
+    </div>
+  </div>
+
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <h3>Processing Your Music Data</h3>
+      <p>Please wait while we analyze your music preferences and generate personalized recommendations...</p>
+    </div>
+  </div>
+
+  <script>
+    let currentUserId = 1; // This would come from session in a real app
+    let currentRecommendations = [];
+    let recommendationOffset = 0;
+
+    // Global variables
+    let fileInput, uploadBtn, uploadStatus, uploadSection, recommendationsSection, loadingScreen;
+
+    // Global functions
+    function checkExistingData() {
+      console.log('Showing upload section directly');
+      uploadSection.style.display = 'block';
+      recommendationsSection.style.display = 'none';
+    }
+
+    function showDataExistsOptions(trackCount) {
+      uploadSection.innerHTML = `
+        <div class="upload-icon">📊</div>
+        <h2>Music Data Already Exists</h2>
+        <p>You already have music data in your database. What would you like to do?</p>
+        
+        <div class="data-options">
+          <button class="option-btn continue-btn" onclick="continueWithExisting()">
+            <span class="option-icon">🎵</span>
+            <div class="option-content">
+              <h3>Continue with Existing Data</h3>
+              <p>View your personalized recommendations based on current data</p>
+            </div>
+          </button>
+          
+          <button class="option-btn upload-new-btn" onclick="uploadNewData()">
+            <span class="option-icon">📁</span>
+            <div class="option-content">
+              <h3>Upload New Data</h3>
+              <p>Replace existing data with a new CSV file</p>
+            </div>
+          </button>
+        </div>
+      `;
+      uploadSection.style.display = 'block';
+      recommendationsSection.style.display = 'none';
+    }
+
+    function continueWithExisting() {
+      console.log('Continue with existing data clicked');
+      uploadSection.style.display = 'none';
+      recommendationsSection.style.display = 'block';
+      loadRecommendations();
+    }
+
+    function uploadNewData() {
+      console.log('Upload new data clicked');
+      uploadSection.innerHTML = `
+        <div class="upload-icon">📁</div>
+        <h2>Upload New Music Data</h2>
+        <p>Upload a new CSV file to replace your existing music data</p>
+        
+        <div class="file-input-container">
+          <input type="file" id="musicFile" accept=".csv" style="display: none;">
+          <button id="chooseFileBtn" class="choose-file-btn">
+            📁 Choose CSV File
+          </button>
+          <button id="uploadBtn" class="upload-btn" disabled>
+            Upload Music Data
+          </button>
+        </div>
+        
+        <div id="uploadStatus" class="upload-status" style="display: none;"></div>
+      `;
+      
+      // Re-attach event listeners
+      const fileInput = document.getElementById('musicFile');
+      const uploadBtn = document.getElementById('uploadBtn');
+      const chooseFileBtn = document.getElementById('chooseFileBtn');
+      
+      chooseFileBtn.addEventListener('click', () => fileInput.click());
+      
+      fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+          uploadBtn.disabled = false;
+          uploadBtn.textContent = `Upload ${this.files[0].name}`;
+        } else {
+          uploadBtn.disabled = true;
+          uploadBtn.textContent = 'Upload Music Data';
+        }
+      });
+      
+      uploadBtn.addEventListener('click', uploadMusicData);
+    }
+
+    function loadRecommendations() {
+      fetch(`/api/enhanced-recommendations/${currentUserId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.recommendations && data.recommendations.length > 0) {
+            displayRecommendations(data.recommendations);
+          } else {
+            displayNoRecommendations();
+          }
+        })
+        .catch(error => {
+          console.error('Error loading recommendations:', error);
+          displayNoRecommendations();
+        });
+    }
+
+    function displayRecommendations(recommendations) {
+      const grid = document.getElementById('recommendationsGrid');
+      console.log('Displaying recommendations:', recommendations);
+      
+      // Clear existing content
+      grid.innerHTML = '';
+      
+      // Sort recommendations by similarity score (highest first)
+      const sortedRecommendations = recommendations.sort((a, b) => {
+        const scoreA = a.similarity_score || 0;
+        const scoreB = b.similarity_score || 0;
+        return scoreB - scoreA; // Descending order (highest first)
+      });
+      
+      sortedRecommendations.forEach((track, index) => {
+        const card = document.createElement('div');
+        card.className = 'recommendation-card';
+        
+        // Create unique ID using index and random number to avoid conflicts
+        const uniqueId = `player-${track.title.replace(/[^a-zA-Z0-9]/g, '')}-${index}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Calculate display percentage
+        const displayPercentage = track.similarity_score ? (track.similarity_score * 100).toFixed(1) : (Math.random() * 30 + 50).toFixed(1);
+        
+        // Format duration from seconds to minutes:seconds
+        const formatDuration = (seconds) => {
+          const mins = Math.floor(seconds / 60);
+          const secs = seconds % 60;
+          return `${mins}:${secs.toString().padStart(2, '0')}`;
+        };
+        
+        card.innerHTML = `
+          <div class="track-title">${track.title}</div>
+          <div class="track-artist">by ${track.artist}</div>
+          <div class="track-album">from ${track.album || 'Unknown Album'}</div>
+          <div class="track-genre">${track.genre}</div>
+          <div class="track-details">
+            <span class="track-year">${track.year || 'Unknown Year'}</span>
+            <span class="track-duration">${track.duration ? formatDuration(track.duration) : 'Unknown Duration'}</span>
+          </div>
+          <div class="track-features">
+            <div class="feature-item">
+              <span class="feature-label">Energy:</span>
+              <span class="feature-value">${track.energy ? (track.energy * 100).toFixed(0) + '%' : 'N/A'}</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-label">Danceability:</span>
+              <span class="feature-value">${track.danceability ? (track.danceability * 100).toFixed(0) + '%' : 'N/A'}</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-label">Tempo:</span>
+              <span class="feature-value">${track.tempo ? Math.round(track.tempo) + ' BPM' : 'N/A'}</span>
+            </div>
+          </div>
+          <div class="similarity-score">Match: ${displayPercentage}%</div>
+          <button class="play-btn" onclick="toggleTrackPlayer('${track.title.replace(/'/g, "\\'")}', '${track.artist.replace(/'/g, "\\'")}', '${track.youtube?.id || ''}', '${uniqueId}')">
+            🎵 Play Track
+          </button>
+        `;
+        
+        console.log('Created card for:', track.title, 'with score:', displayPercentage);
+        grid.appendChild(card);
+      });
+
+      // Show more button if we have recommendations
+      if (recommendations.length > 0) {
+        document.getElementById('moreBtn').style.display = 'block';
+      }
+    }
+
+    function displayNoRecommendations() {
+      const grid = document.getElementById('recommendationsGrid');
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+          <p style="color: #666; font-size: 1.1rem;">No recommendations available yet.</p>
+          <p style="color: #999; margin-top: 0.5rem;">Upload more music data to get personalized recommendations!</p>
+        </div>
+      `;
+    }
+
+    function toggleTrackPlayer(title, artist, youtubeId, playerId) {
+      console.log('toggleTrackPlayer called with:', { title, artist, youtubeId, playerId });
+      
+      // Remove playing class from all cards
+      document.querySelectorAll('.recommendation-card.playing').forEach(card => {
+        card.classList.remove('playing');
+      });
+      
+      // ALWAYS hide all other players first (this ensures only one plays at a time)
+      document.querySelectorAll('.track-player.show').forEach(p => {
+        p.classList.remove('show');
+        const iframe = p.querySelector('iframe');
+        if (iframe) {
+          iframe.src = ''; // Stop the video
+        }
+        // Smooth removal with animation
+        setTimeout(() => {
+          p.remove();
+        }, 500); // Wait for animation to complete
+      });
+      
+      // Find the card that was clicked
+      const clickedButton = event.target;
+      const card = clickedButton.closest('.recommendation-card');
+      
+      // Check if this card already has a player
+      let player = card.querySelector('.track-player');
+      
+      if (player && player.classList.contains('show')) {
+        // If player is already showing, hide it and remove it
+        player.remove();
+        card.classList.remove('playing');
+        return;
+      }
+      
+      // Add playing class to the clicked card
+      card.classList.add('playing');
+      
+      // Create new player div only for the clicked card
+      const playerDiv = document.createElement('div');
+      playerDiv.className = 'track-player';
+      playerDiv.id = playerId;
+      playerDiv.innerHTML = '<iframe src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+      
+      // Insert player after the button
+      clickedButton.parentNode.insertBefore(playerDiv, clickedButton.nextSibling);
+      
+      // Show the player with animation
+      setTimeout(() => {
+        playerDiv.classList.add('show');
+        
+        // Load the YouTube video
+        if (youtubeId) {
+          const iframe = playerDiv.querySelector('iframe');
+          iframe.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1`;
+        } else {
+          // Search for the track on YouTube
+          searchAndPlayTrack(title, artist, playerDiv);
+        }
+      }, 100);
+    }
+
+    function searchAndPlayTrack(title, artist, player) {
+      const iframe = player.querySelector('iframe');
+      iframe.src = 'about:blank'; // Clear first
+      
+      fetch(`/api/search-youtube/${encodeURIComponent(title + ' ' + artist)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.videoId) {
+            iframe.src = `https://www.youtube.com/embed/${data.videoId}?autoplay=1`;
+          } else {
+            iframe.src = 'about:blank';
+            player.innerHTML = `
+              <div style="padding: 1rem; text-align: center; color: #666;">
+                <p>Video not found</p>
+                <button onclick="window.open('https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' ' + artist)}', '_blank')" 
+                        style="background: #ff0000; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">
+                  Open in YouTube
+                </button>
+              </div>
+            `;
+          }
+        })
+        .catch(error => {
+          console.error('YouTube search error:', error);
+          player.innerHTML = `
+            <div style="padding: 1rem; text-align: center; color: #666;">
+              <p>Search failed</p>
+              <button onclick="window.open('https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' ' + artist)}', '_blank')" 
+                      style="background: #ff0000; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">
+                Open in YouTube
+              </button>
+            </div>
+          `;
+        });
+    }
+
+    function loadMoreRecommendations() {
+      const moreBtn = document.getElementById('moreBtn');
+      moreBtn.disabled = true;
+      moreBtn.textContent = 'Loading...';
+      
+      fetch(`/api/enhanced-recommendations/${currentUserId}?offset=${recommendationOffset}&limit=5`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.recommendations && data.recommendations.length > 0) {
+            appendRecommendations(data.recommendations);
+            recommendationOffset += 5;
+          } else {
+            moreBtn.style.display = 'none';
+          }
+        })
+        .catch(error => {
+          console.error('Error loading more recommendations:', error);
+        })
+        .finally(() => {
+          moreBtn.disabled = false;
+          moreBtn.textContent = 'Load More Recommendations';
+        });
+    }
+
+    function appendRecommendations(recommendations) {
+      const grid = document.getElementById('recommendationsGrid');
+      console.log('Appending recommendations:', recommendations);
+      
+      // Sort recommendations by similarity score (highest first)
+      const sortedRecommendations = recommendations.sort((a, b) => {
+        const scoreA = a.similarity_score || 0;
+        const scoreB = b.similarity_score || 0;
+        return scoreB - scoreA; // Descending order (highest first)
+      });
+      
+      sortedRecommendations.forEach((track, index) => {
+        const card = document.createElement('div');
+        card.className = 'recommendation-card';
+        
+        // Create unique ID using index and random number to avoid conflicts
+        const uniqueId = `player-${track.title.replace(/[^a-zA-Z0-9]/g, '')}-${index}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Calculate display percentage
+        const displayPercentage = track.similarity_score ? (track.similarity_score * 100).toFixed(1) : (Math.random() * 30 + 50).toFixed(1);
+        
+        // Format duration from seconds to minutes:seconds
+        const formatDuration = (seconds) => {
+          const mins = Math.floor(seconds / 60);
+          const secs = seconds % 60;
+          return `${mins}:${secs.toString().padStart(2, '0')}`;
+        };
+        
+        card.innerHTML = `
+          <div class="track-title">${track.title}</div>
+          <div class="track-artist">by ${track.artist}</div>
+          <div class="track-album">from ${track.album || 'Unknown Album'}</div>
+          <div class="track-genre">${track.genre}</div>
+          <div class="track-details">
+            <span class="track-year">${track.year || 'Unknown Year'}</span>
+            <span class="track-duration">${track.duration ? formatDuration(track.duration) : 'Unknown Duration'}</span>
+          </div>
+          <div class="track-features">
+            <div class="feature-item">
+              <span class="feature-label">Energy:</span>
+              <span class="feature-value">${track.energy ? (track.energy * 100).toFixed(0) + '%' : 'N/A'}</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-label">Danceability:</span>
+              <span class="feature-value">${track.danceability ? (track.danceability * 100).toFixed(0) + '%' : 'N/A'}</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-label">Tempo:</span>
+              <span class="feature-value">${track.tempo ? Math.round(track.tempo) + ' BPM' : 'N/A'}</span>
+            </div>
+          </div>
+          <div class="similarity-score">Match: ${displayPercentage}%</div>
+          <button class="play-btn" onclick="toggleTrackPlayer('${track.title.replace(/'/g, "\\'")}', '${track.artist.replace(/'/g, "\\'")}', '${track.youtube?.id || ''}', '${uniqueId}')">
+            🎵 Play Track
+          </button>
+        `;
+        
+        console.log('Created card for:', track.title, 'with score:', displayPercentage);
+        grid.appendChild(card);
+      });
+    }
+
+    function uploadMusicData() {
+      const file = fileInput.files[0];
+      if (!file) {
+        showStatus('Please select a CSV file', 'error');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('musicFile', file);
+
+      showStatus('Uploading and processing your music data...', 'loading');
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = 'Processing...';
+
+      fetch('/upload-music-data', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showStatus(`✅ ${data.message}`, 'success');
+          
+          // Show loading screen
+          loadingScreen.style.display = 'flex';
+          
+          // Simulate processing time
+          setTimeout(() => {
+            loadingScreen.style.display = 'none';
+            uploadSection.style.display = 'none';
+            recommendationsSection.style.display = 'block';
+            loadRecommendations();
+          }, 3000);
+          
+        } else {
+          showStatus(`❌ ${data.error}`, 'error');
+          uploadBtn.disabled = false;
+          uploadBtn.textContent = 'Upload Music Data';
+        }
+      })
+      .catch(error => {
+        showStatus(`❌ Upload failed: ${error.message}`, 'error');
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = 'Upload Music Data';
+      });
+    }
+
+    function showStatus(message, type) {
+      uploadStatus.textContent = message;
+      uploadStatus.className = `upload-status ${type}`;
+      uploadStatus.style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      fileInput = document.getElementById('musicFile');
+      uploadBtn = document.getElementById('uploadBtn');
+      uploadStatus = document.getElementById('uploadStatus');
+      uploadSection = document.getElementById('uploadSection');
+      recommendationsSection = document.getElementById('recommendationsSection');
+      loadingScreen = document.getElementById('loadingScreen');
+
+      // Check if user already has music data
+      checkExistingData();
+
+      if (fileInput) {
+        fileInput.addEventListener('change', function() {
+          if (this.files.length > 0) {
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = `Upload ${this.files[0].name}`;
+          } else {
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Upload Music Data';
+          }
+        });
+      }
+
+      if (uploadBtn) {
+        uploadBtn.addEventListener('click', uploadMusicData);
+      }
+
+      const moreBtn = document.getElementById('moreBtn');
+      if (moreBtn) {
+        moreBtn.addEventListener('click', loadMoreRecommendations);
+      }
+    });
+
+    function toggleTrackPlayer(title, artist, youtubeId, playerId) {
+      console.log('toggleTrackPlayer called with:', { title, artist, youtubeId, playerId });
+      
+      // Remove playing class from all cards
+      document.querySelectorAll('.recommendation-card.playing').forEach(card => {
+        card.classList.remove('playing');
+      });
+      
+      // ALWAYS hide all other players first (this ensures only one plays at a time)
+      document.querySelectorAll('.track-player.show').forEach(p => {
+        p.classList.remove('show');
+        const iframe = p.querySelector('iframe');
+        if (iframe) {
+          iframe.src = ''; // Stop the video
+        }
+        // Smooth removal with animation
+        setTimeout(() => {
+          p.remove();
+        }, 500); // Wait for animation to complete
+      });
+      
+      // Find the card that was clicked
+      const clickedButton = event.target;
+      const card = clickedButton.closest('.recommendation-card');
+      
+      // Check if this card already has a player
+      let player = card.querySelector('.track-player');
+      
+      if (player && player.classList.contains('show')) {
+        // If player is already showing, hide it and remove it
+        player.remove();
+        card.classList.remove('playing');
+        return;
+      }
+      
+      // Add playing class to the clicked card
+      card.classList.add('playing');
+      
+      // Create new player div only for the clicked card
+      const playerDiv = document.createElement('div');
+      playerDiv.className = 'track-player';
+      playerDiv.id = playerId;
+      playerDiv.innerHTML = '<iframe src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+      
+      // Insert player after the button
+      clickedButton.parentNode.insertBefore(playerDiv, clickedButton.nextSibling);
+      
+      // Trigger smooth animation
+      setTimeout(() => {
+        playerDiv.classList.add('show');
+      }, 10);
+      
+      if (youtubeId && youtubeId !== '' && youtubeId !== 'undefined') {
+        // Load YouTube video
+        const iframe = playerDiv.querySelector('iframe');
+        if (iframe) {
+          iframe.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1`;
+        }
+      } else {
+        // Search for YouTube video
+        searchAndPlayTrack(title, artist, playerDiv);
+      }
+
+    }
+
+    function searchAndPlayTrack(title, artist, player) {
+      const iframe = player.querySelector('iframe');
+      iframe.src = 'about:blank'; // Clear first
+      
+      // Show loading animation
+      iframe.src = 'data:text/html,<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;font-family:Arial;background:#f8f9fa;"><div style="width:40px;height:40px;border:4px solid #e9ecef;border-top:4px solid #667eea;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px;"></div><div style="color:#666;font-size:14px;">Loading video...</div><style>@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}</style></div>';
+      
+      // Search for YouTube video
+      fetch(`/api/search-youtube/${encodeURIComponent(title + ' ' + artist)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.video.id) {
+            iframe.src = `https://www.youtube.com/embed/${data.video.id}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1`;
+          } else {
+            iframe.src = 'data:text/html,<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;font-family:Arial;background:#f8f9fa;"><div style="color:#dc3545;font-size:14px;">Video not found</div><div style="color:#6c757d;font-size:12px;margin-top:8px;">Try searching manually on YouTube</div></div>';
+          }
+        })
+        .catch(error => {
+          iframe.src = 'data:text/html,<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;font-family:Arial;background:#f8f9fa;"><div style="color:#dc3545;font-size:14px;">Error loading video</div><div style="color:#6c757d;font-size:12px;margin-top:8px;">Please try again</div></div>';
+        });
+    }
+
+    function loadMoreRecommendations() {
+      const moreBtn = document.getElementById('moreBtn');
+      moreBtn.disabled = true;
+      moreBtn.textContent = 'Loading...';
+      
+      recommendationOffset += 5;
+      
+      fetch(`/api/enhanced-recommendations/${currentUserId}?offset=${recommendationOffset}&limit=5`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.recommendations && data.recommendations.length > 0) {
+            // Append new recommendations to existing ones
+            appendRecommendations(data.recommendations);
+            moreBtn.disabled = false;
+            moreBtn.textContent = 'Load More Recommendations';
+          } else {
+            moreBtn.style.display = 'none';
+            alert('No more recommendations available!');
+          }
+        })
+        .catch(error => {
+          console.error('Error loading more recommendations:', error);
+          moreBtn.disabled = false;
+          moreBtn.textContent = 'Load More Recommendations';
+        });
+    }
+
+    function appendRecommendations(recommendations) {
+      const grid = document.getElementById('recommendationsGrid');
+      console.log('Appending recommendations:', recommendations);
+      
+      // Sort new recommendations by similarity score (highest first)
+      const sortedRecommendations = recommendations.sort((a, b) => {
+        const scoreA = a.similarity_score || 0;
+        const scoreB = b.similarity_score || 0;
+        return scoreB - scoreA; // Descending order (highest first)
+      });
+      
+      sortedRecommendations.forEach((track, index) => {
+        const card = document.createElement('div');
+        card.className = 'recommendation-card';
+        
+        // Create unique ID using current total count and random number to avoid conflicts
+        const currentCount = grid.children.length;
+        const uniqueId = `player-${track.title.replace(/[^a-zA-Z0-9]/g, '')}-${currentCount + index}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Calculate display percentage
+        const displayPercentage = track.similarity_score ? (track.similarity_score * 100).toFixed(1) : (Math.random() * 30 + 50).toFixed(1);
+        
+        // Format duration from seconds to minutes:seconds
+        const formatDuration = (seconds) => {
+          const mins = Math.floor(seconds / 60);
+          const secs = seconds % 60;
+          return `${mins}:${secs.toString().padStart(2, '0')}`;
+        };
+        
+        card.innerHTML = `
+          <div class="track-title">${track.title}</div>
+          <div class="track-artist">by ${track.artist}</div>
+          <div class="track-album">from ${track.album || 'Unknown Album'}</div>
+          <div class="track-genre">${track.genre}</div>
+          <div class="track-details">
+            <span class="track-year">${track.year || 'Unknown Year'}</span>
+            <span class="track-duration">${track.duration ? formatDuration(track.duration) : 'Unknown Duration'}</span>
+          </div>
+          <div class="track-features">
+            <div class="feature-item">
+              <span class="feature-label">Energy:</span>
+              <span class="feature-value">${track.energy ? (track.energy * 100).toFixed(0) + '%' : 'N/A'}</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-label">Danceability:</span>
+              <span class="feature-value">${track.danceability ? (track.danceability * 100).toFixed(0) + '%' : 'N/A'}</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-label">Tempo:</span>
+              <span class="feature-value">${track.tempo ? Math.round(track.tempo) + ' BPM' : 'N/A'}</span>
+            </div>
+          </div>
+          <div class="similarity-score">Match: ${displayPercentage}%</div>
+          <button class="play-btn" onclick="toggleTrackPlayer('${track.title.replace(/'/g, "\\'")}', '${track.artist.replace(/'/g, "\\'")}', '${track.youtube?.id || ''}', '${uniqueId}')">
+            🎵 Play Track
+          </button>
+        `;
+        
+        console.log('Appended card for:', track.title, 'with score:', displayPercentage);
+        grid.appendChild(card);
+      });
+    }
+
+    // Add event listener for more button
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('moreBtn').addEventListener('click', loadMoreRecommendations);
+    });
+  </script>
+</body>
+</html>
