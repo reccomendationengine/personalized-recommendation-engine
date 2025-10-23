@@ -65,6 +65,17 @@ const db = new sqlite3.Database(DB_FILE, (err) => {
 				console.error('Failed to run schema.sql:', execErr);
 			} else {
 				console.log('Database schema ensured.');
+				// Add new columns to existing users table if they don't exist
+				db.run('ALTER TABLE users ADD COLUMN date_of_birth DATE', (err) => {
+					if (err && !err.message.includes('duplicate column name')) {
+						console.error('Failed to add date_of_birth column:', err);
+					}
+				});
+				db.run('ALTER TABLE users ADD COLUMN phone_number TEXT', (err) => {
+					if (err && !err.message.includes('duplicate column name')) {
+						console.error('Failed to add phone_number column:', err);
+					}
+				});
 			}
 		});
 	} catch (fsErr) {
@@ -139,7 +150,7 @@ app.post('/login', (req, res) => {
 
 // Signup endpoint: create a new user in the SQLite database
 app.post('/signup', (req, res) => {
-	const { username, email, password } = req.body || {};
+	const { username, email, password, dateOfBirth, phoneNumber } = req.body || {};
 
 	if (!email || !password) {
 		if (req.headers['content-type'] && req.headers['content-type'].includes('application/x-www-form-urlencoded')) {
@@ -153,8 +164,18 @@ app.post('/signup', (req, res) => {
 		return res.status(400).json({ error: 'invalid input' });
 	}
 
+	// Enhanced password validation
 	if (password.length < 6) {
 		return res.status(400).json({ error: 'password must be at least 6 characters' });
+	}
+	
+	// Check for uppercase, lowercase, and number
+	const hasUppercase = /[A-Z]/.test(password);
+	const hasLowercase = /[a-z]/.test(password);
+	const hasNumber = /\d/.test(password);
+	
+	if (!hasUppercase || !hasLowercase || !hasNumber) {
+		return res.status(400).json({ error: 'password must contain at least one uppercase letter, one lowercase letter, and one number' });
 	}
 
 	// Hash the password
@@ -166,8 +187,8 @@ app.post('/signup', (req, res) => {
 		}
 
 		// Insert user into DB
-		const stmt = db.prepare('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)');
-		stmt.run(username || null, email, passwordHash, function (err) {
+		const stmt = db.prepare('INSERT INTO users (username, email, password_hash, date_of_birth, phone_number) VALUES (?, ?, ?, ?, ?)');
+		stmt.run(username || null, email, passwordHash, dateOfBirth || null, phoneNumber || null, function (err) {
 			if (err) {
 				console.error('Failed to insert user:', err);
 				// Handle unique email constraint
