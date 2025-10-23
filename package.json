@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "Minimal user+password demo (Node + SQLite)",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node index.js",
+    "build": "node build.js",
+    "dev": "node index.js",
     "start:firebase": "node server-firebase.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,6 +15,7 @@
     "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^2.4.3",
     "csv-parser": "^3.2.0",
+    "dotenv": "^17.2.3",
     "express": "^4.19.2",
     "express-session": "^1.18.2",
     "firebase": "^12.3.0",
