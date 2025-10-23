@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
   <div class="min-h-screen bg-background flex flex-col">
     <!-- Header -->
@@ -16,7 +18,8 @@
       <div class="container mx-auto px-4 py-4">
         <a href="index.html" class="flex items-center gap-2 w-fit">
           <svg class="icon text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
           </svg>
           <span class="text-xl font-bold font-sans">Personalized Recommendations Engine</span>
         </a>
@@ -50,7 +53,7 @@
               <label for="password" class="label">Password</label>
               <input id="password" name="password" type="password" placeholder="••••••••" class="input" required>
               <div id="passwordError" class="error-message"></div>
-              
+
               <!-- Password Requirements -->
               <div class="password-requirements" style="margin-top: 0.5rem; font-size: 0.75rem;">
                 <p style="color: var(--muted-foreground); margin-bottom: 0.25rem;">Password must contain:</p>
@@ -66,8 +69,29 @@
 
             <div class="form-group">
               <label for="confirmPassword" class="label">Confirm Password</label>
-              <input id="confirmPassword" name="confirmPassword" type="password" placeholder="••••••••" class="input" required>
+              <input id="confirmPassword" name="confirmPassword" type="password" placeholder="••••••••" class="input"
+                required>
               <div id="confirmError" class="error-message">Passwords do not match.</div>
+            </div>
+
+            <div class="form-group">
+              <label for="dob" class="label">Date of Birth</label>
+              <input id="dob" name="dob" type="date" class="input" aria-describedby="dobError" required>
+              <div id="dobError" class="error-message">You must be at least 13 years old.</div>
+            </div>
+
+            <div class="form-group">
+              <label for="phone" class="label">Phone Number</label>
+              <input id="phone" name="phone" type="tel" inputmode="tel" placeholder="+1 (555) 123-4567" class="input"
+                aria-describedby="phoneError" required>
+              <div id="phoneError" class="error-message">Please enter a valid phone number.</div>
+            </div>
+
+            <div class="form-group">
+              <label class="flex items-center gap-2">
+                <input id="optIn" name="optIn" type="checkbox" class="input">
+                <span class="text-sm">Subscribe to our newsletter for updates and offers.</span>
+              </label>
             </div>
 
             <button type="submit" class="btn btn-primary w-full btn-lg">Create Account</button>
@@ -97,9 +121,9 @@
     };
 
     // Real-time password validation
-    document.getElementById('password').addEventListener('input', function(e) {
+    document.getElementById('password').addEventListener('input', function (e) {
       const password = e.target.value;
-      
+
       for (const [key, requirement] of Object.entries(passwordRequirements)) {
         if (requirement.regex.test(password)) {
           requirement.element.style.color = 'var(--primary)';
@@ -166,14 +190,78 @@
         e.preventDefault();
       } else {
         e.preventDefault(); // Prevent form submission
-        
+
         // Store user email in localStorage
         localStorage.setItem('userEmail', email);
-        
+
         // Redirect to dashboard
         window.location.href = 'dashboard.html';
       }
     });
+
+    // Date of birth: set max date to ensure at least 13 years old
+    (function setDobMax() {
+      const dob = document.getElementById('dob');
+      if (!dob) return;
+      const today = new Date();
+      const minAge = 13;
+      const yyyy = today.getFullYear() - minAge;
+      // set max to yyyy-mm-dd so user cannot pick a date making them younger than 13
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      dob.setAttribute('max', `${yyyy}-${mm}-${dd}`);
+      dob.setAttribute('min', '1900-01-01');
+    })();
+
+    // Utility helpers
+    function showError(el, message) {
+      if (!el) return;
+      el.textContent = message;
+      el.style.display = 'block';
+      const input = el.previousElementSibling;
+      if (input && input.tagName === 'INPUT') input.setAttribute('aria-invalid', 'true');
+    }
+    function hideError(el) {
+      if (!el) return;
+      el.style.display = 'none';
+      const input = el.previousElementSibling;
+      if (input && input.tagName === 'INPUT') input.removeAttribute('aria-invalid');
+    }
+
+    // Phone validation (loose but practical): allow digits, spaces, (), +, - and length between 7 and 20
+    function isPhoneValid(phone) {
+      if (!phone) return true; // optional field — treat empty as valid
+      const normalized = phone.trim();
+      const phoneRegex = /^[0-9\-\s()+]{7,20}$/;
+      return phoneRegex.test(normalized);
+    }
+
+    // Age check: returns true if DOB corresponds to at least minAge years old
+    function isOldEnough(dobValue, minAge = 13) {
+      if (!dobValue) return true; // optional — treat empty as valid
+      const dob = new Date(dobValue);
+      if (isNaN(dob.getTime())) return false;
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+      return age >= minAge;
+    }
+
+    // DOB check (must be >= 13 years old if provided)
+    if (dob.value && !isOldEnough(dob.value, 13)) {
+      showError(dobError, 'You must be at least 13 years old.');
+      isValid = false;
+    }
+
+    // Phone check (optional field, but if provided must be valid)
+    if (phone.value && !isPhoneValid(phone.value)) {
+      showError(phoneError, 'Please enter a valid phone number (numbers, spaces, +, -, parentheses allowed).');
+      isValid = false;
+    }
   </script>
 </body>
+
 </html>
