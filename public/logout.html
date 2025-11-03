@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Logout</title>
+    </head>
+    <body>
+        <div class="logout-container">
+            <h1>Logging out...</h1>
+            <P>You will be redirected shortly.</P>
+        </div>
+    </body>
+</html>
+
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    background: #f7f7f7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    }
+
+    .logout-container{
+    text-align: center;
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        color: #333;
+    }
+    p{
+        color: #666;
+    }
+</style>
+
+<script>
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
+
+    localStorage.removeItem("authToken");
+    sessionStorage.removeItem("authToken");
+
+    setTimeout(() => {
+        window.location.href = "login.html";
+    }, 2000);
+</script>
