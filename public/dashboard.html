@@ -245,9 +245,10 @@
     function viewProfile() {
       // For now, show user info in an alert
       // Later this can be expanded to show a profile modal or redirect to profile page
-      const userEmail = localStorage.getItem('userEmail') || 'User';
-      const userName = localStorage.getItem('userName') || 'User';
-      alert(`Profile Information:\n\nName: ${userName}\nEmail: ${userEmail}`);
+      // const userEmail = localStorage.getItem('userEmail') || 'User';
+      // const userName = localStorage.getItem('userName') || 'User';
+      // alert(`Profile Information:\n\nName: ${userName}\nEmail: ${userEmail}`);
+      window.location.href = 'profile.html';
     }
 
     function logout() {
