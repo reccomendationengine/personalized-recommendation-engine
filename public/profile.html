@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile - Personalized Recommendations Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, darkcyan 0%, darkorchid 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .profile-container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 3rem;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .profile-info {
+      margin-top: 2rem;
+      text-align: left;
+      font-size: 1.2rem;
+      line-height: 2rem;
+    }
+
+    .profile-info strong {
+      color: #ffd6ff;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-top: 2rem;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <h1>Your Profile</h1>
+    <p>View and manage your personal information.</p>
+
+    <div class="profile-info">
+      <p><strong>Name:</strong> <span id="profileName">Loading...</span></p>
+      <p><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
+    </div>
+
+    <a href="dashboard.html" class="back-btn">⬅ Back to Dashboard</a>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const userEmail = localStorage.getItem('userEmail');
+      const userName = localStorage.getItem('userName');
+
+      if (!userEmail) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      document.getElementById('profileName').textContent = userName || 'Not provided';
+      document.getElementById('profileEmail').textContent = userEmail || 'Not provided';
+    });
+  </script>
+</body>
+</html>
