@@ -1,0 +1,20 @@
+Test case 1 : Profile page Loads Correctly
+
+Steps:
+1. Run the app locally 
+2. Got to 'profile'
+3. Check that the page loads without errors
+
+Expected Result:
+The profile page displays user info and navigation bar properly.
+
+---
+
+Test Case 2 : Navigation links work
+
+Steps:
+1. From any page, click the 'Profile' or 'Dashboard' link
+2. Ensure the correct page loads
+
+Expected Result:
+All navigation links work and routes are connected properly
