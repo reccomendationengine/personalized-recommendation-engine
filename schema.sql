@@ -57,3 +57,22 @@ CREATE TABLE IF NOT EXISTS music_embeddings (
 	FOREIGN KEY (music_track_id) REFERENCES music_tracks (id),
 	UNIQUE(music_track_id)
 );
+
+-- User behavioral patterns from listening history
+CREATE TABLE IF NOT EXISTS user_behavioral_patterns (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	user_id INTEGER NOT NULL,
+	time_of_day_preferences TEXT, -- JSON: {morning: {genres: [], top_songs: []}, afternoon: {...}, evening: {...}, night: {...}}
+	genre_preferences TEXT, -- JSON: {genre: count, ...}
+	mood_preferences TEXT, -- JSON: {mood: {genres: [], songs: []}, ...}
+	activity_preferences TEXT, -- JSON: {activity: {genres: [], songs: []}, ...}
+	top_artists TEXT, -- JSON: [{artist: name, count: number}, ...]
+	top_songs TEXT, -- JSON: [{song: name, artist: name, count: number, avg_rating: number}, ...]
+	listening_hours TEXT, -- JSON: {hour: count, ...}
+	weekend_preferences TEXT, -- JSON: {genres: [], songs: []}
+	weekday_preferences TEXT, -- JSON: {genres: [], songs: []}
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (user_id) REFERENCES users (id),
+	UNIQUE(user_id)
+);

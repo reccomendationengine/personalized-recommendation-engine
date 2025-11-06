@@ -55,6 +55,13 @@
       color: #28a745;
       content: "✓";
     }
+
+    .error-message {
+      display: none;
+      color: red;
+      font-size: 0.8rem;
+      margin-top: 0.25rem;
+    }
   </style>
 </head>
 
@@ -83,8 +90,7 @@
           </p>
         </div>
         <div class="card-content">
-          <!-- <form id="signupForm" action="/signup" method="POST" class="space-y-4"> -->
-          <form id="signupForm" class="space-y-4"> <!--added this-->
+          <form id="signupForm" class="space-y-4">
             <div class="form-group">
               <label for="username" class="label">Full Name</label>
               <input id="username" name="username" type="text" placeholder="Enter your full name" class="input">
@@ -144,7 +150,7 @@
               <input id="phoneNumber" name="phoneNumber" type="tel" placeholder="+1 (555) 123-4567" class="input">
             </div>
 
-            <div clas="form-group">
+            <div class="form-group">
               <label for="profilePic" class="label">Profile Picture (Optional)</label>
               <input id="profilePic" name="profilePic" type="file" accept="image/*" class="input">
             </div>
@@ -166,7 +172,6 @@
   </div>
 
   <script>
-    // Password validation function
     function validatePassword(password) {
       const requirements = {
         length: password.length >= 6,
@@ -175,19 +180,17 @@
         number: /\d/.test(password)
       };
 
-      // Update requirement indicators
       updateRequirement('req-length', requirements.length);
       updateRequirement('req-uppercase', requirements.uppercase);
       updateRequirement('req-lowercase', requirements.lowercase);
       updateRequirement('req-number', requirements.number);
 
-      return Object.values(requirements).every(req => req);
+      return Object.values(requirements).every(Boolean);
     }
 
     function updateRequirement(id, met) {
       const element = document.getElementById(id);
       const icon = element.querySelector('.requirement-icon');
-
       if (met) {
         element.classList.add('met');
         icon.textContent = '✓';
@@ -197,7 +200,6 @@
       }
     }
 
-    // Phone number formatting
     function formatPhoneNumber(input) {
       let value = input.value.replace(/\D/g, '');
       if (value.length >= 6) {
@@ -208,19 +210,16 @@
       input.value = value;
     }
 
-    // Real-time password validation
     document.getElementById('password').addEventListener('input', function () {
       validatePassword(this.value);
     });
 
-    // Phone number formatting
     document.getElementById('phoneNumber').addEventListener('input', function () {
       formatPhoneNumber(this);
     });
 
-    // Enhanced client-side validation for signup form
     document.getElementById('signupForm').addEventListener('submit', function (e) {
-      e.preventDefault(); //stop normal form submission
+      e.preventDefault();
 
       const username = document.getElementById('username').value.trim();
       const email = document.getElementById('email').value.trim();
@@ -241,57 +240,57 @@
       confirmError.style.display = 'none';
 
       let isValid = true;
-
-      // Email validation (required)
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
       if (!email || !emailPattern.test(email)) {
         emailError.style.display = 'block';
         isValid = false;
       }
-
-      // Username validation (optional, but if provided must be valid)
       if (username.length > 0 && username.length < 2) {
         usernameError.style.display = 'block';
         isValid = false;
       }
-
-      // Enhanced password validation
       const passwordValid = validatePassword(password);
       if (!password || !passwordValid) {
         passwordError.style.display = 'block';
         passwordError.textContent = 'Password must meet all requirements above.';
         isValid = false;
       }
-
-      // Password confirmation
       if (password !== confirmPassword) {
         confirmError.style.display = 'block';
         isValid = false;
       }
 
-      if (!isValid) {
-        e.preventDefault();
-      } else {
-        // Save user info to localStorage
-        const userNameToSave = username.trim() || email.split('@')[0];
-        localStorage.setItem('userEmail', email);
-        localStorage.setItem('userName', userNameToSave);
-        localStorage.setItem('userDOB', dateOfBirth || '');
-        localStorage.setItem('userPhone', phoneNumber || '');
+      if (!isValid) return;
 
-        // if a user uploaded a picture, save it
-        if (profilePicInput.files && profilePicInput.files[0]) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            localStorage.setItem('userProfilePic', e.target.result);
-            window.location.href = 'dashboard.html';
-          };
-          reader.readAsDataURL(profilePicInput.files[0]);
-        } else {
-          localStorage.setItem('userProfilePic', '');
-          window.location.href = 'dashboard.html'
+      const userNameToSave = username || email.split('@')[0];
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userName', userNameToSave);
+      localStorage.setItem('userDOB', dateOfBirth || '');
+      localStorage.setItem('userPhone', phoneNumber || '');
+
+      const goToDashboard = () => {
+        try {
+          window.location.href = 'dashboard.html';
+        } catch (err) {
+          console.error('Redirect failed:', err);
         }
-        
+      };
+
+      if (profilePicInput.files && profilePicInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          localStorage.setItem('userProfilePic', event.target.result);
+          goToDashboard();
+        };
+        reader.onerror = () => {
+          console.warn('Image failed to load, continuing...');
+          goToDashboard();
+        };
+        reader.readAsDataURL(profilePicInput.files[0]);
+      } else {
+        localStorage.setItem('userProfilePic', '');
+        goToDashboard();
       }
     });
   </script>
