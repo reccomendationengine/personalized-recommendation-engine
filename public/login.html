@@ -34,7 +34,7 @@
           <p class="card-description">Enter your credentials to access your account</p>
         </div>
         <div class="card-content">
-          <form id="loginForm" action="/login" method="POST" class="space-y-4">
+          <form id="loginForm" class="space-y-4">
             <div class="form-group">
               <label for="email" class="label">Email</label>
               <input id="email" name="email" type="email" placeholder="Enter your email address" class="input" required>
@@ -62,10 +62,9 @@
   </div>
 
   <script>
-    // Enhanced client-side validation and login
-    document.getElementById('loginForm').addEventListener('submit', async function (e) {
-      e.preventDefault(); // Prevent default form submission
-      
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       const emailError = document.getElementById('emailError');
@@ -76,104 +75,25 @@
 
       let isValid = true;
 
-      // Email validation
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!email || !emailPattern.test(email)) {
         emailError.style.display = 'block';
         isValid = false;
       }
 
-      // Password validation
       if (!password || password.length < 6) {
         passwordError.style.display = 'block';
         isValid = false;
       }
 
-      if (!isValid) {
-        return;
-      }
+      if (!isValid) return;
 
-      // Submit login to server to create session
-      try {
-        const formData = new URLSearchParams();
-        formData.append('email', email);
-        formData.append('password', password);
+      // ✅ Simulated successful login (no backend needed)
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userName', email.split('@')[0]);
 
-        const response = await fetch('/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept': 'application/json'
-          },
-          body: formData,
-          credentials: 'include', // Important for session cookies
-          redirect: 'manual' // Handle redirects manually
-        });
-
-        // Handle different response statuses
-        if (response.status === 200) {
-          // Success - try to parse JSON
-          try {
-            const data = await response.json();
-            if (data.success) {
-              localStorage.setItem('userEmail', email);
-              const userName = email.split('@')[0];
-              localStorage.setItem('userName', userName);
-              window.location.href = '/dashboard.html';
-              return;
-            }
-          } catch (e) {
-            // Not JSON, but 200 means success - verify session
-            const userCheck = await fetch('/api/current-user', { credentials: 'include' });
-            if (userCheck.ok) {
-              localStorage.setItem('userEmail', email);
-              const userName = email.split('@')[0];
-              localStorage.setItem('userName', userName);
-              window.location.href = '/dashboard.html';
-              return;
-            }
-          }
-        } else if (response.status === 302) {
-          // Redirect means login successful - verify session was created
-          const userCheck = await fetch('/api/current-user', { credentials: 'include' });
-          if (userCheck.ok) {
-            localStorage.setItem('userEmail', email);
-            const userName = email.split('@')[0];
-            localStorage.setItem('userName', userName);
-            window.location.href = '/dashboard.html';
-            return;
-          } else {
-            // Session not created, show error
-            passwordError.textContent = 'Login failed. Session could not be created.';
-            passwordError.style.display = 'block';
-            return;
-          }
-        } else if (response.status === 400) {
-          // Bad request - get error message
-          const errorText = await response.text();
-          if (errorText.includes('invalid credentials')) {
-            passwordError.textContent = 'Invalid email or password';
-            passwordError.style.display = 'block';
-          } else if (errorText.includes('required')) {
-            emailError.textContent = 'Email and password are required';
-            emailError.style.display = 'block';
-          } else {
-            passwordError.textContent = 'Login failed: ' + errorText;
-            passwordError.style.display = 'block';
-          }
-          return;
-        }
-        
-        // Unknown error
-        const errorText = await response.text();
-        console.error('Login failed:', response.status, errorText);
-        passwordError.textContent = 'Login failed. Please try again.';
-        passwordError.style.display = 'block';
-      } catch (error) {
-        console.error('Login error:', error);
-        passwordError.textContent = 'Login failed. Please try again.';
-        passwordError.style.display = 'block';
-      }
+      alert('Login successful! Redirecting to dashboard...');
+      window.location.href = 'dashboard.html';
     });
   </script>
 </body>
