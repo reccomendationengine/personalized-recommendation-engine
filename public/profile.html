@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>User Profile - Personalized Recommendations Engine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +17,6 @@
       align-items: center;
       justify-content: center;
     }
-
     .profile-container {
       background: rgba(255, 255, 255, 0.1);
       padding: 3rem;
@@ -28,26 +27,37 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
       backdrop-filter: blur(10px);
     }
-
     h1 {
       font-size: 2.5rem;
       margin-bottom: 1rem;
     }
-
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      margin-top: 1rem;
+    }
     .profile-info {
       margin-top: 2rem;
       text-align: left;
       font-size: 1.2rem;
       line-height: 2rem;
     }
-
     .profile-info strong {
       color: #ffd6ff;
     }
-
-    .back-btn {
-      display: inline-block;
-      margin-top: 2rem;
+    .btn-container {
+      margin-top: 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      flex: 1;
+      text-align: center;
       background: rgba(255, 255, 255, 0.2);
       border: 1px solid rgba(255, 255, 255, 0.3);
       padding: 0.8rem 1.5rem;
@@ -56,40 +66,104 @@
       text-decoration: none;
       font-weight: 500;
       transition: all 0.3s ease;
+      cursor: pointer;
     }
-
-    .back-btn:hover {
+    .btn:hover {
       background: rgba(255, 255, 255, 0.3);
       transform: translateY(-2px);
     }
+    .delete-btn {
+      background: rgba(255, 0, 0, 0.3);
+      border-color: rgba(255, 0, 0, 0.5);
+    }
+    .delete-btn:hover {
+      background: rgba(255, 0, 0, 0.5);
+    }
+    #changePicInput {
+      display: none;
+    }
   </style>
 </head>
+
 <body>
   <div class="profile-container">
     <h1>Your Profile</h1>
+    <img id="profilePic" src="" alt="Profile Picture" class="profile-pic">
+    <br>
+    <button id="changePicBtn" class="btn" style="margin-top: 1rem;">📸 Change Picture</button>
+    <input type="file" id="changePicInput" accept="image/*">
+
     <p>View and manage your personal information.</p>
 
     <div class="profile-info">
       <p><strong>Name:</strong> <span id="profileName">Loading...</span></p>
       <p><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
+      <p><strong>Date of Birth:</strong> <span id="profileDOB">Loading...</span></p>
+      <p><strong>Phone:</strong> <span id="profilePhone">Loading...</span></p>
     </div>
 
-    <a href="dashboard.html" class="back-btn">⬅ Back to Dashboard</a>
+    <div class="btn-container">
+      <a href="dashboard.html" class="btn">⬅ Back to Dashboard</a>
+      <button id="deleteAccountBtn" class="btn delete-btn">🗑 Delete Account</button>
+    </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const userEmail = localStorage.getItem('userEmail');
       const userName = localStorage.getItem('userName');
+      const userDOB = localStorage.getItem('userDOB');
+      const userPhone = localStorage.getItem('userPhone');
+      const userProfilePic = localStorage.getItem('userProfilePic');
+      const profilePicElement = document.getElementById('profilePic');
 
+      // Redirect to signup if not logged in
       if (!userEmail) {
-        window.location.href = 'login.html';
+        window.location.href = 'signup.html';
         return;
       }
 
+      // Display saved user info
       document.getElementById('profileName').textContent = userName || 'Not provided';
       document.getElementById('profileEmail').textContent = userEmail || 'Not provided';
+      document.getElementById('profileDOB').textContent = userDOB || 'Not provided';
+      document.getElementById('profilePhone').textContent = userPhone || 'Not provided';
+      profilePicElement.src = userProfilePic || 'https://via.placeholder.com/120?text=Profile';
+
+      // Change picture functionality
+      const changePicBtn = document.getElementById('changePicBtn');
+      const changePicInput = document.getElementById('changePicInput');
+
+      changePicBtn.addEventListener('click', () => {
+        changePicInput.click();
+      });
+
+      changePicInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const newPic = e.target.result;
+          profilePicElement.src = newPic;
+          localStorage.setItem('userProfilePic', newPic);
+          alert('Profile picture updated successfully!');
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // Delete account
+    document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+      if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+        localStorage.clear();
+        alert('Your account has been deleted.');
+        window.location.href = 'signup.html';
+      }
     });
   </script>
 </body>
 </html>
+
+
+
