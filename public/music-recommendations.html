@@ -594,6 +594,27 @@
           method: 'GET'
         });
         
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          if (text.trim().startsWith('<!') || text.includes('<!doctype') || text.includes('<html')) {
+            console.warn('Backend API not available - returning null for current user');
+            return null;
+          }
+          // If it's not HTML but also not JSON, try to parse as JSON anyway
+          try {
+            const user = JSON.parse(text);
+            if (response.ok && user.userId) {
+              return user.userId;
+            }
+          } catch (e) {
+            console.warn('Could not parse response as JSON');
+            return null;
+          }
+          return null;
+        }
+        
         if (response.ok) {
           const user = await response.json();
           console.log('User session found:', user);
@@ -628,6 +649,24 @@
         const response = await fetch('/api/behavioral-patterns', {
           credentials: 'include'
         });
+        
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          if (text.trim().startsWith('<!') || text.includes('<!doctype') || text.includes('<html')) {
+            console.warn('Backend API not available - no behavioral patterns found');
+            return null;
+          }
+          // If it's not HTML but also not JSON, try to parse as JSON anyway
+          try {
+            return JSON.parse(text);
+          } catch (e) {
+            console.warn('Could not parse response as JSON');
+            return null;
+          }
+        }
+        
         const data = await response.json();
         
         console.log('Behavioral patterns check result:', data);
@@ -804,10 +843,22 @@
       fetch(`/api/recommendations-with-youtube/${currentUserId}?offset=${offset}`, {
         credentials: 'include'
       })
-        .then(response => {
+        .then(async response => {
           console.log('Recommendations response status:', response.status);
+          
+          // Check if response is JSON
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            if (text.trim().startsWith('<!') || text.includes('<!doctype') || text.includes('<html')) {
+              throw new Error('Backend API server is not available. Please ensure the server is running locally (npm start) or deploy the backend to Cloud Run.');
+            }
+            throw new Error(`Server returned ${response.status}: ${text.substring(0, 100)}`);
+          }
+          
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorData = await response.json().catch(() => ({ error: `HTTP error! status: ${response.status}` }));
+            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
           }
           return response.json();
         })
@@ -1599,7 +1650,23 @@
         body: formData,
         credentials: 'include'
       })
-      .then(response => response.json())
+      .then(async response => {
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          // If we get HTML, it means the backend is not available
+          if (text.trim().startsWith('<!') || text.includes('<!doctype') || text.includes('<html')) {
+            throw new Error('Backend API server is not available. The server may not be running or the backend needs to be deployed. Please check if the server is running on localhost:3000 or deploy the backend to Cloud Run.');
+          }
+          throw new Error(`Server returned ${response.status}: ${text.substring(0, 100)}`);
+        }
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: `Server error: ${response.status} ${response.statusText}` }));
+          throw new Error(errorData.error || `Upload failed: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      })
       .then(data => {
         if (data.success) {
           const tracksMsg = data.tracksCreated > 0 ? ` Created ${data.tracksCreated} music tracks.` : '';
@@ -1636,7 +1703,12 @@
       })
       .catch(error => {
         console.error('Error uploading listening history:', error);
-        showHistoryStatus(`❌ Upload failed: ${error.message}`, 'error');
+        let errorMessage = error.message;
+        // Provide more helpful error message
+        if (errorMessage.includes('Backend API server is not available')) {
+          errorMessage = '⚠️ Backend server is not available. Please ensure the server is running locally (npm start) or deploy the backend to Cloud Run.';
+        }
+        showHistoryStatus(`❌ ${errorMessage}`, 'error');
         historyUploadBtn.disabled = false;
         historyUploadBtn.textContent = 'Upload Listening History';
       });
