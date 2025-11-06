@@ -238,11 +238,28 @@
   <script>
     function selectOption(type) {
       if (type === 'music') {
+        // Use window.location to ensure cookies are sent
         window.location.href = '/music-recommendations.html';
       } else if (type === 'movie') {
         alert('Movie recommendations coming soon! 🎬');
       }
     }
+    
+    // Verify session on page load
+    window.addEventListener('DOMContentLoaded', async function() {
+      try {
+        const response = await fetch('/api/current-user', {
+          credentials: 'include',
+          method: 'GET'
+        });
+        if (!response.ok) {
+          console.warn('Session check failed, redirecting to login');
+          window.location.href = '/login.html';
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      }
+    });
 
     function viewProfile() {
       window.location.href = 'profile.html';

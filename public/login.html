@@ -62,9 +62,9 @@
   </div>
 
   <script>
-    // Enhanced client-side validation
-    document.getElementById('loginForm').addEventListener('submit', function (e) {
-      e.preventDefault(); // Prevent actual form submission
+    // Enhanced client-side validation and login
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault(); // Prevent default form submission
       
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
@@ -90,16 +90,89 @@
       }
 
       if (!isValid) {
-        e.preventDefault();
-      } else {
-        // Store email and extract user name from email for localStorage
-        localStorage.setItem('userEmail', email);
-        const userName = email.split('@')[0]; // Extract name from email
-        localStorage.setItem('userName', userName);
+        return;
+      }
 
-        window.location.href = 'dashboard.html';
+      // Submit login to server to create session
+      try {
+        const formData = new URLSearchParams();
+        formData.append('email', email);
+        formData.append('password', password);
 
-        // The form will submit normally and redirect to dashboard
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json'
+          },
+          body: formData,
+          credentials: 'include', // Important for session cookies
+          redirect: 'manual' // Handle redirects manually
+        });
+
+        // Handle different response statuses
+        if (response.status === 200) {
+          // Success - try to parse JSON
+          try {
+            const data = await response.json();
+            if (data.success) {
+              localStorage.setItem('userEmail', email);
+              const userName = email.split('@')[0];
+              localStorage.setItem('userName', userName);
+              window.location.href = '/dashboard.html';
+              return;
+            }
+          } catch (e) {
+            // Not JSON, but 200 means success - verify session
+            const userCheck = await fetch('/api/current-user', { credentials: 'include' });
+            if (userCheck.ok) {
+              localStorage.setItem('userEmail', email);
+              const userName = email.split('@')[0];
+              localStorage.setItem('userName', userName);
+              window.location.href = '/dashboard.html';
+              return;
+            }
+          }
+        } else if (response.status === 302) {
+          // Redirect means login successful - verify session was created
+          const userCheck = await fetch('/api/current-user', { credentials: 'include' });
+          if (userCheck.ok) {
+            localStorage.setItem('userEmail', email);
+            const userName = email.split('@')[0];
+            localStorage.setItem('userName', userName);
+            window.location.href = '/dashboard.html';
+            return;
+          } else {
+            // Session not created, show error
+            passwordError.textContent = 'Login failed. Session could not be created.';
+            passwordError.style.display = 'block';
+            return;
+          }
+        } else if (response.status === 400) {
+          // Bad request - get error message
+          const errorText = await response.text();
+          if (errorText.includes('invalid credentials')) {
+            passwordError.textContent = 'Invalid email or password';
+            passwordError.style.display = 'block';
+          } else if (errorText.includes('required')) {
+            emailError.textContent = 'Email and password are required';
+            emailError.style.display = 'block';
+          } else {
+            passwordError.textContent = 'Login failed: ' + errorText;
+            passwordError.style.display = 'block';
+          }
+          return;
+        }
+        
+        // Unknown error
+        const errorText = await response.text();
+        console.error('Login failed:', response.status, errorText);
+        passwordError.textContent = 'Login failed. Please try again.';
+        passwordError.style.display = 'block';
+      } catch (error) {
+        console.error('Login error:', error);
+        passwordError.textContent = 'Login failed. Please try again.';
+        passwordError.style.display = 'block';
       }
     });
   </script>
