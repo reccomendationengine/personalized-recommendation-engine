@@ -24,5 +24,8 @@
     "sqlite3": "^5.1.7",
     "youtube-search-without-api-key": "^2.0.7",
     "ytdl-core": "^4.11.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1"
   }
 }
