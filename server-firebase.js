@@ -17,7 +17,7 @@ app.use(express.json());
 // and place it as 'firebase-service-account.json' in your project root
 let serviceAccount;
 try {
-  serviceAccount = require('./firebase-service-account.json');
+  serviceAccount = require('./personalizedreceng-firebase-adminsdk-fbsvc-21cc18d3fc.json');
 } catch (error) {
   console.error('Firebase service account key not found. Please add firebase-service-account.json to your project root.');
   console.error('You can download this from Firebase Console > Project Settings > Service Accounts');
