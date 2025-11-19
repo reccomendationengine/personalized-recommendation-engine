@@ -179,51 +179,40 @@
         };
         reader.readAsDataURL(file);
       });
-      });
+    });
 
-    document.getElementById('changePasswordBtn').addEventListener('click', async () => {
+    document.getElementById('changePasswordBtn').addEventListener('click', () => {
       const newPass = document.getElementById('newPassword').value;
       const confirmPass = document.getElementById('confirmPassword').value;
-
 
       if (!newPass || !confirmPass) {
         alert('Please fill out both password fields');
         return;
       }
 
-
       if (newPass !== confirmPass) {
         alert('Passwords do not match');
         return;
       }
 
+      // Simulate password update (for demo purposes)
+      localStorage.setItem('userPassword', newPass); // optional, just for storage
+      alert('Your password has been updated successfully!');
 
-      const user = auth.currentUser;
+      // Clear the input fields
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+    });
 
 
-      if (!user) {
-        alert('No user logged in');
-        return;
+    // Delete account
+    document.getElementById('deleteAccountBtn').addEventListener('click', function () {
+      if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+        localStorage.clear();
+        alert('Your account has been deleted.');
+        window.location.href = 'signup.html';
       }
-
-
-      try {
-        await updatePassword(user, newPass);
-        alert('Password updated successfully');
-      } catch (err) {
-        console.error(err);
-        alert('Error updating password: ' + err.message);
-      }
-
-      // Delete account
-      document.getElementById('deleteAccountBtn').addEventListener('click', function () {
-        if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
-          localStorage.clear();
-          alert('Your account has been deleted.');
-          window.location.href = 'signup.html';
-        }
-      });
-      });
+    });
   </script>
 </body>
 
