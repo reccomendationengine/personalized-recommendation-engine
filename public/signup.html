@@ -171,7 +171,11 @@
     </main>
   </div>
 
-  <script>
+  <script type="module">
+    import { auth , db } from './firebase-config.js';
+    import { createUserWithEmailAndPassword } from "firebase/auth";
+    import { doc, setDoc } from "firebase/firestore";
+
     function validatePassword(password) {
       const requirements = {
         length: password.length >= 6,
@@ -263,35 +267,41 @@
 
       if (!isValid) return;
 
-      const userNameToSave = username || email.split('@')[0];
-      localStorage.setItem('userEmail', email);
-      localStorage.setItem('userName', userNameToSave);
-      localStorage.setItem('userDOB', dateOfBirth || '');
-      localStorage.setItem('userPhone', phoneNumber || '');
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(async (userCredential) => {
+          const user = userCredential.user;
 
-      const goToDashboard = () => {
-        try {
-          window.location.href = 'dashboard.html';
-        } catch (err) {
-          console.error('Redirect failed:', err);
-        }
-      };
+          // Firestore user document
+          await setDoc(doc(db, "users", user.uid), {
+            username: username || email.split('@')[0],
+            email: email,
+            createdAt: new Date(),
+            preferences: {},
+            categories: [],
+            genres: [],
+            dateOfBirth: dateOfBirth || "",
+            phoneNumber: phoneNumber || ""
+          });
 
-      if (profilePicInput.files && profilePicInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          localStorage.setItem('userProfilePic', event.target.result);
-          goToDashboard();
-        };
-        reader.onerror = () => {
-          console.warn('Image failed to load, continuing...');
-          goToDashboard();
-        };
-        reader.readAsDataURL(profilePicInput.files[0]);
-      } else {
-        localStorage.setItem('userProfilePic', '');
-        goToDashboard();
-      }
+          // Optional profile picture
+          if (profilePicInput.files && profilePicInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+              await setDoc(doc(db, "users", user.uid), {
+                profilePic: event.target.result
+              }, { merge: true });
+              window.location.href = 'dashboard.html';
+            };
+            reader.readAsDataURL(profilePicInput.files[0]);
+          } else {
+            window.location.href = 'dashboard.html';
+          }
+        })
+        .catch((error) => {
+          console.error("Signup error:", error);
+          passwordError.style.display = 'block';
+          passwordError.textContent = error.message;
+        });
     });
   </script>
 </body>
