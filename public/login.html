@@ -43,7 +43,7 @@
             <div class="form-group">
               <div class="flex items-center justify-between">
                 <label for="password" class="label">Password</label>
-                <a href="#" class="text-sm text-primary hover:underline">Forgot password?</a>
+                <a href="forgotPassword.html" class="text-sm text-primary hover:underline">Forgot password?</a>
               </div>
               <input id="password" name="password" type="password" placeholder="Enter your password" class="input"
                 required>
@@ -105,9 +105,9 @@
             'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json'
           },
-          body: formData,
+          body: formData.toString(),
           credentials: 'include', // Important for session cookies
-          redirect: 'manual' // Handle redirects manually
+          redirect: 'follow' // Handle redirects manually
         });
 
         // Handle different response statuses

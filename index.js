@@ -11,6 +11,7 @@ const media_search = require('youtube-search-without-api-key');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.use(express.urlencoded({ extended: true }));
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'your-gemini-api-key-here');
