@@ -36,46 +36,24 @@
       align-items: center;
       font-size: 0.8rem;
       color: #6c757d;
-      margin-bottom: 0.35rem;
-      transition: color 0.3s ease;
+      margin-bottom: 0.25rem;
     }
 
     .requirement-icon {
       margin-right: 0.5rem;
       font-weight: bold;
-      width: 18px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      transition: color 0.3s ease, transform 0.2s ease;
+      width: 16px;
+      display: inline-block;
+      text-align: center;
     }
 
-    /* Unmet requirements - red/gray */
-    .requirement:not(.met) {
-      color: #6c757d;
-    }
-    
-    .requirement:not(.met) .requirement-icon {
-      color: #dc3545;
-    }
-
-    /* Met requirements - green */
     .requirement.met {
       color: #28a745;
-      font-weight: 500;
     }
 
     .requirement.met .requirement-icon {
       color: #28a745;
-      transform: scale(1.1);
-    }
-
-    .error-message {
-      display: none;
-      color: red;
-      font-size: 0.8rem;
-      margin-top: 0.25rem;
+      content: "✓";
     }
   </style>
 </head>
@@ -105,7 +83,8 @@
           </p>
         </div>
         <div class="card-content">
-          <form id="signupForm" class="space-y-4">
+          <!-- <form id="signupForm" action="/signup" method="POST" class="space-y-4"> -->
+          <form id="signupForm" class="space-y-4"> <!--added this-->
             <div class="form-group">
               <label for="username" class="label">Full Name</label>
               <input id="username" name="username" type="text" placeholder="Enter your full name" class="input">
@@ -144,10 +123,6 @@
                     <span class="requirement-icon">✗</span>
                     One number
                   </li>
-                  <li id="req-special" class="requirement">
-                    <span class="requirement-icon">✗</span>
-                    One special character (!@#$%^&*)
-                  </li>
                 </ul>
               </div>
             </div>
@@ -161,7 +136,7 @@
 
             <div class="form-group">
               <label for="dateOfBirth" class="label">Date of Birth (Optional)</label>
-              <input id="dateOfBirth" name="dateOfBirth" type="date" class="input">
+              <input id="dateOfBirth" name="dateOfBirth" type="text" class="input" placeholder="dd-mm-yyyy">
             </div>
 
             <div class="form-group">
@@ -169,7 +144,7 @@
               <input id="phoneNumber" name="phoneNumber" type="tel" placeholder="+1 (555) 123-4567" class="input">
             </div>
 
-            <div class="form-group">
+            <div clas="form-group">
               <label for="profilePic" class="label">Profile Picture (Optional)</label>
               <input id="profilePic" name="profilePic" type="file" accept="image/*" class="input">
             </div>
@@ -191,27 +166,28 @@
   </div>
 
   <script>
+    // Password validation function
     function validatePassword(password) {
       const requirements = {
         length: password.length >= 6,
         uppercase: /[A-Z]/.test(password),
         lowercase: /[a-z]/.test(password),
-        number: /\d/.test(password),
-        special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+        number: /\d/.test(password)
       };
 
+      // Update requirement indicators
       updateRequirement('req-length', requirements.length);
       updateRequirement('req-uppercase', requirements.uppercase);
       updateRequirement('req-lowercase', requirements.lowercase);
       updateRequirement('req-number', requirements.number);
-      updateRequirement('req-special', requirements.special);
 
-      return Object.values(requirements).every(Boolean);
+      return Object.values(requirements).every(req => req);
     }
 
     function updateRequirement(id, met) {
       const element = document.getElementById(id);
       const icon = element.querySelector('.requirement-icon');
+
       if (met) {
         element.classList.add('met');
         icon.textContent = '✓';
@@ -221,6 +197,7 @@
       }
     }
 
+    // Phone number formatting
     function formatPhoneNumber(input) {
       let value = input.value.replace(/\D/g, '');
       if (value.length >= 6) {
@@ -231,16 +208,33 @@
       input.value = value;
     }
 
+    // Real-time password validation
     document.getElementById('password').addEventListener('input', function () {
       validatePassword(this.value);
     });
 
+    // Phone number formatting
     document.getElementById('phoneNumber').addEventListener('input', function () {
       formatPhoneNumber(this);
     });
 
+    // Date of birth formatting (dd-mm-yyyy)
+    document.getElementById('dateOfBirth').addEventListener('input', function () {
+      let value = this.value.replace(/\D/g, '');
+
+      if (value.length >= 5) {
+        value = value.replace(/(\d{2})(\d{2})(\d{0,4})/, '$1-$2-$3');
+      } else if (value.length >= 3) {
+        value = value.replace(/(\d{2})(\d{0,2})/, '$1-$2');
+      }
+
+      this.value = value;
+    });
+
+
+    // Enhanced client-side validation for signup form
     document.getElementById('signupForm').addEventListener('submit', function (e) {
-      e.preventDefault();
+      e.preventDefault(); //stop normal form submission
 
       const username = document.getElementById('username').value.trim();
       const email = document.getElementById('email').value.trim();
@@ -261,57 +255,57 @@
       confirmError.style.display = 'none';
 
       let isValid = true;
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+      // Email validation (required)
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!email || !emailPattern.test(email)) {
         emailError.style.display = 'block';
         isValid = false;
       }
+
+      // Username validation (optional, but if provided must be valid)
       if (username.length > 0 && username.length < 2) {
         usernameError.style.display = 'block';
         isValid = false;
       }
+
+      // Enhanced password validation
       const passwordValid = validatePassword(password);
       if (!password || !passwordValid) {
         passwordError.style.display = 'block';
         passwordError.textContent = 'Password must meet all requirements above.';
         isValid = false;
       }
+
+      // Password confirmation
       if (password !== confirmPassword) {
         confirmError.style.display = 'block';
         isValid = false;
       }
 
-      if (!isValid) return;
-
-      const userNameToSave = username || email.split('@')[0];
-      localStorage.setItem('userEmail', email);
-      localStorage.setItem('userName', userNameToSave);
-      localStorage.setItem('userDOB', dateOfBirth || '');
-      localStorage.setItem('userPhone', phoneNumber || '');
-
-      const goToDashboard = () => {
-        try {
-          window.location.href = 'dashboard.html';
-        } catch (err) {
-          console.error('Redirect failed:', err);
-        }
-      };
-
-      if (profilePicInput.files && profilePicInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          localStorage.setItem('userProfilePic', event.target.result);
-          goToDashboard();
-        };
-        reader.onerror = () => {
-          console.warn('Image failed to load, continuing...');
-          goToDashboard();
-        };
-        reader.readAsDataURL(profilePicInput.files[0]);
+      if (!isValid) {
+        e.preventDefault();
       } else {
-        localStorage.setItem('userProfilePic', '');
-        goToDashboard();
+        // Save user info to localStorage
+        const userNameToSave = username.trim() || email.split('@')[0];
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('userName', userNameToSave);
+        localStorage.setItem('userDOB', dateOfBirth || '');
+        localStorage.setItem('userPhone', phoneNumber || '');
+
+        // if a user uploaded a picture, save it
+        if (profilePicInput.files && profilePicInput.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            localStorage.setItem('userProfilePic', e.target.result);
+            window.location.href = 'dashboard.html';
+          };
+          reader.readAsDataURL(profilePicInput.files[0]);
+        } else {
+          localStorage.setItem('userProfilePic', '');
+          window.location.href = 'dashboard.html'
+        }
+
       }
     });
   </script>
