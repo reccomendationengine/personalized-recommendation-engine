@@ -1,143 +1,204 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const admin = require('firebase-admin');
+// Firebase-enabled Express server for the music recommendation engine
+require('dotenv').config();
 const path = require('path');
-const cors = require('cors'); // Required for development/testing
-
-// --- Configuration and Initialization ---
-
-// 1. Load the Service Account Credentials
-// IMPORTANT: This file MUST NOT be committed to your repository. 
-// It appears you were blocked by GitHub Push Protection because this file was committed.
-// Make sure this file is listed in your .gitignore: personal-recommendation-engine-firebase-adminsdk.json
-const serviceAccount = require('./personal-recommendation-engine-firebase-adminsdk.json');
-
-// 2. Initialize Firebase Admin SDK
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-    // You might need to add databaseURL if you use Realtime Database, 
-    // but Firestore works without it here.
-});
+const fs = require('fs');
+const express = require('express');
+// Removed SQLite, session, and multer in favor of Firebase/client auth
+const admin = require('firebase-admin');
+const media_search = require('youtube-search-without-api-key');
+const MusicRecommendationSystem = require('./musicrec.js');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
-const db = admin.firestore();
-const port = 3000;
+const PORT = process.env.PORT || 3000;
 
-// --- Middleware Setup ---
-app.use(cors({ origin: true })); // Allows cross-origin requests (for testing)
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Middleware
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-// Serve static files (HTML, CSS, client-side JS)
-app.use(express.static(path.join(__dirname)));
-
-/**
- * Middleware to protect API routes and retrieve user context.
- * The token is sent in the 'Authorization: Bearer <ID_TOKEN>' header from the client.
- */
-async function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (token == null) {
-        return res.sendStatus(401).send('Unauthorized: No token provided'); // No token
-    }
-
-    try {
-        // Verify the token using Firebase Admin SDK
-        const decodedToken = await admin.auth().verifyIdToken(token);
-        
-        // Attach user info to the request object
-        req.user = { 
-            uid: decodedToken.uid,
-            email: decodedToken.email
-        };
-        next();
-    } catch (error) {
-        console.error("Token verification error:", error);
-        return res.sendStatus(403).send('Forbidden: Invalid or expired token'); // Invalid token
-    }
+// --- FIREBASE INITIALIZATION ---
+// This block initializes the Firebase Admin SDK, which allows the Node.js server
+// to securely interact with Firestore (replacing SQLite).
+let serviceAccount;
+try {
+  // Try to load the service account from an environment variable first (best practice)
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } else {
+    // Fallback: This is a placeholder for local development. 
+    // You MUST ensure your service account file is present here or use the environment variable.
+    serviceAccount = require('./personal-recommendation-engine-firebase-adminsdk.json'); 
+  }
+} catch (error) {
+  console.error('Firebase service account configuration not found or invalid.');
+  serviceAccount = null;
 }
 
-// --- API Endpoints ---
+let db;
+if (serviceAccount) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    projectId: "personal-recommendation-engine" // Your actual Firebase Project ID
+  });
+  
+  db = admin.firestore();
+  console.log('Firebase Admin SDK initialized successfully.');
+} else {
+  console.error('SERVER ERROR: Firebase Admin SDK not initialized. Recommendation features requiring database access will fail.');
+}
 
-// 1. Login Endpoint: Generates a custom token for the client
-app.post('/api/login', async (req, res) => {
-    const { email, password } = req.body;
-    
-    // In a production scenario, you would securely verify the password
-    // (e.g., using Firebase Auth REST API or a secure service).
-    // For this mock, we assume the user authenticated successfully on the client
-    // and is now exchanging the ID token for a session token/custom claim, or just fetching profile.
-    
+// Mock user session/auth for demonstration purposes. 
+// In a production environment, this authentication should be handled via Firebase Auth.
+const MOCK_USER_ID = 'user_demo_123';
+const MOCK_USER_EMAIL = 'demo@example.com';
+const MOCK_USER_NAME = 'DemoUser';
+
+app.use((req, res, next) => {
+    // Attach the DB instance and Mock Auth details to the request
+    req.db = db;
+    req.session = { userId: MOCK_USER_ID, email: MOCK_USER_EMAIL, username: MOCK_USER_NAME };
+    next();
+});
+
+// Mock authentication check
+function requireAuth(req, res, next) { 
+    if (req.session?.userId) next(); 
+    else res.status(401).json({ error: 'authentication required' }); 
+}
+
+// Global instance of the Recommendation System, initialized with Firestore
+const recSystem = new MusicRecommendationSystem(db); 
+
+// --- API ENDPOINTS ---
+
+app.get('/health', (req, res) => res.json({status: 'ok'}));
+app.get('/api/current-user', requireAuth, (req, res) => res.json({ userId: req.session.userId, username: req.session.username, email: req.session.email }));
+
+// Serve static HTML files
+app.get('/dashboard.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
+app.get('/music-recommendations.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'music-recommendations.html')));
+
+/**
+ * Replaces the CSV upload endpoint. Now, it seeds mock data into Firestore 
+ * to ensure the recommendation engine has data to work with.
+ */
+app.post('/api/upload-listening-history', requireAuth, async (req, res) => {
+    const userId = req.session.userId;
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
     try {
-        // Lookup the user by email
-        const user = await admin.auth().getUserByEmail(email);
+        // Seed content and user history data into the Firestore collections
+        await recSystem.seedMockHistory(userId);
+        // Initialize the Item Tower embeddings based on the seeded content
+        await recSystem.initializeTwoTowerModel(); 
         
-        // Fetch profile data from Firestore
-        const profileRef = db.doc(`artifacts/${appId}/users/${user.uid}/profile/data/user_profile`);
-        const profileDoc = await profileRef.get();
-        
-        if (!profileDoc.exists) {
-            console.warn(`Profile not found for user: ${user.uid}`);
-        }
-        
-        const profileData = profileDoc.data() || {};
-        
-        // Return user data (or an ID token if using custom claims)
-        res.status(200).json({ 
-            message: 'Login successful', 
-            user: {
-                id: user.uid,
-                email: user.email,
-                username: profileData.username
-            }
-        });
-        
+        res.json({ success: true, message: 'Mock listening history seeded to Firestore successfully.', userId });
     } catch (error) {
-        console.error('Server-side login error:', error.message);
-        // Map common errors
-        if (error.code === 'auth/user-not-found') {
-            return res.status(401).send('Invalid email or password.');
-        }
-        res.status(500).send('Authentication failed.');
+        console.error('Error seeding mock history:', error);
+        res.status(500).json({ error: 'Failed to seed mock history data', details: error.message });
     }
 });
 
-// 2. Recommendations Endpoint (Protected)
-app.post('/api/recommendations', authenticateToken, async (req, res) => {
-    // This is a protected route. req.user contains the UID.
-    const { category, exclude_song_ids } = req.body;
-    const userId = req.user.uid;
+/**
+ * Main recommendation endpoint using the 2-Tower model.
+ * Fetches user history from Firestore -> generates User Embedding -> calculates similarity
+ * with Item Embeddings -> returns top results.
+ */
+app.get('/api/recommendations-with-youtube/:userId', requireAuth, async (req, res) => {
+	const userId = req.params.userId;
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+    
+	try {
+		const allRecommendations = await recSystem.getHybridRecommendations(userId, { hour: new Date().getHours() }, 50);
+        
+		if (allRecommendations.length === 0) {
+            return res.json({ recommendations: [], hasMore: false, message: 'No recommendations found. Run /api/upload-listening-history first to seed data.' });
+        }
 
-    try {
-        // Lazy load the recommendation engine and mock data
-        const { MusicRecommendationSystem } = require('./musicrec');
-        const fs = require('fs');
-        const mockDataPath = path.join(__dirname, 'mock_listening_history.csv');
-        const csvData = fs.readFileSync(mockDataPath, 'utf8');
-
-        const recommender = new MusicRecommendationSystem();
-        recommender.loadData(csvData);
-
-        // Train and generate recommendations
-        recommender.trainUserTower(userId); 
-        const recommendations = recommender.getRecommendations(userId, 100, category, exclude_song_ids);
-
-        res.status(200).json({ 
-            userId,
-            category: category || 'General',
-            recommendations 
-        });
-
-    } catch (error) {
-        console.error('Error generating recommendations:', error);
-        res.status(500).json({ error: 'Failed to generate recommendations.' });
-    }
+		// Normalize scores for client-side presentation
+		const allScores = allRecommendations.map(r => r.score || 0);
+		const maxScore = Math.max(...allScores) || 1;
+		const minScore = Math.min(...allScores) || 0;
+		const scoreRange = maxScore - minScore || 1;
+        
+		const formattedRecs = allRecommendations.map(rec => {
+			const normalizedScore = scoreRange > 0 ? (rec.score - minScore) / scoreRange : 0;
+			const percentage = Math.min(normalizedScore * 100, 100);
+			if (percentage < 1.0) return null; // Filter out very low compatibility
+            
+			let matchLevel = 'maylike', matchLevelText = 'You May Like';
+			if (percentage >= 80) { matchLevel = 'highly'; matchLevelText = 'Highly Recommended'; } 
+            else if (percentage >= 50) { matchLevel = 'moderate'; matchLevelText = 'Moderately Recommended'; }
+            
+			return { 
+                id: rec.id, 
+                title: rec.title, 
+                artist: rec.artist, 
+                genre: rec.genre || 'Unknown', 
+                similarity_score: normalizedScore, 
+                matchLevel, 
+                matchLevelText, 
+                explanation: `Based on your ${rec.genre || 'music'} preferences, this track has a ${percentage.toFixed(1)}% compatibility.`, 
+                youtube: null // Placeholder for YouTube search (handled separately on client)
+            };
+		}).filter(rec => rec !== null);
+        
+		res.json({ recommendations: formattedRecs, hasMore: false, offset: 0 });
+	} catch (error) {
+		console.error('Recommendation Error:', error);
+		res.status(500).json({ recommendations: [], hasMore: false, error: error.message });
+	}
 });
 
-// --- Server Start ---
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-    console.log(`Open http://localhost:${port}/index.html to start the app.`);
+// Endpoint to get category-based recommendations (e.g., based on top genre)
+app.get('/api/recommendations-by-category/:userId/:category', requireAuth, async (req, res) => {
+	const userId = req.params.userId;
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+	const category = decodeURIComponent(req.params.category);
+    
+	try {
+		const allRecommendations = await recSystem.getRecommendationsBy(category, userId, { hour: new Date().getHours() }, 100);
+        
+		if (allRecommendations.length === 0) {
+            return res.json({ recommendations: [], hasMore: false, message: 'No category recommendations found.' });
+        }
+        
+		// Normalization logic is performed inside the musicrec.js and for presentation here
+
+		res.json({ recommendations: allRecommendations, hasMore: false, category, offset: 0 });
+	} catch (error) {
+        console.error('Category Recommendation Error:', error);
+		res.status(500).json({ error: 'Failed to get category recommendations', details: error.message });
+	}
 });
+
+// Endpoint to search YouTube for video links (for playing the music)
+app.get('/api/search-youtube/:query', requireAuth, async (req, res) => {
+	try {
+		const query = decodeURIComponent(req.params.query);
+		const results = await media_search.search(`${query} official music video`);
+		if (results && results.length > 0) {
+			const video = results[0];
+			const videoId = video.id?.videoId || video.id;
+			res.json({ success: true, video: { id: videoId, title: video.title || video.snippet?.title, url: video.url || `https://www.youtube.com/watch?v=${videoId}`, thumbnail: video.snippet?.thumbnails?.default?.url || video.thumbnail, duration: video.duration_raw || video.duration } });
+		} else {
+			res.json({ success: false, message: 'No YouTube video found' });
+		}
+	} catch (error) {
+		console.error('YouTube Search Error:', error);
+		res.status(500).json({ success: false, error: 'Failed to search YouTube' });
+	}
+});
+
+function startServer(port, remainingAttempts = 3) {
+	const server = app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
+	server.on('error', (err) => { 
+        if (err.code === 'EADDRINUSE' && remainingAttempts > 0) { 
+            setTimeout(() => startServer(port + 1, remainingAttempts - 1), 200); 
+        } else { 
+            console.error('Server failed to start:', err); 
+            process.exit(1); 
+        } 
+    });
+}
+startServer(PORT, 3);
