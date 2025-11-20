@@ -36,24 +36,39 @@
       align-items: center;
       font-size: 0.8rem;
       color: #6c757d;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.35rem;
+      transition: color 0.3s ease;
     }
 
     .requirement-icon {
       margin-right: 0.5rem;
       font-weight: bold;
-      width: 16px;
-      display: inline-block;
-      text-align: center;
+      width: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      transition: color 0.3s ease, transform 0.2s ease;
     }
 
+    /* Unmet requirements - red/gray */
+    .requirement:not(.met) {
+      color: #6c757d;
+    }
+    
+    .requirement:not(.met) .requirement-icon {
+      color: #dc3545;
+    }
+
+    /* Met requirements - green */
     .requirement.met {
       color: #28a745;
+      font-weight: 500;
     }
 
     .requirement.met .requirement-icon {
       color: #28a745;
-      content: "✓";
+      transform: scale(1.1);
     }
 
     .error-message {
@@ -129,6 +144,10 @@
                     <span class="requirement-icon">✗</span>
                     One number
                   </li>
+                  <li id="req-special" class="requirement">
+                    <span class="requirement-icon">✗</span>
+                    One special character (!@#$%^&*)
+                  </li>
                 </ul>
               </div>
             </div>
@@ -177,13 +196,15 @@
         length: password.length >= 6,
         uppercase: /[A-Z]/.test(password),
         lowercase: /[a-z]/.test(password),
-        number: /\d/.test(password)
+        number: /\d/.test(password),
+        special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
       };
 
       updateRequirement('req-length', requirements.length);
       updateRequirement('req-uppercase', requirements.uppercase);
       updateRequirement('req-lowercase', requirements.lowercase);
       updateRequirement('req-number', requirements.number);
+      updateRequirement('req-special', requirements.special);
 
       return Object.values(requirements).every(Boolean);
     }

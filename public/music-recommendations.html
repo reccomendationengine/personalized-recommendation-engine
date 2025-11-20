@@ -19,11 +19,132 @@
       background: linear-gradient(135deg, darkcyan 0%, darkorchid 100%);
       min-height: 100vh;
       padding: 2rem;
+      padding-left: 2rem; /* Keep left padding */
+      overflow-x: hidden; /* Prevent horizontal scroll */
+      overflow-y: auto; /* Allow vertical scrolling */
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 1400px;
       margin: 0 auto;
+      display: flex;
+      gap: 2rem;
+      position: relative;
+      padding-top: 0; /* No extra padding needed since back button is fixed */
+    }
+    
+    .main-content {
+      flex: 1;
+      min-width: 0;
+      overflow-x: hidden; /* Prevent horizontal scroll */
+    }
+    
+    .side-panel {
+      width: 280px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      height: fit-content;
+      max-height: calc(100vh - 8rem); /* Prevent overflow, account for back button */
+      overflow-y: auto; /* Allow scrolling within panel if needed */
+      overflow-x: hidden; /* Prevent horizontal scroll */
+      position: sticky;
+      top: 6.5rem; /* Start well below the back button (1rem top + ~4rem button height + 1.5rem spacing) */
+      align-self: flex-start; /* Align to top of flex container */
+      z-index: 1; /* Below back button */
+    }
+    
+    .side-panel h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .category-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .category-item {
+      margin-bottom: 0.5rem;
+    }
+    
+    .category-button {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: #f8f9fa;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #333;
+      text-align: left;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .category-button:hover {
+      background: #e9ecef;
+      border-color: #667eea;
+      transform: translateX(5px);
+    }
+    
+    .category-button.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .category-button .category-icon {
+      font-size: 1.1rem;
+      margin-right: 0.5rem;
+    }
+    
+    .category-button .category-arrow {
+      font-size: 0.8rem;
+      opacity: 0.6;
+    }
+    
+    .category-button.active .category-arrow {
+      opacity: 1;
+    }
+    
+    .all-recommendations-button {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+    
+    .all-recommendations-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+    
+    .category-description {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.25rem;
+      padding-left: 1rem;
+      font-style: italic;
     }
 
     .header {
@@ -210,9 +331,10 @@
     }
 
     .back-btn {
-      position: absolute;
-      top: 2rem;
-      left: 2rem;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 10000; /* Ensure it's above everything */
       background: rgba(255, 255, 255, 0.2);
       color: white;
       border: none;
@@ -225,6 +347,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
+      backdrop-filter: blur(10px);
     }
 
     .back-btn:hover {
@@ -251,10 +374,226 @@
     }
 
     .recommendations-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      display: flex;
+      flex-direction: column;
       gap: 1.5rem;
-      align-items: start;
+      margin-top: 2rem;
+    }
+    
+    .recommendation-card-horizontal {
+      display: flex;
+      align-items: center;
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      min-height: 100px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .recommendation-card-horizontal::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 6px;
+      background: currentColor;
+    }
+    
+    .recommendation-card-horizontal:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+    }
+    
+    .card-number {
+      font-size: 2rem;
+      font-weight: bold;
+      min-width: 60px;
+      text-align: center;
+      margin-right: 1.5rem;
+      color: rgba(0,0,0,0.3);
+    }
+    
+    .card-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+    
+    .card-info {
+      flex: 1;
+    }
+    
+    .card-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+    
+    .card-artist {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 0.25rem;
+    }
+    
+    .card-genre {
+      font-size: 0.9rem;
+      color: #999;
+      font-style: italic;
+    }
+    
+    .card-match {
+      text-align: right;
+      min-width: 180px;
+    }
+    
+    .card-percentage {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    
+    .card-match-level {
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .card-play-button {
+      min-width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+      margin-left: 1rem;
+    }
+    
+    .card-play-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(255, 0, 0, 0.5);
+    }
+    
+    .card-play-button:active {
+      transform: scale(0.95);
+    }
+    
+    /* YouTube Modal Styles */
+    .youtube-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .youtube-modal.show {
+      display: flex;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .youtube-modal-content {
+      background: white;
+      border-radius: 20px;
+      padding: 1.5rem;
+      max-width: 98%;
+      max-height: 98vh;
+      width: 1600px;
+      position: relative;
+      animation: slideUp 0.3s ease;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .youtube-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #eee;
+    }
+    
+    .youtube-modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #333;
+    }
+    
+    .youtube-modal-artist {
+      font-size: 1.1rem;
+      color: #666;
+      margin-top: 0.25rem;
+    }
+    
+    .youtube-modal-close {
+      background: #f0f0f0;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    
+    .youtube-modal-close:hover {
+      background: #e0e0e0;
+      transform: rotate(90deg);
+    }
+    
+    .youtube-modal-player {
+      width: 100%;
+      min-height: 600px;
+      aspect-ratio: 16 / 9;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      flex: 1;
+      position: relative;
+    }
+    
+    .youtube-modal-player iframe {
+      width: 100%;
+      height: 100%;
+      min-height: 600px;
+      border: none;
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
     }
 
     .recommendation-card {
@@ -317,89 +656,6 @@
       min-height: auto;
       opacity: 1;
     }
-
-    .more-btn {
-      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-      color: white;
-      border: none;
-      padding: 1rem 2rem;
-      border-radius: 50px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
-      margin: 2rem auto;
-      display: block;
-    }
-
-    .more-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
-    }
-
-    .more-btn:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    /* Data Options Styles */
-    .data-options {
-      display: flex;
-      gap: 1.5rem;
-      margin-top: 2rem;
-      justify-content: center;
-    }
-
-    .option-btn {
-      background: white;
-      border: 2px solid #e0e0e0;
-      border-radius: 15px;
-      padding: 1.5rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      min-width: 250px;
-      text-align: left;
-    }
-
-    .option-btn:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-      border-color: #667eea;
-    }
-
-    .continue-btn:hover {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-
-    .upload-new-btn:hover {
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-      color: white;
-    }
-
-    .option-icon {
-      font-size: 2rem;
-      flex-shrink: 0;
-    }
-
-    .option-content h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.2rem;
-      font-weight: 600;
-    }
-
-    .option-content p {
-      margin: 0;
-      font-size: 0.9rem;
-      opacity: 0.8;
-    }
-
 
     .track-title {
       font-size: 1.2rem;
@@ -517,28 +773,77 @@
   </a>
 
   <div class="container">
+    <!-- Side Panel with Categories -->
+    <aside class="side-panel" id="categoryPanel" style="display: none;">
+      <h3>🎵 Filter by Category</h3>
+      <ul class="category-list">
+        <li class="category-item">
+          <button class="category-button" onclick="loadCategoryRecommendations('genre')" data-category="genre">
+            <span><span class="category-icon">🎼</span> Genre</span>
+            <span class="category-arrow">→</span>
+          </button>
+        </li>
+        <li class="category-item">
+          <button class="category-button" onclick="loadCategoryRecommendations('sub-genre')" data-category="sub-genre">
+            <span><span class="category-icon">🎹</span> Sub-Genre</span>
+            <span class="category-arrow">→</span>
+          </button>
+        </li>
+        <li class="category-item">
+          <button class="category-button" onclick="loadCategoryRecommendations('artist')" data-category="artist">
+            <span><span class="category-icon">👤</span> Artist</span>
+            <span class="category-arrow">→</span>
+          </button>
+        </li>
+        <li class="category-item">
+          <button class="category-button" onclick="loadCategoryRecommendations('mood')" data-category="mood">
+            <span><span class="category-icon">😊</span> Mood</span>
+            <span class="category-arrow">→</span>
+          </button>
+        </li>
+        <li class="category-item">
+          <button class="category-button" onclick="loadCategoryRecommendations('time of day')" data-category="time of day">
+            <span><span class="category-icon">🕐</span> Time of Day</span>
+            <span class="category-arrow">→</span>
+          </button>
+        </li>
+        <li class="category-item">
+          <button class="category-button" onclick="loadCategoryRecommendations('day of week')" data-category="day of week">
+            <span><span class="category-icon">📅</span> Day of Week</span>
+            <span class="category-arrow">→</span>
+          </button>
+        </li>
+        <li class="category-item">
+          <button class="category-button" onclick="loadCategoryRecommendations('weekend listening')" data-category="weekend listening">
+            <span><span class="category-icon">🎉</span> Weekend Listening</span>
+            <span class="category-arrow">→</span>
+          </button>
+        </li>
+        <li class="category-item">
+          <button class="category-button" onclick="loadCategoryRecommendations('user action')" data-category="user action">
+            <span><span class="category-icon">⚡</span> User Action</span>
+            <span class="category-arrow">→</span>
+          </button>
+        </li>
+        <li class="category-item">
+          <button class="category-button" onclick="loadCategoryRecommendations('listening history flags')" data-category="listening history flags">
+            <span><span class="category-icon">🏷️</span> Listening History Flags</span>
+            <span class="category-arrow">→</span>
+          </button>
+        </li>
+      </ul>
+      <button class="all-recommendations-button" onclick="loadAllRecommendations()">
+        🎯 All Recommendations
+      </button>
+    </aside>
+    
+    <!-- Main Content -->
+    <div class="main-content">
     <div class="header">
       <h1>🎵 Music Recommendations</h1>
       <p>Upload your music data to get personalized recommendations</p>
     </div>
 
-
-    <div class="upload-section" id="uploadSection">
-      <div class="upload-icon">📁</div>
-      <h2>Upload Your Music Data</h2>
-      <p>We don't have your music data yet. Please upload a CSV file with your music preferences so we can recommend personalized songs for you.</p>
-      
-      <div class="file-input-container">
-        <input type="file" id="musicFile" class="file-input" accept=".csv" required>
-        <label for="musicFile" class="file-input-label">
-          <span class="file-input-icon">📁</span>
-          <span>Choose CSV File</span>
-        </label>
-      </div>
-      
-      <button id="uploadBtn" class="upload-btn" disabled>Upload Music Data</button>
-      <div id="uploadStatus" class="upload-status" style="display: none;"></div>
-    </div>
 
     <!-- Listening History Upload Section -->
     <div class="upload-section" id="listeningHistorySection" style="margin-top: 2rem; background: rgba(255, 255, 255, 0.95); padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
@@ -561,12 +866,31 @@
     <div class="recommendations-section" id="recommendationsSection" style="display: none;">
       <h2>Your Personalized Music Recommendations</h2>
       <p style="text-align: center; color: #666; margin-bottom: 2rem;">Based on your listening history analysis - perfectly matched songs for you</p>
-      <div class="recommendations-grid" id="recommendationsGrid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); max-width: 1400px; margin: 0 auto;">
+      <div class="recommendations-grid" id="recommendationsGrid" style="max-width: 1200px; margin: 0 auto;">
         <!-- Recommendations will be loaded here -->
       </div>
-      <button id="moreBtn" class="more-btn" style="display: none; margin: 2rem auto; padding: 1rem 2rem; font-size: 1.1rem;">
-        Load 4 More Recommendations
-      </button>
+    </div>
+    </div> <!-- End main-content -->
+  </div> <!-- End container -->
+
+  <!-- YouTube Modal -->
+  <div id="youtubeModal" class="youtube-modal">
+    <div class="youtube-modal-content">
+      <div class="youtube-modal-header">
+        <div>
+          <div class="youtube-modal-title" id="modalTitle">Song Title</div>
+          <div class="youtube-modal-artist" id="modalArtist">Artist Name</div>
+        </div>
+        <button class="youtube-modal-close" onclick="closeYouTubeModal()">×</button>
+      </div>
+      <div class="youtube-modal-player" id="modalPlayer">
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white;">
+          <div style="text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🎵</div>
+            <div>Loading YouTube player...</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -584,7 +908,26 @@
     let recommendationOffset = 0;
 
     // Global variables
-    let fileInput, uploadBtn, uploadStatus, uploadSection, recommendationsSection, loadingScreen;
+    let recommendationsSection, loadingScreen;
+
+    // Utility functions for escaping
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function escapeJsString(str) {
+      if (!str) return '';
+      return str
+        .replace(/\\/g, '\\\\')  // Escape backslashes first
+        .replace(/'/g, "\\'")    // Escape single quotes
+        .replace(/"/g, '\\"')    // Escape double quotes
+        .replace(/\n/g, '\\n')   // Escape newlines
+        .replace(/\r/g, '\\r')   // Escape carriage returns
+        .replace(/\t/g, '\\t');  // Escape tabs
+    }
 
     // Get current user ID from session
     async function getCurrentUserId() {
@@ -618,7 +961,8 @@
     async function checkExistingData() {
       if (!currentUserId) {
         console.log('No user ID, showing upload section');
-        if (uploadSection) uploadSection.style.display = 'block';
+        const listeningHistorySection = document.getElementById('listeningHistorySection');
+        if (listeningHistorySection) listeningHistorySection.style.display = 'block';
         if (recommendationsSection) recommendationsSection.style.display = 'none';
         return;
       }
@@ -632,32 +976,19 @@
         
         console.log('Behavioral patterns check result:', data);
         
-        // Check if patterns exist (more lenient check)
-        const hasPatterns = data.patterns && (
-          (data.patterns.topArtists && data.patterns.topArtists.length > 0) ||
-          (data.patterns.genres && Object.keys(data.patterns.genres).length > 0) ||
-          (data.patterns.timeOfDay && Object.keys(data.patterns.timeOfDay).length > 0) ||
-          (data.patterns.topSongs && data.patterns.topSongs.length > 0)
-        );
-        
-        // Always show ONLY upload section first - recommendations come after upload
+        // Always show upload section first - recommendations come after upload
         console.log('User logged in - showing upload section only');
         
-        // Show upload sections (this is the main action)
-        if (uploadSection) uploadSection.style.display = 'none'; // Hide old upload section
         const listeningHistorySection = document.getElementById('listeningHistorySection');
         if (listeningHistorySection) {
-          listeningHistorySection.style.display = 'block'; // Show listening history upload
+          listeningHistorySection.style.display = 'block';
         }
         
-        // Hide recommendations section initially - it will show after upload
         if (recommendationsSection) {
           recommendationsSection.style.display = 'none';
         }
       } catch (error) {
         console.error('Error checking existing data:', error);
-        // On error, show upload section only
-        if (uploadSection) uploadSection.style.display = 'none';
         const listeningHistorySection = document.getElementById('listeningHistorySection');
         if (listeningHistorySection) {
           listeningHistorySection.style.display = 'block';
@@ -668,121 +999,6 @@
       }
     }
 
-    function showDataExistsOptions(trackCount) {
-      uploadSection.innerHTML = `
-        <div class="upload-icon">📊</div>
-        <h2>Music Data Already Exists</h2>
-        <p>You already have music data in your database. What would you like to do?</p>
-        
-        <div class="data-options">
-          <button class="option-btn continue-btn" onclick="continueWithExisting()">
-            <span class="option-icon">🎵</span>
-            <div class="option-content">
-              <h3>Continue with Existing Data</h3>
-              <p>View your personalized recommendations based on current data</p>
-            </div>
-          </button>
-          
-          <button class="option-btn upload-new-btn" onclick="uploadNewData()">
-            <span class="option-icon">📁</span>
-            <div class="option-content">
-              <h3>Upload New Data</h3>
-              <p>Replace existing data with a new CSV file</p>
-            </div>
-          </button>
-        </div>
-      `;
-      uploadSection.style.display = 'block';
-      recommendationsSection.style.display = 'none';
-    }
-
-    function continueWithExisting() {
-      console.log('Continue with existing data clicked');
-      uploadSection.style.display = 'none';
-      recommendationsSection.style.display = 'block';
-      loadRecommendations();
-    }
-
-    function uploadNewData() {
-      console.log('Upload new data clicked');
-      uploadSection.innerHTML = `
-        <div class="upload-icon">📁</div>
-        <h2>Upload New Music Data</h2>
-        <p>Upload a new CSV file to replace your existing music data</p>
-        
-        <div class="file-input-container">
-          <input type="file" id="musicFile" accept=".csv" style="display: none;">
-          <button id="chooseFileBtn" class="choose-file-btn">
-            📁 Choose CSV File
-          </button>
-          <button id="uploadBtn" class="upload-btn" disabled>
-            Upload Music Data
-          </button>
-        </div>
-        
-        <div id="uploadStatus" class="upload-status" style="display: none;"></div>
-      `;
-      
-      // Re-attach event listeners
-      const fileInput = document.getElementById('musicFile');
-      const uploadBtn = document.getElementById('uploadBtn');
-      const chooseFileBtn = document.getElementById('chooseFileBtn');
-      
-      chooseFileBtn.addEventListener('click', () => fileInput.click());
-      
-      fileInput.addEventListener('change', function() {
-        if (this.files.length > 0) {
-          uploadBtn.disabled = false;
-          uploadBtn.textContent = `Upload ${this.files[0].name}`;
-        } else {
-          uploadBtn.disabled = true;
-          uploadBtn.textContent = 'Upload Music Data';
-        }
-      });
-      
-      uploadBtn.addEventListener('click', uploadMusicData);
-    }
-
-    function loadRecommendations() {
-      if (!currentUserId) {
-        console.error('No user ID available');
-        displayNoRecommendations();
-        return;
-      }
-      
-      console.log('Loading regular recommendations for user:', currentUserId);
-      const grid = document.getElementById('recommendationsGrid');
-      if (grid) {
-        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem;"><p>🎵 Loading recommendations...</p></div>';
-      }
-      
-      fetch(`/api/enhanced-recommendations/${currentUserId}`, {
-        credentials: 'include'
-      })
-        .then(response => {
-          console.log('Enhanced recommendations response status:', response.status);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log('Enhanced recommendations data:', data);
-          if (data.recommendations && data.recommendations.length > 0) {
-            console.log(`Displaying ${data.recommendations.length} recommendations`);
-            displayRecommendations(data.recommendations);
-          } else {
-            console.warn('No recommendations found, showing message');
-            displayNoRecommendations();
-          }
-        })
-        .catch(error => {
-          console.error('Error loading recommendations:', error);
-          displayNoRecommendations();
-        });
-    }
-
-    let currentOffset = 0; // Track pagination offset
     
     function loadRecommendationsWithYouTube(offset = 0) {
       if (!currentUserId) {
@@ -837,16 +1053,14 @@
             }
             setTimeout(() => loadRecommendationsWithYouTube(), 3000);
           } else {
-            console.warn('No recommendations in response, trying fallback');
+            console.warn('No recommendations in response');
             console.log('Full response data:', data);
-            // Try regular recommendations endpoint
-            loadRecommendations();
+            displayNoRecommendations();
           }
         })
         .catch(error => {
           console.error('Error loading recommendations with YouTube:', error);
-          // Fallback to regular recommendations
-          loadRecommendations();
+          displayNoRecommendations();
         });
     }
 
@@ -856,8 +1070,8 @@
       
       // Sort new recommendations by similarity score (highest first)
       const sortedRecs = [...recommendations].sort((a, b) => {
-        const scoreA = (a.similarity_score || 0) * 100;
-        const scoreB = (b.similarity_score || 0) * 100;
+        const scoreA = a.similarity_score || 0;
+        const scoreB = b.similarity_score || 0;
         return scoreB - scoreA; // Descending order
       });
       
@@ -869,6 +1083,17 @@
       const grid = document.getElementById('recommendationsGrid');
       console.log('Displaying recommendations with YouTube:', recommendations);
       
+      // Show category panel when recommendations are available
+      showCategoryPanel();
+      
+      // Filter out recommendations below 1.0%
+      const filteredRecs = recommendations.filter(rec => {
+        const percentage = (rec.similarity_score || 0) * 100;
+        return percentage >= 1.0;
+      });
+      
+      console.log(`Filtered ${recommendations.length} recommendations to ${filteredRecs.length} (removed ${recommendations.length - filteredRecs.length} below 1.0%)`);
+      
       // Clear existing content only on first load
       if (!data || data.offset === 0) {
         grid.innerHTML = '';
@@ -876,7 +1101,7 @@
       }
       
       // Sort recommendations by similarity score (highest first) before displaying
-      const sortedRecs = [...recommendations].sort((a, b) => {
+      const sortedRecs = [...filteredRecs].sort((a, b) => {
         const scoreA = (a.similarity_score || 0) * 100;
         const scoreB = (b.similarity_score || 0) * 100;
         return scoreB - scoreA; // Descending order
@@ -889,337 +1114,95 @@
     let currentlyPlayingIndex = null;
     
     function displayRecommendationsInGrid(recommendations, grid, startIndex, data) {
-      // Sort recommendations by similarity score (highest first) - ensure proper sorting
+      // Sort recommendations by similarity score (highest first)
       const sortedRecommendations = [...recommendations].sort((a, b) => {
-        const scoreA = (a.similarity_score || 0) * 100;
-        const scoreB = (b.similarity_score || 0) * 100;
+        const scoreA = a.similarity_score || 0;
+        const scoreB = b.similarity_score || 0;
         return scoreB - scoreA; // Descending order (highest first)
       });
       
       sortedRecommendations.forEach((track, relativeIndex) => {
         const index = startIndex + relativeIndex;
         const card = document.createElement('div');
-        card.className = 'recommendation-card';
+        card.className = 'recommendation-card-horizontal';
         card.id = `recommendation-card-${index}`;
-        card.dataset.trackIndex = index;
-        // Ensure consistent styling for all cards - apply base styles first
-        card.style.position = 'relative'; // For absolute positioning of "Now Playing" badge
-        card.style.minHeight = '450px'; // Ensure all cards have same minimum height
-        card.style.display = 'flex';
-        card.style.flexDirection = 'column';
         
-        // Calculate match percentage from similarity_score
+        // Calculate match percentage from similarity_score (already normalized 0-1)
         const similarityScore = track.similarity_score || 0;
-        const displayPercentage = (similarityScore * 100).toFixed(1);
-        const youtubeId = track.youtube?.id || '';
-        const hasYouTube = youtubeId && track.youtube;
+        const displayPercentage = Math.min((similarityScore * 100), 100).toFixed(1); // Cap at 100%
         
-        const formatDuration = (seconds) => {
-          if (!seconds) return 'Unknown';
-          const mins = Math.floor(seconds / 60);
-          const secs = seconds % 60;
-          return `${mins}:${secs.toString().padStart(2, '0')}`;
-        };
+        // Get match level - use the one from backend if available, otherwise calculate
+        let matchLevel = track.matchLevel || 'maylike';
+        let matchLevelText = track.matchLevelText || 'You May Like';
         
-        // Get match level based on similarity percentage - use actual score
+        // If not provided by backend, calculate based on percentage
+        if (!track.matchLevel) {
+          const similarityPercent = parseFloat(displayPercentage);
+          if (similarityPercent >= 80) {
+            matchLevel = 'highly';
+            matchLevelText = 'Highly Recommended';
+          } else if (similarityPercent >= 50) {
+            matchLevel = 'moderate';
+            matchLevelText = 'Moderately Recommended';
+          } else {
+            matchLevel = 'maylike';
+            matchLevelText = 'You May Like';
+          }
+        }
+        
+        // Calculate color gradient: Green (high) -> Yellow/White (low)
+        // Use match level for color, but adjust intensity based on percentage
         const similarityPercent = parseFloat(displayPercentage);
-        let matchLevel = 'maylike';
-        if (similarityPercent >= 80) {
-          matchLevel = 'highly';
-        } else if (similarityPercent >= 65) {
-          matchLevel = 'moderate';
-        } else {
-          matchLevel = 'maylike';
-        }
+        let bgColor, textColor, borderColor, percentageColor;
         
-        let matchBadge = '';
-        let matchBadgeClass = '';
         if (matchLevel === 'highly') {
-          matchBadge = '⭐ Highly Recommended';
-          matchBadgeClass = 'highly-recommended';
+          // Green gradient for highly recommended
+          const greenIntensity = Math.min(similarityPercent / 100, 1); // 0.0 to 1.0
+          bgColor = `linear-gradient(135deg, rgba(40, 167, 69, ${0.15 + greenIntensity * 0.15}) 0%, rgba(32, 201, 151, ${0.1 + greenIntensity * 0.1}) 100%)`;
+          textColor = '#28a745';
+          borderColor = '#28a745';
+          percentageColor = '#28a745';
         } else if (matchLevel === 'moderate') {
-          matchBadge = '✓ Moderately Recommended';
-          matchBadgeClass = 'moderately-recommended';
+          // Yellow-green gradient for moderate
+          const yellowIntensity = Math.min((similarityPercent - 50) / 30, 1); // 0.0 to 1.0
+          bgColor = `linear-gradient(135deg, rgba(255, 193, 7, ${0.2 + yellowIntensity * 0.1}) 0%, rgba(255, 235, 59, ${0.15 + yellowIntensity * 0.1}) 100%)`;
+          textColor = '#ff9800';
+          borderColor = '#ffc107';
+          percentageColor = '#ff9800';
         } else {
-          matchBadge = '💡 You May Like This Song';
-          matchBadgeClass = 'may-like';
+          // Light yellow to white for low recommendations
+          const whiteIntensity = Math.min(similarityPercent / 50, 1); // 0.0 to 1.0
+          bgColor = `linear-gradient(135deg, rgba(255, 249, 196, ${0.25 + whiteIntensity * 0.2}) 0%, rgba(255, 255, 255, ${0.4 + whiteIntensity * 0.3}) 100%)`;
+          textColor = '#ffc107';
+          borderColor = '#ffeb3b';
+          percentageColor = '#ffc107';
         }
         
-        // Build explanation text - displayed above YouTube player
-        const explanation = track.explanation ? `
-          <div class="recommendation-explanation" style="
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 1rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-            border-left: 4px solid ${matchLevel === 'highly' ? '#28a745' : matchLevel === 'moderate' ? '#ffc107' : '#17a2b8'};
-            font-size: 0.95rem;
-            color: #333;
-            line-height: 1.6;
-          ">
-            <strong style="color: ${matchLevel === 'highly' ? '#28a745' : matchLevel === 'moderate' ? '#ffc107' : '#17a2b8'}; display: block; margin-bottom: 0.5rem;">Why you may like this:</strong>
-            ${track.explanation}
-          </div>
-        ` : '';
-        
-        // Add visual highlight if this is the currently playing track
-        const isPlaying = currentlyPlayingIndex === index;
-        if (isPlaying) {
-          card.style.boxShadow = '0 8px 32px rgba(102, 126, 234, 0.4)';
-          card.style.border = '2px solid #667eea';
-          card.style.transform = 'scale(1.02)';
-          card.style.background = 'linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%)';
-        }
+        card.style.background = bgColor;
+        card.style.color = borderColor;
         
         card.innerHTML = `
-          <div class="match-badge ${matchBadgeClass}" style="
-            display: inline-block;
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            ${matchLevel === 'highly' ? 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;' : 
-              matchLevel === 'moderate' ? 'background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); color: #333;' : 
-              'background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white;'}
-          ">${matchBadge}</div>
-          ${isPlaying ? '<div class="now-playing-badge" style="position: absolute; top: 10px; right: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.3rem 0.6rem; border-radius: 15px; font-size: 0.75rem; font-weight: 600; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3); z-index: 10;">▶️ Now Playing</div>' : ''}
-          <div class="track-title" style="${isPlaying ? 'color: #667eea; font-weight: 700;' : ''}">${track.title}</div>
-          <div class="track-artist" style="${isPlaying ? 'color: #667eea;' : ''}">by ${track.artist}</div>
-          ${track.album ? `<div class="track-album">from ${track.album}</div>` : ''}
-          ${track.genre ? `<div class="track-genre">${track.genre}</div>` : ''}
-          <div class="similarity-score" style="margin: 0.5rem 0; ${isPlaying ? 'color: #667eea; font-weight: 700; font-size: 1.1rem;' : ''}">Match: ${displayPercentage}%</div>
-          ${explanation}
-          <div style="margin-top: 1rem;">
-            ${hasYouTube ? `
-              <div id="youtube-player-${index}" style="
-                position: relative;
-                width: 100%;
-                padding-bottom: 56.25%;
-                height: 0;
-                overflow: hidden;
-                border-radius: 10px;
-                margin-bottom: 0.5rem;
-                display: none;
-                background: #000;
-              ">
-                <iframe 
-                  id="youtube-iframe-${index}"
-                  style="
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    border: none;
-                  "
-                  src=""
-                  frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen>
-                </iframe>
-              </div>
-              <button class="play-btn toggle-player-btn" onclick="toggleYouTubePlayer(${index}, '${youtubeId}')" style="background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); width: 100%; margin-bottom: 0.5rem; padding: 0.75rem; border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
-                <span id="play-btn-text-${index}">▶️ Play in Card</span>
-              </button>
-              <a href="${track.youtube.url}" target="_blank" class="play-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); text-decoration: none; display: block; text-align: center; width: 100%; padding: 0.75rem; border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
-                🔗 Open in YouTube
-              </a>
-            ` : `
-              <button class="play-btn" onclick="searchYouTubeForTrack('${track.title.replace(/'/g, "\\'")}', '${track.artist.replace(/'/g, "\\'")}')" style="margin-top: 0; width: 100%; padding: 0.75rem; border: none; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
-                🔍 Search on YouTube
-              </button>
-            `}
+          <div class="card-number">${index + 1}</div>
+          <div class="card-content">
+            <div class="card-info">
+              <div class="card-title">${escapeHtml(track.title)}</div>
+              <div class="card-artist">by ${escapeHtml(track.artist)}</div>
+              ${track.genre ? `<div class="card-genre">${escapeHtml(track.genre)}</div>` : ''}
+            </div>
+            <div class="card-match">
+              <div class="card-percentage" style="color: ${percentageColor};">${displayPercentage}%</div>
+              <div class="card-match-level" style="color: ${textColor};">${matchLevelText}</div>
+            </div>
+            <button class="card-play-button" onclick="openYouTubeModal('${escapeJsString(track.title)}', '${escapeJsString(track.artist)}', ${index})" title="Play on YouTube">
+              ▶
+            </button>
           </div>
         `;
         
-        // Base styles are already applied above, so we just append the card
         grid.appendChild(card);
       });
-      
-      // Show/hide "Load More" button based on hasMore flag
-      if (data) {
-        const moreBtn = document.getElementById('moreBtn');
-        if (moreBtn) {
-          if (data.hasMore) {
-            moreBtn.style.display = 'block';
-            moreBtn.onclick = () => loadMoreRecommendations(data.offset + 4);
-          } else {
-            moreBtn.style.display = 'none';
-          }
-        }
-      }
     }
     
-    function loadMoreRecommendations(offset) {
-      console.log('Loading more recommendations, offset:', offset);
-      loadRecommendationsWithYouTube(offset);
-    }
-
-    function displayRecommendations(recommendations) {
-      const grid = document.getElementById('recommendationsGrid');
-      console.log('Displaying recommendations:', recommendations);
-      
-      grid.innerHTML = '';
-      
-      const sortedRecommendations = recommendations.sort((a, b) => {
-        const scoreA = a.similarity_score || 0;
-        const scoreB = b.similarity_score || 0;
-        return scoreB - scoreA;
-      });
-      
-      sortedRecommendations.forEach((track, index) => {
-        const card = document.createElement('div');
-        card.className = 'recommendation-card';
-        
-        const uniqueId = `player-${track.title.replace(/[^a-zA-Z0-9]/g, '')}-${index}-${Math.random().toString(36).substr(2, 9)}`;
-        const displayPercentage = track.similarity_score ? (track.similarity_score * 100).toFixed(1) : (Math.random() * 30 + 50).toFixed(1);
-        
-        const formatDuration = (seconds) => {
-          const mins = Math.floor(seconds / 60);
-          const secs = seconds % 60;
-          return `${mins}:${secs.toString().padStart(2, '0')}`;
-        };
-        
-        const explanation = track.explanation ? `<div class="track-explanation" style="margin-top: 0.5rem; font-size: 0.9rem; color: #666; font-style: italic;">${track.explanation}</div>` : '';
-        
-        card.innerHTML = `
-          <div class="track-title">${track.title}</div>
-          <div class="track-artist">by ${track.artist}</div>
-          ${track.album ? `<div class="track-album">from ${track.album}</div>` : ''}
-          ${track.genre ? `<div class="track-genre">${track.genre}</div>` : ''}
-          ${explanation}
-          <div class="similarity-score">Match: ${displayPercentage}%</div>
-          <button class="play-btn" onclick="searchYouTubeForTrack('${track.title.replace(/'/g, "\\'")}', '${track.artist.replace(/'/g, "\\'")}')" style="margin-top: 1rem;">
-            🔍 Search on YouTube
-          </button>
-        `;
-        
-        grid.appendChild(card);
-      });
-
-      if (recommendations.length > 0) {
-        document.getElementById('moreBtn').style.display = 'block';
-      }
-    }
-
-    function searchYouTubeForTrack(title, artist) {
-      const query = encodeURIComponent(`${title} ${artist}`);
-      window.open(`https://www.youtube.com/results?search_query=${query}`, '_blank');
-    }
-
-    // Toggle YouTube player in card
-    function toggleYouTubePlayer(index, videoId) {
-      const playerDiv = document.getElementById(`youtube-player-${index}`);
-      const iframe = document.getElementById(`youtube-iframe-${index}`);
-      const playBtn = document.getElementById(`play-btn-text-${index}`);
-      
-      if (!playerDiv || !iframe) return;
-      
-      // If clicking on a different card, stop the previous one
-      if (currentlyPlayingIndex !== null && currentlyPlayingIndex !== index) {
-        const prevPlayerDiv = document.getElementById(`youtube-player-${currentlyPlayingIndex}`);
-        const prevIframe = document.getElementById(`youtube-iframe-${currentlyPlayingIndex}`);
-        const prevPlayBtn = document.getElementById(`play-btn-text-${currentlyPlayingIndex}`);
-        const prevCard = document.getElementById(`recommendation-card-${currentlyPlayingIndex}`);
-        
-        if (prevPlayerDiv) prevPlayerDiv.style.display = 'none';
-        if (prevIframe) prevIframe.src = '';
-        if (prevPlayBtn) prevPlayBtn.textContent = '▶️ Play in Card';
-        if (prevCard) {
-          prevCard.style.boxShadow = '';
-          prevCard.style.border = '';
-          prevCard.style.transform = '';
-          prevCard.style.background = '';
-          // Reset text colors
-          const prevTitle = prevCard.querySelector('.track-title');
-          const prevArtist = prevCard.querySelector('.track-artist');
-          const prevScore = prevCard.querySelector('.similarity-score');
-          if (prevTitle) prevTitle.style.color = '';
-          if (prevTitle) prevTitle.style.fontWeight = '';
-          if (prevArtist) prevArtist.style.color = '';
-          if (prevScore) prevScore.style.color = '';
-          if (prevScore) prevScore.style.fontWeight = '';
-          if (prevScore) prevScore.style.fontSize = '';
-          // Remove "Now Playing" badge
-          const prevBadge = prevCard.querySelector('.now-playing-badge');
-          if (prevBadge) prevBadge.remove();
-        }
-      }
-      
-      if (playerDiv.style.display === 'none' || !playerDiv.style.display) {
-        // Show player and highlight card
-        playerDiv.style.display = 'block';
-        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-        if (playBtn) playBtn.textContent = '⏸️ Hide Player';
-        
-        // Highlight this card
-        const card = document.getElementById(`recommendation-card-${index}`);
-        if (card) {
-          card.style.boxShadow = '0 8px 32px rgba(102, 126, 234, 0.4)';
-          card.style.border = '2px solid #667eea';
-          card.style.transform = 'scale(1.02)';
-          card.style.background = 'linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%)';
-          card.style.transition = 'all 0.3s ease';
-          // Update text colors
-          const title = card.querySelector('.track-title');
-          const artist = card.querySelector('.track-artist');
-          const score = card.querySelector('.similarity-score');
-          if (title) {
-            title.style.color = '#667eea';
-            title.style.fontWeight = '700';
-          }
-          if (artist) artist.style.color = '#667eea';
-          if (score) {
-            score.style.color = '#667eea';
-            score.style.fontWeight = '700';
-            score.style.fontSize = '1.1rem';
-          }
-          // Add "Now Playing" badge if it doesn't exist
-          if (!card.querySelector('.now-playing-badge')) {
-            const badge = document.createElement('div');
-            badge.className = 'now-playing-badge';
-            badge.style.cssText = 'position: absolute; top: 10px; right: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.3rem 0.6rem; border-radius: 15px; font-size: 0.75rem; font-weight: 600; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3); z-index: 10;';
-            badge.textContent = '▶️ Now Playing';
-            card.appendChild(badge);
-          }
-        }
-        
-        currentlyPlayingIndex = index;
-      } else {
-        // Hide player and remove highlight
-        playerDiv.style.display = 'none';
-        iframe.src = '';
-        if (playBtn) playBtn.textContent = '▶️ Play in Card';
-        
-        const card = document.getElementById(`recommendation-card-${index}`);
-        if (card) {
-          card.style.boxShadow = '';
-          card.style.border = '';
-          card.style.transform = '';
-          card.style.background = '';
-          // Reset text colors
-          const title = card.querySelector('.track-title');
-          const artist = card.querySelector('.track-artist');
-          const score = card.querySelector('.similarity-score');
-          if (title) {
-            title.style.color = '';
-            title.style.fontWeight = '';
-          }
-          if (artist) artist.style.color = '';
-          if (score) {
-            score.style.color = '';
-            score.style.fontWeight = '';
-            score.style.fontSize = '';
-          }
-          // Remove "Now Playing" badge
-          const badge = card.querySelector('.now-playing-badge');
-          if (badge) badge.remove();
-        }
-        
-        currentlyPlayingIndex = null;
-      }
-    }
 
     function displayNoRecommendations() {
       const grid = document.getElementById('recommendationsGrid');
@@ -1236,243 +1219,6 @@
       `;
     }
 
-    function toggleTrackPlayer(title, artist, youtubeId, playerId) {
-      console.log('toggleTrackPlayer called with:', { title, artist, youtubeId, playerId });
-      
-      // Remove playing class from all cards
-      document.querySelectorAll('.recommendation-card.playing').forEach(card => {
-        card.classList.remove('playing');
-      });
-      
-      // ALWAYS hide all other players first (this ensures only one plays at a time)
-      document.querySelectorAll('.track-player.show').forEach(p => {
-        p.classList.remove('show');
-        const iframe = p.querySelector('iframe');
-        if (iframe) {
-          iframe.src = ''; // Stop the video
-        }
-        // Smooth removal with animation
-        setTimeout(() => {
-          p.remove();
-        }, 500); // Wait for animation to complete
-      });
-      
-      // Find the card that was clicked
-      const clickedButton = event.target;
-      const card = clickedButton.closest('.recommendation-card');
-      
-      // Check if this card already has a player
-      let player = card.querySelector('.track-player');
-      
-      if (player && player.classList.contains('show')) {
-        // If player is already showing, hide it and remove it
-        player.remove();
-        card.classList.remove('playing');
-        return;
-      }
-      
-      // Add playing class to the clicked card
-      card.classList.add('playing');
-      
-      // Create new player div only for the clicked card
-      const playerDiv = document.createElement('div');
-      playerDiv.className = 'track-player';
-      playerDiv.id = playerId;
-      playerDiv.innerHTML = '<iframe src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
-      
-      // Insert player after the button
-      clickedButton.parentNode.insertBefore(playerDiv, clickedButton.nextSibling);
-      
-      // Show the player with animation
-      setTimeout(() => {
-        playerDiv.classList.add('show');
-        
-        // Load the YouTube video
-        if (youtubeId) {
-          const iframe = playerDiv.querySelector('iframe');
-          iframe.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1`;
-        } else {
-          // Search for the track on YouTube
-          searchAndPlayTrack(title, artist, playerDiv);
-        }
-      }, 100);
-    }
-
-    function searchAndPlayTrack(title, artist, player) {
-      const iframe = player.querySelector('iframe');
-      iframe.src = 'about:blank'; // Clear first
-      
-      fetch(`/api/search-youtube/${encodeURIComponent(title + ' ' + artist)}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.videoId) {
-            iframe.src = `https://www.youtube.com/embed/${data.videoId}?autoplay=1`;
-          } else {
-            iframe.src = 'about:blank';
-            player.innerHTML = `
-              <div style="padding: 1rem; text-align: center; color: #666;">
-                <p>Video not found</p>
-                <button onclick="window.open('https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' ' + artist)}', '_blank')" 
-                        style="background: #ff0000; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">
-                  Open in YouTube
-                </button>
-              </div>
-            `;
-          }
-        })
-        .catch(error => {
-          console.error('YouTube search error:', error);
-          player.innerHTML = `
-            <div style="padding: 1rem; text-align: center; color: #666;">
-              <p>Search failed</p>
-              <button onclick="window.open('https://www.youtube.com/results?search_query=${encodeURIComponent(title + ' ' + artist)}', '_blank')" 
-                      style="background: #ff0000; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">
-                Open in YouTube
-              </button>
-            </div>
-          `;
-        });
-    }
-
-    function loadMoreRecommendations() {
-      const moreBtn = document.getElementById('moreBtn');
-      moreBtn.disabled = true;
-      moreBtn.textContent = 'Loading...';
-      
-      fetch(`/api/enhanced-recommendations/${currentUserId}?offset=${recommendationOffset}&limit=5`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.recommendations && data.recommendations.length > 0) {
-            appendRecommendations(data.recommendations);
-            recommendationOffset += 5;
-          } else {
-            moreBtn.style.display = 'none';
-          }
-        })
-        .catch(error => {
-          console.error('Error loading more recommendations:', error);
-        })
-        .finally(() => {
-          moreBtn.disabled = false;
-          moreBtn.textContent = 'Load More Recommendations';
-        });
-    }
-
-    function appendRecommendations(recommendations) {
-      const grid = document.getElementById('recommendationsGrid');
-      console.log('Appending recommendations:', recommendations);
-      
-      // Sort recommendations by similarity score (highest first)
-      const sortedRecommendations = recommendations.sort((a, b) => {
-        const scoreA = a.similarity_score || 0;
-        const scoreB = b.similarity_score || 0;
-        return scoreB - scoreA; // Descending order (highest first)
-      });
-      
-      sortedRecommendations.forEach((track, index) => {
-        const card = document.createElement('div');
-        card.className = 'recommendation-card';
-        
-        // Create unique ID using index and random number to avoid conflicts
-        const uniqueId = `player-${track.title.replace(/[^a-zA-Z0-9]/g, '')}-${index}-${Math.random().toString(36).substr(2, 9)}`;
-        
-        // Calculate display percentage
-        const displayPercentage = track.similarity_score ? (track.similarity_score * 100).toFixed(1) : (Math.random() * 30 + 50).toFixed(1);
-        
-        // Format duration from seconds to minutes:seconds
-        const formatDuration = (seconds) => {
-          const mins = Math.floor(seconds / 60);
-          const secs = seconds % 60;
-          return `${mins}:${secs.toString().padStart(2, '0')}`;
-        };
-        
-        card.innerHTML = `
-          <div class="track-title">${track.title}</div>
-          <div class="track-artist">by ${track.artist}</div>
-          <div class="track-album">from ${track.album || 'Unknown Album'}</div>
-          <div class="track-genre">${track.genre}</div>
-          <div class="track-details">
-            <span class="track-year">${track.year || 'Unknown Year'}</span>
-            <span class="track-duration">${track.duration ? formatDuration(track.duration) : 'Unknown Duration'}</span>
-          </div>
-          <div class="track-features">
-            <div class="feature-item">
-              <span class="feature-label">Energy:</span>
-              <span class="feature-value">${track.energy ? (track.energy * 100).toFixed(0) + '%' : 'N/A'}</span>
-            </div>
-            <div class="feature-item">
-              <span class="feature-label">Danceability:</span>
-              <span class="feature-value">${track.danceability ? (track.danceability * 100).toFixed(0) + '%' : 'N/A'}</span>
-            </div>
-            <div class="feature-item">
-              <span class="feature-label">Tempo:</span>
-              <span class="feature-value">${track.tempo ? Math.round(track.tempo) + ' BPM' : 'N/A'}</span>
-            </div>
-          </div>
-          <div class="similarity-score">Match: ${displayPercentage}%</div>
-          <button class="play-btn" onclick="toggleTrackPlayer('${track.title.replace(/'/g, "\\'")}', '${track.artist.replace(/'/g, "\\'")}', '${track.youtube?.id || ''}', '${uniqueId}')">
-            🎵 Play Track
-          </button>
-        `;
-        
-        console.log('Created card for:', track.title, 'with score:', displayPercentage);
-        grid.appendChild(card);
-      });
-    }
-
-    function uploadMusicData() {
-      const file = fileInput.files[0];
-      if (!file) {
-        showStatus('Please select a CSV file', 'error');
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('musicFile', file);
-
-      showStatus('Uploading and processing your music data...', 'loading');
-      uploadBtn.disabled = true;
-      uploadBtn.textContent = 'Processing...';
-
-      fetch('/upload-music-data', {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          showStatus(`✅ ${data.message}`, 'success');
-          
-          // Show loading screen
-          loadingScreen.style.display = 'flex';
-          
-          // Simulate processing time
-          setTimeout(() => {
-            loadingScreen.style.display = 'none';
-            uploadSection.style.display = 'none';
-            recommendationsSection.style.display = 'block';
-            loadRecommendations();
-          }, 3000);
-          
-        } else {
-          showStatus(`❌ ${data.error}`, 'error');
-          uploadBtn.disabled = false;
-          uploadBtn.textContent = 'Upload Music Data';
-        }
-      })
-      .catch(error => {
-        showStatus(`❌ Upload failed: ${error.message}`, 'error');
-        uploadBtn.disabled = false;
-        uploadBtn.textContent = 'Upload Music Data';
-      });
-    }
-
-    function showStatus(message, type) {
-      uploadStatus.textContent = message;
-      uploadStatus.className = `upload-status ${type}`;
-      uploadStatus.style.display = 'block';
-    }
-
     document.addEventListener('DOMContentLoaded', async function() {
       // Get current user ID from session
       // Don't block page load if this fails - let the server-side auth handle it
@@ -1487,21 +1233,16 @@
         // Continue anyway - server-side protection will handle auth
       }
 
-      fileInput = document.getElementById('musicFile');
-      uploadBtn = document.getElementById('uploadBtn');
-      uploadStatus = document.getElementById('uploadStatus');
-      uploadSection = document.getElementById('uploadSection');
       recommendationsSection = document.getElementById('recommendationsSection');
       loadingScreen = document.getElementById('loadingScreen');
 
-      // Show ONLY upload section by default - recommendations appear after upload
-      if (uploadSection) uploadSection.style.display = 'none'; // Hide old upload section
+      // Show upload section by default - recommendations appear after upload
       const listeningHistorySection = document.getElementById('listeningHistorySection');
       if (listeningHistorySection) {
-        listeningHistorySection.style.display = 'block'; // Show listening history upload
+        listeningHistorySection.style.display = 'block';
       }
       if (recommendationsSection) {
-        recommendationsSection.style.display = 'none'; // Hide recommendations initially
+        recommendationsSection.style.display = 'none';
       }
       
       // If we don't have a user ID yet, try to get it again after a short delay
@@ -1514,7 +1255,8 @@
             await checkExistingData();
           } else {
             // No user ID - show upload section
-            if (uploadSection) uploadSection.style.display = 'block';
+            const listeningHistorySection = document.getElementById('listeningHistorySection');
+            if (listeningHistorySection) listeningHistorySection.style.display = 'block';
             if (recommendationsSection) recommendationsSection.style.display = 'none';
           }
         }, 100);
@@ -1523,21 +1265,6 @@
         await checkExistingData();
       }
 
-      if (fileInput) {
-        fileInput.addEventListener('change', function() {
-          if (this.files.length > 0) {
-            uploadBtn.disabled = false;
-            uploadBtn.textContent = `Upload ${this.files[0].name}`;
-          } else {
-            uploadBtn.disabled = true;
-            uploadBtn.textContent = 'Upload Music Data';
-          }
-        });
-      }
-
-      if (uploadBtn) {
-        uploadBtn.addEventListener('click', uploadMusicData);
-      }
 
       // Listening History Upload Handlers
       const historyFileInput = document.getElementById('historyFile');
@@ -1567,11 +1294,6 @@
 
       if (historyUploadBtn) {
         historyUploadBtn.addEventListener('click', uploadListeningHistory);
-      }
-
-      const moreBtn = document.getElementById('moreBtn');
-      if (moreBtn) {
-        moreBtn.addEventListener('click', loadMoreRecommendations);
       }
     });
 
@@ -1605,8 +1327,7 @@
           const tracksMsg = data.tracksCreated > 0 ? ` Created ${data.tracksCreated} music tracks.` : '';
           showHistoryStatus(`✅ ${data.message}${tracksMsg} Analyzed ${data.patterns?.topGenres?.length || 0} genres, ${data.patterns?.topArtists?.length || 0} artists. Processing your recommendations...`, 'success');
           
-          // Hide upload sections
-          if (uploadSection) uploadSection.style.display = 'none';
+          // Hide upload section
           const historySection = document.getElementById('listeningHistorySection');
           if (historySection) {
             historySection.style.display = 'none';
@@ -1736,100 +1457,215 @@
         });
     }
 
-    function loadMoreRecommendations() {
-      const moreBtn = document.getElementById('moreBtn');
-      moreBtn.disabled = true;
-      moreBtn.textContent = 'Loading...';
+
+    // YouTube Modal Functions
+    function openYouTubeModal(title, artist, index) {
+      console.log('Opening YouTube modal for:', title, 'by', artist);
+      const modal = document.getElementById('youtubeModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalArtist = document.getElementById('modalArtist');
+      const modalPlayer = document.getElementById('modalPlayer');
       
-      recommendationOffset += 5;
+      if (!modal || !modalTitle || !modalArtist || !modalPlayer) {
+        console.error('Modal elements not found');
+        return;
+      }
       
-      fetch(`/api/enhanced-recommendations/${currentUserId}?offset=${recommendationOffset}&limit=5`)
+      // Update modal title and artist
+      modalTitle.textContent = title;
+      modalArtist.textContent = `by ${artist}`;
+      
+      // Show modal with loading state
+      modal.classList.add('show');
+      modalPlayer.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white;">
+          <div style="text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🎵</div>
+            <div>Searching for video on YouTube...</div>
+          </div>
+        </div>
+      `;
+      
+      // Search for YouTube video
+      const searchQuery = encodeURIComponent(`${title} ${artist}`);
+      fetch(`/api/search-youtube/${searchQuery}`, {
+        credentials: 'include'
+      })
         .then(response => response.json())
         .then(data => {
-          if (data.recommendations && data.recommendations.length > 0) {
-            // Append new recommendations to existing ones
-            appendRecommendations(data.recommendations);
-            moreBtn.disabled = false;
-            moreBtn.textContent = 'Load More Recommendations';
+          if (data.success && data.video && data.video.id) {
+            // Load YouTube player
+            const videoId = data.video.id;
+            modalPlayer.innerHTML = `
+              <iframe 
+                src="https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                style="width: 100%; height: 100%; border: none;"
+              ></iframe>
+            `;
           } else {
-            moreBtn.style.display = 'none';
-            alert('No more recommendations available!');
+            // No video found - show error and link to search
+            modalPlayer.innerHTML = `
+              <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; flex-direction: column; padding: 2rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                <div style="margin-bottom: 1rem; text-align: center;">Video not found on YouTube</div>
+                <a href="https://www.youtube.com/results?search_query=${searchQuery}" target="_blank" style="background: #ff0000; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                  Search on YouTube
+                </a>
+              </div>
+            `;
           }
         })
         .catch(error => {
-          console.error('Error loading more recommendations:', error);
-          moreBtn.disabled = false;
-          moreBtn.textContent = 'Load More Recommendations';
+          console.error('Error searching YouTube:', error);
+          modalPlayer.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; flex-direction: column; padding: 2rem;">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+              <div style="margin-bottom: 1rem; text-align: center;">Error loading video</div>
+              <a href="https://www.youtube.com/results?search_query=${searchQuery}" target="_blank" style="background: #ff0000; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                Search on YouTube
+              </a>
+            </div>
+          `;
         });
     }
-
-    function appendRecommendations(recommendations) {
-      const grid = document.getElementById('recommendationsGrid');
-      console.log('Appending recommendations:', recommendations);
+    
+    function closeYouTubeModal() {
+      const modal = document.getElementById('youtubeModal');
+      const modalPlayer = document.getElementById('modalPlayer');
       
-      // Sort new recommendations by similarity score (highest first)
-      const sortedRecommendations = recommendations.sort((a, b) => {
-        const scoreA = a.similarity_score || 0;
-        const scoreB = b.similarity_score || 0;
-        return scoreB - scoreA; // Descending order (highest first)
-      });
+      if (modal) {
+        modal.classList.remove('show');
+      }
       
-      sortedRecommendations.forEach((track, index) => {
-        const card = document.createElement('div');
-        card.className = 'recommendation-card';
-        
-        // Create unique ID using current total count and random number to avoid conflicts
-        const currentCount = grid.children.length;
-        const uniqueId = `player-${track.title.replace(/[^a-zA-Z0-9]/g, '')}-${currentCount + index}-${Math.random().toString(36).substr(2, 9)}`;
-        
-        // Calculate display percentage
-        const displayPercentage = track.similarity_score ? (track.similarity_score * 100).toFixed(1) : (Math.random() * 30 + 50).toFixed(1);
-        
-        // Format duration from seconds to minutes:seconds
-        const formatDuration = (seconds) => {
-          const mins = Math.floor(seconds / 60);
-          const secs = seconds % 60;
-          return `${mins}:${secs.toString().padStart(2, '0')}`;
-        };
-        
-        card.innerHTML = `
-          <div class="track-title">${track.title}</div>
-          <div class="track-artist">by ${track.artist}</div>
-          <div class="track-album">from ${track.album || 'Unknown Album'}</div>
-          <div class="track-genre">${track.genre}</div>
-          <div class="track-details">
-            <span class="track-year">${track.year || 'Unknown Year'}</span>
-            <span class="track-duration">${track.duration ? formatDuration(track.duration) : 'Unknown Duration'}</span>
-          </div>
-          <div class="track-features">
-            <div class="feature-item">
-              <span class="feature-label">Energy:</span>
-              <span class="feature-value">${track.energy ? (track.energy * 100).toFixed(0) + '%' : 'N/A'}</span>
-            </div>
-            <div class="feature-item">
-              <span class="feature-label">Danceability:</span>
-              <span class="feature-value">${track.danceability ? (track.danceability * 100).toFixed(0) + '%' : 'N/A'}</span>
-            </div>
-            <div class="feature-item">
-              <span class="feature-label">Tempo:</span>
-              <span class="feature-value">${track.tempo ? Math.round(track.tempo) + ' BPM' : 'N/A'}</span>
-            </div>
-          </div>
-          <div class="similarity-score">Match: ${displayPercentage}%</div>
-          <button class="play-btn" onclick="toggleTrackPlayer('${track.title.replace(/'/g, "\\'")}', '${track.artist.replace(/'/g, "\\'")}', '${track.youtube?.id || ''}', '${uniqueId}')">
-            🎵 Play Track
-          </button>
-        `;
-        
-        console.log('Appended card for:', track.title, 'with score:', displayPercentage);
-        grid.appendChild(card);
-      });
+      // Stop video by clearing iframe src
+      if (modalPlayer) {
+        const iframe = modalPlayer.querySelector('iframe');
+        if (iframe) {
+          iframe.src = '';
+        }
+      }
     }
-
-    // Add event listener for more button
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('moreBtn').addEventListener('click', loadMoreRecommendations);
+    
+    // Close modal when clicking outside
+    document.addEventListener('click', function(e) {
+      const modal = document.getElementById('youtubeModal');
+      if (modal && e.target === modal) {
+        closeYouTubeModal();
+      }
     });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeYouTubeModal();
+      }
+    });
+    
+    // Category-based recommendation functions
+    let currentCategory = null;
+    
+    function loadCategoryRecommendations(category) {
+      if (!currentUserId) {
+        console.error('No user ID available');
+        return;
+      }
+      
+      console.log('Loading recommendations for category:', category);
+      
+      // Update active button
+      document.querySelectorAll('.category-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      const activeBtn = document.querySelector(`[data-category="${category}"]`);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+      }
+      
+      currentCategory = category;
+      
+      // Show loading state
+      const grid = document.getElementById('recommendationsGrid');
+      if (grid) {
+        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem;"><p>🎵 Loading recommendations for ' + category + '...</p></div>';
+      }
+      
+      // Encode category for URL
+      const encodedCategory = encodeURIComponent(category);
+      
+      fetch(`/api/recommendations-by-category/${currentUserId}/${encodedCategory}`, {
+        credentials: 'include'
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Category recommendations received:', data);
+          
+          if (data.recommendations && data.recommendations.length > 0) {
+            // Update header to show category
+            const header = document.querySelector('#recommendationsSection h2');
+            if (header) {
+              header.textContent = `Recommendations by ${category.charAt(0).toUpperCase() + category.slice(1)}`;
+            }
+            
+            // Display recommendations
+            displayRecommendationsWithYouTube(data.recommendations, data);
+          } else {
+            const grid = document.getElementById('recommendationsGrid');
+            if (grid) {
+              grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 2rem;"><p>No recommendations found for ${category}. Try another category.</p></div>`;
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error loading category recommendations:', error);
+          const grid = document.getElementById('recommendationsGrid');
+          if (grid) {
+            grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 2rem;"><p style="color: red;">Error loading recommendations: ${error.message}</p></div>`;
+          }
+        });
+    }
+    
+    function loadAllRecommendations() {
+      // Remove active state from all category buttons
+      document.querySelectorAll('.category-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      currentCategory = null;
+      
+      // Reset header
+      const header = document.querySelector('#recommendationsSection h2');
+      if (header) {
+        header.textContent = 'Your Personalized Music Recommendations';
+      }
+      
+      // Load all recommendations
+      if (typeof loadRecommendationsWithYouTube === 'function') {
+        loadRecommendationsWithYouTube(0);
+      }
+    }
+    
+    // Show/hide category panel
+    function showCategoryPanel() {
+      const panel = document.getElementById('categoryPanel');
+      if (panel) {
+        panel.style.display = 'block';
+      }
+    }
+    
+    function hideCategoryPanel() {
+      const panel = document.getElementById('categoryPanel');
+      if (panel) {
+        panel.style.display = 'none';
+      }
+    }
   </script>
 </body>
 </html>
