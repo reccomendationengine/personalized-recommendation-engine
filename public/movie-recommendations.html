@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Recommendations - Personalized Recommendations Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #e74c3c 0%, #8e44ad 100%);
+      min-height: 100vh;
+      padding: 2rem;
+      padding-left: 2rem;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      gap: 2rem;
+      position: relative;
+      padding-top: 0;
+    }
+    
+    .main-content {
+      flex: 1;
+      min-width: 0;
+      overflow-x: hidden;
+    }
+    
+    .side-panel {
+      width: 300px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      height: fit-content;
+      max-height: calc(100vh - 8rem);
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: sticky;
+      top: 6.5rem;
+      align-self: flex-start;
+      z-index: 1;
+    }
+    
+    .side-panel h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .category-section {
+      margin-bottom: 1.5rem;
+    }
+    
+    .category-section-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.75rem;
+      padding-left: 0.5rem;
+    }
+    
+    .category-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .category-item {
+      margin-bottom: 0.5rem;
+    }
+    
+    .category-button {
+      width: 100%;
+      padding: 0.65rem 1rem;
+      background: #f8f9fa;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #333;
+      text-align: left;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .category-button:hover {
+      background: #e9ecef;
+      border-color: #e74c3c;
+      transform: translateX(5px);
+    }
+    
+    .category-button.active {
+      background: linear-gradient(135deg, #e74c3c 0%, #8e44ad 100%);
+      color: white;
+      border-color: #e74c3c;
+      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    }
+    
+    .category-button .category-icon {
+      font-size: 1rem;
+      margin-right: 0.5rem;
+    }
+    
+    .category-button .category-arrow {
+      font-size: 0.8rem;
+      opacity: 0.6;
+    }
+    
+    .category-button.active .category-arrow {
+      opacity: 1;
+    }
+    
+    .all-recommendations-button {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+    
+    .all-recommendations-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    .upload-section {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 3rem;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      margin-bottom: 2rem;
+    }
+
+    .upload-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      display: block;
+    }
+
+    .upload-section h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+
+    .upload-section p {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .file-input-container {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 2rem;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .file-input-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+      background: linear-gradient(135deg, #e74c3c 0%, #8e44ad 100%);
+      color: white;
+      padding: 1.5rem 3rem;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+    }
+
+    .file-input-label:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(231, 76, 60, 0.6);
+    }
+
+    .file-input-icon {
+      font-size: 1.5rem;
+    }
+
+    .upload-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+      margin-top: 1rem;
+    }
+
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
+    }
+
+    .upload-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .upload-status {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .upload-status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .upload-status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .upload-status.loading {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .back-btn {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 10000;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .recommendations-section {
+      display: none;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 3rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .recommendations-section h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .recommendations-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .recommendation-card-horizontal {
+      display: flex;
+      align-items: center;
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      min-height: 100px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(142, 68, 173, 0.1) 100%);
+    }
+    
+    .recommendation-card-horizontal::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 6px;
+      background: linear-gradient(135deg, #e74c3c 0%, #8e44ad 100%);
+    }
+    
+    .recommendation-card-horizontal:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+    }
+    
+    .card-number {
+      font-size: 2rem;
+      font-weight: bold;
+      min-width: 60px;
+      text-align: center;
+      margin-right: 1.5rem;
+      color: rgba(0,0,0,0.3);
+    }
+    
+    .card-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+    
+    .card-info {
+      flex: 1;
+    }
+    
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 0.25rem;
+    }
+    
+    .card-year {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .card-genres {
+      font-size: 0.9rem;
+      color: #999;
+      font-style: italic;
+    }
+    
+    .card-match {
+      text-align: right;
+      min-width: 200px;
+    }
+    
+    .card-recommendation-level {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #e74c3c;
+    }
+    
+    .card-youtube-note {
+      font-size: 0.85rem;
+      color: #666;
+      font-style: italic;
+      margin-top: 0.5rem;
+    }
+    
+    .card-play-button {
+      min-width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #e74c3c 0%, #8e44ad 100%);
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+      margin-left: 1rem;
+    }
+    
+    .card-play-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+        flex-direction: column;
+      }
+      
+      .side-panel {
+        width: 100%;
+        position: relative;
+        top: 0;
+      }
+      
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .upload-section {
+        padding: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="dashboard.html" class="back-btn">
+    ← Back to Dashboard
+  </a>
+
+  <div class="container">
+    <!-- Side Panel with Categories -->
+    <aside class="side-panel" id="categoryPanel" style="display: none;">
+      <h3>🎬 Filter by Category</h3>
+      
+      <!-- Genre Categories -->
+      <div class="category-section">
+        <div class="category-section-title">Genre Categories</div>
+        <ul class="category-list">
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Action Movies')" data-category="Action Movies">
+              <span><span class="category-icon">💥</span> Action Movies</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Comedy Movies')" data-category="Comedy Movies">
+              <span><span class="category-icon">😂</span> Comedy Movies</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Drama Movies')" data-category="Drama Movies">
+              <span><span class="category-icon">🎭</span> Drama Movies</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Romance Movies')" data-category="Romance Movies">
+              <span><span class="category-icon">💕</span> Romance Movies</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Horror Movies')" data-category="Horror Movies">
+              <span><span class="category-icon">👻</span> Horror Movies</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Sci-Fi Movies')" data-category="Sci-Fi Movies">
+              <span><span class="category-icon">🚀</span> Sci-Fi Movies</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Adventure Movies')" data-category="Adventure Movies">
+              <span><span class="category-icon">🗺️</span> Adventure Movies</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Animation & Family Movies')" data-category="Animation & Family Movies">
+              <span><span class="category-icon">🎨</span> Animation & Family</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Hybrid Categories -->
+      <div class="category-section">
+        <div class="category-section-title">Hybrid Categories</div>
+        <ul class="category-list">
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Action + Adventure')" data-category="Action + Adventure">
+              <span><span class="category-icon">⚔️</span> Action + Adventure</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Comedy + Romance')" data-category="Comedy + Romance">
+              <span><span class="category-icon">💑</span> Comedy + Romance</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Drama + Thriller')" data-category="Drama + Thriller">
+              <span><span class="category-icon">🎯</span> Drama + Thriller</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Sci-Fi + Thriller')" data-category="Sci-Fi + Thriller">
+              <span><span class="category-icon">🔮</span> Sci-Fi + Thriller</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Horror + Mystery')" data-category="Horror + Mystery">
+              <span><span class="category-icon">🔍</span> Horror + Mystery</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Comedy + Family')" data-category="Comedy + Family">
+              <span><span class="category-icon">👨‍👩‍👧‍👦</span> Comedy + Family</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Time-Based Categories -->
+      <div class="category-section">
+        <div class="category-section-title">Time-Based</div>
+        <ul class="category-list">
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Classic Movies')" data-category="Classic Movies">
+              <span><span class="category-icon">🎞️</span> Classic (before 2000)</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Modern Movies')" data-category="Modern Movies">
+              <span><span class="category-icon">📹</span> Modern (2000-2010)</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Recent Movies')" data-category="Recent Movies">
+              <span><span class="category-icon">🎥</span> Recent (2010-2020)</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Newest Movies')" data-category="Newest Movies">
+              <span><span class="category-icon">✨</span> Newest (after 2020)</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Mood Categories -->
+      <div class="category-section">
+        <div class="category-section-title">Mood Categories</div>
+        <ul class="category-list">
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Feel-Good Movies')" data-category="Feel-Good Movies">
+              <span><span class="category-icon">😊</span> Feel-Good Movies</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+          <li class="category-item">
+            <button class="category-button" onclick="loadCategoryRecommendations('Emotional / Deep Movies')" data-category="Emotional / Deep Movies">
+              <span><span class="category-icon">💭</span> Emotional / Deep</span>
+              <span class="category-arrow">→</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+      
+      <button class="all-recommendations-button" onclick="loadAllRecommendations()">
+        🎯 All Recommendations
+      </button>
+    </aside>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+    <div class="header">
+      <h1>🎬 Movie Recommendations</h1>
+      <p>Upload your movie data to get personalized recommendations</p>
+    </div>
+
+    <!-- Movie Data Upload Section -->
+    <div class="upload-section" id="movieDataSection" style="margin-top: 2rem;">
+      <div class="upload-icon">🎬</div>
+      <h2>Upload Your Movie Data</h2>
+      <p>Upload your movie CSV file with columns: Title, Year, Genres (comma-separated). The system will analyze and provide recommendations across 20 different categories.</p>
+      
+      <div class="file-input-container">
+        <input type="file" id="movieFile" class="file-input" accept=".csv" required>
+        <label for="movieFile" class="file-input-label">
+          <span class="file-input-icon">📁</span>
+          <span>Choose Movie CSV File</span>
+        </label>
+      </div>
+      
+      <button id="uploadMovieBtn" class="upload-btn" disabled>Upload Movie Data</button>
+      <div id="movieUploadStatus" class="upload-status" style="display: none;"></div>
+    </div>
+
+    <div class="recommendations-section" id="recommendationsSection" style="display: none;">
+      <h2>Your Personalized Movie Recommendations</h2>
+      <p style="text-align: center; color: #666; margin-bottom: 2rem;">Based on your movie data - perfectly matched films for you</p>
+      <div class="recommendations-grid" id="recommendationsGrid" style="max-width: 1200px; margin: 0 auto;">
+        <!-- Recommendations will be loaded here -->
+      </div>
+    </div>
+    </div> <!-- End main-content -->
+  </div> <!-- End container -->
+
+  <script>
+    // Global state variables
+    let currentUserId = null;
+    let currentCategory = null;
+
+    /**
+     * Escapes HTML to prevent XSS attacks
+     * @param {string} text - Text to escape
+     * @returns {string} Escaped HTML string
+     */
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    /**
+     * Escapes JavaScript string for safe use in onclick handlers
+     * @param {string} str - String to escape
+     * @returns {string} Escaped JavaScript string
+     */
+    function escapeJsString(str) {
+      if (!str) return '';
+      return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"')
+                .replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+    }
+
+    /**
+     * Gets current user ID from session via API
+     * Redirects to login if not authenticated
+     * @returns {Promise<number|null>} User ID or null
+     */
+    async function getCurrentUserId() {
+      try {
+        const response = await fetch('/api/current-user', { credentials: 'include', method: 'GET' });
+        if (response.ok) {
+          const user = await response.json();
+          return user.userId;
+        } else if (response.status === 401) {
+          window.location.href = '/login.html';
+          return null;
+        }
+        return null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    /**
+     * Shows status message for upload operations
+     * @param {string} message - Status message
+     * @param {string} type - Status type: 'success', 'error', or 'loading'
+     */
+    function showMovieStatus(message, type) {
+      const statusEl = document.getElementById('movieUploadStatus');
+      statusEl.textContent = message;
+      statusEl.className = `upload-status ${type}`;
+      statusEl.style.display = 'block';
+    }
+
+    /**
+     * Uploads movie CSV file to server and processes it
+     * Shows recommendations section on success
+     */
+    function uploadMovieData() {
+      const fileInput = document.getElementById('movieFile');
+      const uploadBtn = document.getElementById('uploadMovieBtn');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        showMovieStatus('Please select a CSV file', 'error');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('movieFile', file);
+      showMovieStatus('Uploading and analyzing your movie data...', 'loading');
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = 'Processing...';
+
+      fetch('/api/upload-movie-data', { method: 'POST', body: formData, credentials: 'include' })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showMovieStatus(`✅ ${data.message} Processed ${data.movieCount || 0} movies.`, 'success');
+            document.getElementById('movieDataSection').style.display = 'none';
+            document.getElementById('recommendationsSection').style.display = 'block';
+            showCategoryPanel();
+            setTimeout(() => loadAllRecommendations(), 1000);
+          } else {
+            showMovieStatus(`❌ ${data.error || 'Upload failed'}`, 'error');
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = 'Upload Movie Data';
+          }
+        })
+        .catch(error => {
+          showMovieStatus(`❌ Upload failed: ${error.message}`, 'error');
+          uploadBtn.disabled = false;
+          uploadBtn.textContent = 'Upload Movie Data';
+        });
+    }
+
+    /**
+     * Loads recommendations for a specific category
+     * Updates UI to show category-specific recommendations
+     * @param {string} category - Category name
+     */
+    function loadCategoryRecommendations(category) {
+      if (!currentUserId) return;
+      
+      // Update active button state
+      document.querySelectorAll('.category-button').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.querySelector(`[data-category="${category}"]`);
+      if (activeBtn) activeBtn.classList.add('active');
+      
+      currentCategory = category;
+      const grid = document.getElementById('recommendationsGrid');
+      grid.innerHTML = `<div style="text-align: center; padding: 2rem;"><p>🎬 Loading recommendations for ${escapeHtml(category)}...</p></div>`;
+      
+      fetch(`/api/movie-recommendations-by-category/${currentUserId}/${encodeURIComponent(category)}`, {
+        credentials: 'include'
+      })
+        .then(response => response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`)))
+        .then(data => {
+          if (data.recommendations && data.recommendations.length > 0) {
+            document.querySelector('#recommendationsSection h2').textContent = `Recommendations: ${category}`;
+            displayMovieRecommendations(data.recommendations);
+          } else {
+            grid.innerHTML = `<div style="text-align: center; padding: 2rem;"><p>No recommendations found for ${escapeHtml(category)}. Try another category.</p></div>`;
+          }
+        })
+        .catch(error => {
+          grid.innerHTML = `<div style="text-align: center; padding: 2rem;"><p style="color: red;">Error: ${escapeHtml(error.message)}</p></div>`;
+        });
+    }
+    
+    /**
+     * Loads all movie recommendations (no category filter)
+     * Resets category selection and shows all recommendations
+     */
+    function loadAllRecommendations() {
+      document.querySelectorAll('.category-button').forEach(btn => btn.classList.remove('active'));
+      currentCategory = null;
+      document.querySelector('#recommendationsSection h2').textContent = 'Your Personalized Movie Recommendations';
+      
+      if (!currentUserId) return;
+      
+      const grid = document.getElementById('recommendationsGrid');
+      grid.innerHTML = '<div style="text-align: center; padding: 2rem;"><p>🎬 Loading all recommendations...</p></div>';
+      
+      fetch(`/api/movie-recommendations/${currentUserId}`, { credentials: 'include' })
+        .then(response => response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`)))
+        .then(data => {
+          if (data.recommendations && data.recommendations.length > 0) {
+            displayMovieRecommendations(data.recommendations);
+          } else {
+            grid.innerHTML = '<div style="text-align: center; padding: 2rem;"><p>No recommendations available. Try uploading your movie data.</p></div>';
+          }
+        })
+        .catch(error => {
+          grid.innerHTML = `<div style="text-align: center; padding: 2rem;"><p style="color: red;">Error: ${escapeHtml(error.message)}</p></div>`;
+        });
+    }
+    
+    /**
+     * Displays movie recommendations in the grid
+     * Creates cards for each movie with title, year, genres, and recommendation level
+     * @param {Array} recommendations - Array of movie recommendation objects
+     */
+    function displayMovieRecommendations(recommendations) {
+      const grid = document.getElementById('recommendationsGrid');
+      if (!grid) return;
+      
+      grid.innerHTML = '';
+      
+      recommendations.forEach(movie => {
+        const card = document.createElement('div');
+        card.className = 'recommendation-card-horizontal';
+        
+        const genres = movie.genres || 'Unknown';
+        const score = movie.score || 0.5;
+        
+        // Determine recommendation level based on score thresholds
+        let recommendationLevel, recommendationColor;
+        if (score >= 0.75) {
+          recommendationLevel = 'Highly Recommended';
+          recommendationColor = '#28a745';
+        } else if (score >= 0.45) {
+          recommendationLevel = 'Moderately Recommended';
+          recommendationColor = '#ff9800';
+        } else {
+          recommendationLevel = 'You May Like';
+          recommendationColor = '#8e44ad';
+        }
+        
+        // Format title and year - safety check for numeric IDs
+        let titleText = escapeHtml(movie.title || 'Unknown Movie');
+        if (/^\d+$/.test(titleText.trim())) {
+          titleText = 'Movie Title Not Found';
+        }
+        const yearText = movie.year ? escapeHtml(movie.year.toString()) : '';
+        
+        card.innerHTML = `
+          <div class="card-content">
+            <div class="card-info">
+              <div class="card-title">${titleText}</div>
+              ${yearText ? `<div class="card-year">${yearText}</div>` : ''}
+              <div class="card-genres">${escapeHtml(genres)}</div>
+              <div class="card-youtube-note">Click the red button to find trailer on YouTube</div>
+            </div>
+            <div class="card-match">
+              <div class="card-recommendation-level" style="color: ${recommendationColor};">${recommendationLevel}</div>
+            </div>
+            <button class="card-play-button" onclick="searchMovie('${escapeJsString(movie.title || '')}')" title="Find trailer on YouTube">▶</button>
+          </div>
+        `;
+        
+        grid.appendChild(card);
+      });
+    }
+    
+    /**
+     * Opens YouTube search for movie trailer
+     * @param {string} title - Movie title to search
+     */
+    function searchMovie(title) {
+      const searchQuery = encodeURIComponent(`${title} movie trailer`);
+      window.open(`https://www.youtube.com/results?search_query=${searchQuery}`, '_blank');
+    }
+    
+    /**
+     * Shows the category filter panel
+     */
+    function showCategoryPanel() {
+      const panel = document.getElementById('categoryPanel');
+      if (panel) panel.style.display = 'block';
+    }
+
+    // Initialize page on load
+    document.addEventListener('DOMContentLoaded', async function() {
+      currentUserId = await getCurrentUserId();
+      
+      // Setup file input handlers
+      const movieFileInput = document.getElementById('movieFile');
+      const movieUploadBtn = document.getElementById('uploadMovieBtn');
+      const movieFileLabel = document.querySelector('label[for="movieFile"]');
+      
+      if (movieFileLabel) {
+        movieFileLabel.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (movieFileInput) movieFileInput.click();
+        });
+      }
+      
+      if (movieFileInput) {
+        movieFileInput.addEventListener('change', function() {
+          if (this.files.length > 0) {
+            movieUploadBtn.disabled = false;
+            movieUploadBtn.textContent = `Upload ${this.files[0].name}`;
+          } else {
+            movieUploadBtn.disabled = true;
+            movieUploadBtn.textContent = 'Upload Movie Data';
+          }
+        });
+      }
+      
+      if (movieUploadBtn) {
+        movieUploadBtn.addEventListener('click', uploadMovieData);
+      }
+    });
+  </script>
+</body>
+</html>
+

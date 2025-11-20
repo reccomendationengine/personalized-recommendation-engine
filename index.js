@@ -8,10 +8,12 @@ const multer = require('multer');
 const csv = require('csv-parser');
 const media_search = require('youtube-search-without-api-key');
 const MusicRecommendationSystem = require('./musicrec.js');
+const MovieRecommendationSystem = require('./movierec.js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const userRecommendationSystems = new Map();
+const userMovieSystems = new Map();
 
 app.use(session({ secret: 'your-secret-key-change-in-production-12345', resave: true, saveUninitialized: true, cookie: { maxAge: 24 * 60 * 60 * 1000 } }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -63,6 +65,7 @@ app.post('/logout', (req, res) => { req.session.destroy(() => { res.clearCookie(
 app.get('/logout', (req, res) => { req.session.destroy(() => { res.clearCookie('connect.sid'); res.redirect('/login.html'); }); });
 app.get('/dashboard.html', requireAuth, (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
 app.get('/music-recommendations.html', requireAuth, (req, res) => res.sendFile(path.join(__dirname, 'public', 'music-recommendations.html')));
+app.get('/movie-recommendations.html', requireAuth, (req, res) => res.sendFile(path.join(__dirname, 'public', 'movie-recommendations.html')));
 
 app.post('/api/upload-listening-history', requireAuth, upload.single('historyFile'), (req, res) => {
 	if (!req.file || !req.session.userId) return res.status(400).json({ error: 'No file uploaded' });
@@ -153,6 +156,108 @@ app.get('/api/search-youtube/:query', requireAuth, async (req, res) => {
 		}
 	} catch (error) {
 		res.status(500).json({ success: false, error: 'Failed to search YouTube' });
+	}
+});
+
+// Movie Recommendation Endpoints
+app.post('/api/upload-movie-data', requireAuth, upload.single('movieFile'), (req, res) => {
+	if (!req.file || !req.session.userId) return res.status(400).json({ error: 'No file uploaded' });
+	const userId = req.session.userId;
+	try {
+		const csvData = fs.readFileSync(req.file.path, 'utf8');
+		const movieSystem = new MovieRecommendationSystem();
+		movieSystem.loadData(csvData);
+		if (movieSystem.movies.length === 0) throw new Error('No movies loaded from CSV');
+		userMovieSystems.set(userId, movieSystem);
+		res.json({ success: true, message: 'Movie data uploaded successfully', userId, movieCount: movieSystem.movies.length });
+	} catch (error) {
+		res.status(500).json({ error: 'Failed to process file', details: error.message });
+	}
+});
+
+app.get('/api/movie-recommendations/:userId', requireAuth, (req, res) => {
+	const userId = parseInt(req.params.userId);
+	const movieSystem = userMovieSystems.get(userId);
+	if (!movieSystem) return res.json({ recommendations: [], hasMore: false, message: 'No movie system found. Please upload your movie data first.' });
+	try {
+		const allRecommendations = movieSystem.getAllMovies(50);
+		if (allRecommendations.length === 0) return res.json({ recommendations: [], hasMore: false });
+		// Normalize scores
+		const allScores = allRecommendations.map(r => r.score || 0.5);
+		const maxScore = Math.max(...allScores) || 1;
+		const minScore = Math.min(...allScores) || 0;
+		const scoreRange = maxScore - minScore || 1;
+		const formattedRecs = allRecommendations.map(rec => {
+			const normalizedScore = scoreRange > 0 ? (rec.score - minScore) / scoreRange : 0.5;
+			return {
+				title: rec.title,
+				year: rec.year,
+				genres: rec.genres,
+				genresArray: rec.genresArray,
+				score: normalizedScore,
+				explanation: rec.explanation
+			};
+		});
+		res.json({ recommendations: formattedRecs, hasMore: false });
+	} catch (error) {
+		res.json({ recommendations: [], hasMore: false, error: error.message });
+	}
+});
+
+app.get('/api/movie-recommendations-by-category/:userId/:category', requireAuth, (req, res) => {
+	const userId = parseInt(req.params.userId);
+	const category = decodeURIComponent(req.params.category);
+	const movieSystem = userMovieSystems.get(userId);
+	if (!movieSystem) return res.json({ recommendations: [], hasMore: false, message: 'No movie system found. Please upload your movie data first.' });
+	try {
+		const allRecommendations = movieSystem.getRecommendationsByCategory(category, 20);
+		if (allRecommendations.length === 0) return res.json({ recommendations: [], hasMore: false });
+		
+		// Use percentile-based scoring to ensure good distribution
+		// Sort by score first
+		allRecommendations.sort((a, b) => (b.score || 0) - (a.score || 0));
+		
+		// Assign scores based on percentile position to create clear distribution
+		const formattedRecs = allRecommendations.map((rec, index) => {
+			const total = allRecommendations.length;
+			const percentile = index / total;
+			
+			// Create score distribution:
+			// Top 20% get 0.85-1.0 (Highly Recommended)
+			// Next 40% get 0.55-0.84 (Moderately Recommended)
+			// Rest get 0.3-0.54 (You May Like)
+			let finalScore;
+			if (percentile <= 0.2) {
+				// Top 20%: 0.85 to 1.0
+				finalScore = 0.85 + ((0.2 - percentile) / 0.2) * 0.15;
+			} else if (percentile <= 0.6) {
+				// Next 40%: 0.55 to 0.84
+				finalScore = 0.55 + ((0.6 - percentile) / 0.4) * 0.29;
+			} else {
+				// Rest: 0.3 to 0.54
+				finalScore = 0.3 + ((1.0 - percentile) / 0.4) * 0.24;
+			}
+			
+			// Ensure score is in valid range
+			finalScore = Math.max(0.3, Math.min(1.0, finalScore));
+			
+			// Debug logging for first few movies
+			if (index < 3) {
+				console.log(`Movie ${index + 1}: ${rec.title}, percentile: ${percentile.toFixed(2)}, score: ${finalScore.toFixed(2)}`);
+			}
+			
+			return {
+				title: rec.title,
+				year: rec.year,
+				genres: rec.genres,
+				genresArray: rec.genresArray,
+				score: finalScore,
+				explanation: rec.explanation
+			};
+		});
+		res.json({ recommendations: formattedRecs, hasMore: false, category });
+	} catch (error) {
+		res.status(500).json({ error: 'Failed to get category recommendations', details: error.message });
 	}
 });
 
