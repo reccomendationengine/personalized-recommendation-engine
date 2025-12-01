@@ -71,7 +71,11 @@ jspm_packages/
 
 # OS
 .DS_Store
-Thumbs.dbpersonalizedreceng-firebase-adminsdk-fbsvc-21cc18d3fc.json
+Thumbs.db
 
 # Tests
 test-results/
+
+# Firebase Admin SDK private key
+personal-recommendation-engine-firebase-adminsdk.json
+
