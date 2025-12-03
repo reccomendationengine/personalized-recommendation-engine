@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +16,7 @@
     }
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: linear-gradient(135deg, darkcyan 0%, darkorchid 100%);
       min-height: 100vh;
       padding: 2rem;
@@ -36,7 +37,7 @@
       font-size: 2.5rem;
       font-weight: 700;
       margin-bottom: 1rem;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .header p {
@@ -50,7 +51,7 @@
       border-radius: 20px;
       padding: 3rem;
       text-align: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
       margin-bottom: 2rem;
     }
@@ -179,7 +180,7 @@
       padding: 3rem;
       border-radius: 20px;
       text-align: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     }
 
     .loading-spinner {
@@ -193,8 +194,13 @@
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     .loading-content h3 {
@@ -238,7 +244,7 @@
       backdrop-filter: blur(10px);
       border-radius: 20px;
       padding: 3rem;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
@@ -261,8 +267,8 @@
       background: white;
       border-radius: 15px;
       padding: 1.5rem;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      border: 1px solid rgba(0,0,0,0.05);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.05);
       transition: all 0.5s ease;
       position: relative;
       height: fit-content;
@@ -287,7 +293,7 @@
 
     .recommendation-card:hover:not(.playing) {
       transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     }
 
     .track-player {
@@ -500,17 +506,18 @@
       .container {
         padding: 1rem;
       }
-      
+
       .header h1 {
         font-size: 2rem;
       }
-      
+
       .upload-section {
         padding: 2rem;
       }
     }
   </style>
 </head>
+
 <body>
   <a href="dashboard.html" class="back-btn">
     ← Back to Dashboard
@@ -526,8 +533,9 @@
     <div class="upload-section" id="uploadSection">
       <div class="upload-icon">📁</div>
       <h2>Upload Your Music Data</h2>
-      <p>We don't have your music data yet. Please upload a CSV file with your music preferences so we can recommend personalized songs for you.</p>
-      
+      <p>We don't have your music data yet. Please upload a CSV file with your music preferences so we can recommend
+        personalized songs for you.</p>
+
       <div class="file-input-container">
         <input type="file" id="musicFile" class="file-input" accept=".csv" required>
         <label for="musicFile" class="file-input-label">
@@ -535,17 +543,19 @@
           <span>Choose CSV File</span>
         </label>
       </div>
-      
+
       <button id="uploadBtn" class="upload-btn" disabled>Upload Music Data</button>
       <div id="uploadStatus" class="upload-status" style="display: none;"></div>
     </div>
 
     <!-- Listening History Upload Section -->
-    <div class="upload-section" id="listeningHistorySection" style="margin-top: 2rem; background: rgba(255, 255, 255, 0.95); padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
+    <div class="upload-section" id="listeningHistorySection"
+      style="margin-top: 2rem; background: rgba(255, 255, 255, 0.95); padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
       <div class="upload-icon">📊</div>
       <h2>Upload Your Listening History</h2>
-      <p>Upload your 2-week listening history CSV file to get personalized recommendations based on your listening behavior, time of day preferences, mood, and activities.</p>
-      
+      <p>Upload your 2-week listening history CSV file to get personalized recommendations based on your listening
+        behavior, time of day preferences, mood, and activities.</p>
+
       <div class="file-input-container">
         <input type="file" id="historyFile" class="file-input" accept=".csv" required>
         <label for="historyFile" class="file-input-label">
@@ -553,18 +563,21 @@
           <span>Choose Listening History CSV File</span>
         </label>
       </div>
-      
+
       <button id="uploadHistoryBtn" class="upload-btn" disabled>Upload Listening History</button>
       <div id="historyUploadStatus" class="upload-status" style="display: none;"></div>
     </div>
 
     <div class="recommendations-section" id="recommendationsSection" style="display: none;">
       <h2>Your Personalized Music Recommendations</h2>
-      <p style="text-align: center; color: #666; margin-bottom: 2rem;">Based on your listening history analysis - perfectly matched songs for you</p>
-      <div class="recommendations-grid" id="recommendationsGrid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); max-width: 1400px; margin: 0 auto;">
+      <p style="text-align: center; color: #666; margin-bottom: 2rem;">Based on your listening history analysis -
+        perfectly matched songs for you</p>
+      <div class="recommendations-grid" id="recommendationsGrid"
+        style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); max-width: 1400px; margin: 0 auto;">
         <!-- Recommendations will be loaded here -->
       </div>
-      <button id="moreBtn" class="more-btn" style="display: none; margin: 2rem auto; padding: 1rem 2rem; font-size: 1.1rem;">
+      <button id="moreBtn" class="more-btn"
+        style="display: none; margin: 2rem auto; padding: 1rem 2rem; font-size: 1.1rem;">
         Load 4 More Recommendations
       </button>
     </div>
@@ -593,7 +606,7 @@
           credentials: 'include',
           method: 'GET'
         });
-        
+
         if (response.ok) {
           const user = await response.json();
           console.log('User session found:', user);
@@ -622,16 +635,16 @@
         if (recommendationsSection) recommendationsSection.style.display = 'none';
         return;
       }
-      
+
       // Check if user has behavioral patterns (listening history uploaded)
       try {
         const response = await fetch('/api/behavioral-patterns', {
           credentials: 'include'
         });
         const data = await response.json();
-        
+
         console.log('Behavioral patterns check result:', data);
-        
+
         // Check if patterns exist (more lenient check)
         const hasPatterns = data.patterns && (
           (data.patterns.topArtists && data.patterns.topArtists.length > 0) ||
@@ -639,17 +652,17 @@
           (data.patterns.timeOfDay && Object.keys(data.patterns.timeOfDay).length > 0) ||
           (data.patterns.topSongs && data.patterns.topSongs.length > 0)
         );
-        
+
         // Always show ONLY upload section first - recommendations come after upload
         console.log('User logged in - showing upload section only');
-        
+
         // Show upload sections (this is the main action)
         if (uploadSection) uploadSection.style.display = 'none'; // Hide old upload section
         const listeningHistorySection = document.getElementById('listeningHistorySection');
         if (listeningHistorySection) {
           listeningHistorySection.style.display = 'block'; // Show listening history upload
         }
-        
+
         // Hide recommendations section initially - it will show after upload
         if (recommendationsSection) {
           recommendationsSection.style.display = 'none';
@@ -722,15 +735,15 @@
         
         <div id="uploadStatus" class="upload-status" style="display: none;"></div>
       `;
-      
+
       // Re-attach event listeners
       const fileInput = document.getElementById('musicFile');
       const uploadBtn = document.getElementById('uploadBtn');
       const chooseFileBtn = document.getElementById('chooseFileBtn');
-      
+
       chooseFileBtn.addEventListener('click', () => fileInput.click());
-      
-      fileInput.addEventListener('change', function() {
+
+      fileInput.addEventListener('change', function () {
         if (this.files.length > 0) {
           uploadBtn.disabled = false;
           uploadBtn.textContent = `Upload ${this.files[0].name}`;
@@ -739,7 +752,7 @@
           uploadBtn.textContent = 'Upload Music Data';
         }
       });
-      
+
       uploadBtn.addEventListener('click', uploadMusicData);
     }
 
@@ -749,13 +762,13 @@
         displayNoRecommendations();
         return;
       }
-      
+
       console.log('Loading regular recommendations for user:', currentUserId);
       const grid = document.getElementById('recommendationsGrid');
       if (grid) {
         grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem;"><p>🎵 Loading recommendations...</p></div>';
       }
-      
+
       fetch(`/api/enhanced-recommendations/${currentUserId}`, {
         credentials: 'include'
       })
@@ -783,16 +796,16 @@
     }
 
     let currentOffset = 0; // Track pagination offset
-    
+
     function loadRecommendationsWithYouTube(offset = 0) {
       if (!currentUserId) {
         console.error('No user ID available for recommendations');
         displayNoRecommendations();
         return;
       }
-      
+
       console.log('Loading recommendations with YouTube for user:', currentUserId, 'offset:', offset);
-      
+
       // Show loading state only if it's the first load (offset === 0)
       if (offset === 0) {
         const grid = document.getElementById('recommendationsGrid');
@@ -800,7 +813,7 @@
           grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem;"><p>🎵 Finding the best songs for you with YouTube links...</p></div>';
         }
       }
-      
+
       fetch(`/api/recommendations-with-youtube/${currentUserId}?offset=${offset}`, {
         credentials: 'include'
       })
@@ -814,7 +827,7 @@
         .then(data => {
           console.log('Recommendations data received:', data);
           console.log('Number of recommendations:', data.recommendations?.length || 0);
-          
+
           if (data.recommendations && data.recommendations.length > 0) {
             console.log(`Displaying ${data.recommendations.length} recommendations`);
             if (offset === 0) {
@@ -853,41 +866,41 @@
     function appendRecommendationsWithYouTube(recommendations, data) {
       const grid = document.getElementById('recommendationsGrid');
       if (!grid) return;
-      
+
       // Sort new recommendations by similarity score (highest first)
       const sortedRecs = [...recommendations].sort((a, b) => {
         const scoreA = (a.similarity_score || 0) * 100;
         const scoreB = (b.similarity_score || 0) * 100;
         return scoreB - scoreA; // Descending order
       });
-      
+
       const startIndex = grid.children.length;
       displayRecommendationsInGrid(sortedRecs, grid, startIndex, data);
     }
-    
+
     function displayRecommendationsWithYouTube(recommendations, data) {
       const grid = document.getElementById('recommendationsGrid');
       console.log('Displaying recommendations with YouTube:', recommendations);
-      
+
       // Clear existing content only on first load
       if (!data || data.offset === 0) {
         grid.innerHTML = '';
         currentlyPlayingIndex = null; // Reset playing track on new load
       }
-      
+
       // Sort recommendations by similarity score (highest first) before displaying
       const sortedRecs = [...recommendations].sort((a, b) => {
         const scoreA = (a.similarity_score || 0) * 100;
         const scoreB = (b.similarity_score || 0) * 100;
         return scoreB - scoreA; // Descending order
       });
-      
+
       displayRecommendationsInGrid(sortedRecs, grid, data?.offset || 0, data);
     }
-    
+
     // Track currently playing song
     let currentlyPlayingIndex = null;
-    
+
     function displayRecommendationsInGrid(recommendations, grid, startIndex, data) {
       // Sort recommendations by similarity score (highest first) - ensure proper sorting
       const sortedRecommendations = [...recommendations].sort((a, b) => {
@@ -895,7 +908,7 @@
         const scoreB = (b.similarity_score || 0) * 100;
         return scoreB - scoreA; // Descending order (highest first)
       });
-      
+
       sortedRecommendations.forEach((track, relativeIndex) => {
         const index = startIndex + relativeIndex;
         const card = document.createElement('div');
@@ -907,20 +920,20 @@
         card.style.minHeight = '450px'; // Ensure all cards have same minimum height
         card.style.display = 'flex';
         card.style.flexDirection = 'column';
-        
+
         // Calculate match percentage from similarity_score
         const similarityScore = track.similarity_score || 0;
         const displayPercentage = (similarityScore * 100).toFixed(1);
         const youtubeId = track.youtube?.id || '';
         const hasYouTube = youtubeId && track.youtube;
-        
+
         const formatDuration = (seconds) => {
           if (!seconds) return 'Unknown';
           const mins = Math.floor(seconds / 60);
           const secs = seconds % 60;
           return `${mins}:${secs.toString().padStart(2, '0')}`;
         };
-        
+
         // Get match level based on similarity percentage - use actual score
         const similarityPercent = parseFloat(displayPercentage);
         let matchLevel = 'maylike';
@@ -931,7 +944,7 @@
         } else {
           matchLevel = 'maylike';
         }
-        
+
         let matchBadge = '';
         let matchBadgeClass = '';
         if (matchLevel === 'highly') {
@@ -944,7 +957,7 @@
           matchBadge = '💡 You May Like This Song';
           matchBadgeClass = 'may-like';
         }
-        
+
         // Build explanation text - displayed above YouTube player
         const explanation = track.explanation ? `
           <div class="recommendation-explanation" style="
@@ -961,7 +974,7 @@
             ${track.explanation}
           </div>
         ` : '';
-        
+
         // Add visual highlight if this is the currently playing track
         const isPlaying = currentlyPlayingIndex === index;
         if (isPlaying) {
@@ -970,7 +983,7 @@
           card.style.transform = 'scale(1.02)';
           card.style.background = 'linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%)';
         }
-        
+
         card.innerHTML = `
           <div class="match-badge ${matchBadgeClass}" style="
             display: inline-block;
@@ -979,8 +992,8 @@
             font-size: 0.85rem;
             font-weight: 600;
             margin-bottom: 1rem;
-            ${matchLevel === 'highly' ? 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;' : 
-              matchLevel === 'moderate' ? 'background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); color: #333;' : 
+            ${matchLevel === 'highly' ? 'background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;' :
+            matchLevel === 'moderate' ? 'background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); color: #333;' :
               'background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white;'}
           ">${matchBadge}</div>
           ${isPlaying ? '<div class="now-playing-badge" style="position: absolute; top: 10px; right: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.3rem 0.6rem; border-radius: 15px; font-size: 0.75rem; font-weight: 600; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3); z-index: 10;">▶️ Now Playing</div>' : ''}
@@ -1032,11 +1045,11 @@
             `}
           </div>
         `;
-        
+
         // Base styles are already applied above, so we just append the card
         grid.appendChild(card);
       });
-      
+
       // Show/hide "Load More" button based on hasMore flag
       if (data) {
         const moreBtn = document.getElementById('moreBtn');
@@ -1050,7 +1063,7 @@
         }
       }
     }
-    
+
     function loadMoreRecommendations(offset) {
       console.log('Loading more recommendations, offset:', offset);
       loadRecommendationsWithYouTube(offset);
@@ -1059,30 +1072,30 @@
     function displayRecommendations(recommendations) {
       const grid = document.getElementById('recommendationsGrid');
       console.log('Displaying recommendations:', recommendations);
-      
+
       grid.innerHTML = '';
-      
+
       const sortedRecommendations = recommendations.sort((a, b) => {
         const scoreA = a.similarity_score || 0;
         const scoreB = b.similarity_score || 0;
         return scoreB - scoreA;
       });
-      
+
       sortedRecommendations.forEach((track, index) => {
         const card = document.createElement('div');
         card.className = 'recommendation-card';
-        
+
         const uniqueId = `player-${track.title.replace(/[^a-zA-Z0-9]/g, '')}-${index}-${Math.random().toString(36).substr(2, 9)}`;
         const displayPercentage = track.similarity_score ? (track.similarity_score * 100).toFixed(1) : (Math.random() * 30 + 50).toFixed(1);
-        
+
         const formatDuration = (seconds) => {
           const mins = Math.floor(seconds / 60);
           const secs = seconds % 60;
           return `${mins}:${secs.toString().padStart(2, '0')}`;
         };
-        
+
         const explanation = track.explanation ? `<div class="track-explanation" style="margin-top: 0.5rem; font-size: 0.9rem; color: #666; font-style: italic;">${track.explanation}</div>` : '';
-        
+
         card.innerHTML = `
           <div class="track-title">${track.title}</div>
           <div class="track-artist">by ${track.artist}</div>
@@ -1094,7 +1107,7 @@
             🔍 Search on YouTube
           </button>
         `;
-        
+
         grid.appendChild(card);
       });
 
@@ -1113,16 +1126,16 @@
       const playerDiv = document.getElementById(`youtube-player-${index}`);
       const iframe = document.getElementById(`youtube-iframe-${index}`);
       const playBtn = document.getElementById(`play-btn-text-${index}`);
-      
+
       if (!playerDiv || !iframe) return;
-      
+
       // If clicking on a different card, stop the previous one
       if (currentlyPlayingIndex !== null && currentlyPlayingIndex !== index) {
         const prevPlayerDiv = document.getElementById(`youtube-player-${currentlyPlayingIndex}`);
         const prevIframe = document.getElementById(`youtube-iframe-${currentlyPlayingIndex}`);
         const prevPlayBtn = document.getElementById(`play-btn-text-${currentlyPlayingIndex}`);
         const prevCard = document.getElementById(`recommendation-card-${currentlyPlayingIndex}`);
-        
+
         if (prevPlayerDiv) prevPlayerDiv.style.display = 'none';
         if (prevIframe) prevIframe.src = '';
         if (prevPlayBtn) prevPlayBtn.textContent = '▶️ Play in Card';
@@ -1146,13 +1159,13 @@
           if (prevBadge) prevBadge.remove();
         }
       }
-      
+
       if (playerDiv.style.display === 'none' || !playerDiv.style.display) {
         // Show player and highlight card
         playerDiv.style.display = 'block';
         iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
         if (playBtn) playBtn.textContent = '⏸️ Hide Player';
-        
+
         // Highlight this card
         const card = document.getElementById(`recommendation-card-${index}`);
         if (card) {
@@ -1184,14 +1197,14 @@
             card.appendChild(badge);
           }
         }
-        
+
         currentlyPlayingIndex = index;
       } else {
         // Hide player and remove highlight
         playerDiv.style.display = 'none';
         iframe.src = '';
         if (playBtn) playBtn.textContent = '▶️ Play in Card';
-        
+
         const card = document.getElementById(`recommendation-card-${index}`);
         if (card) {
           card.style.boxShadow = '';
@@ -1216,7 +1229,7 @@
           const badge = card.querySelector('.now-playing-badge');
           if (badge) badge.remove();
         }
-        
+
         currentlyPlayingIndex = null;
       }
     }
@@ -1224,7 +1237,7 @@
     function displayNoRecommendations() {
       const grid = document.getElementById('recommendationsGrid');
       if (!grid) return;
-      
+
       grid.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
           <p style="color: #666; font-size: 1.1rem;">No recommendations available yet.</p>
@@ -1238,12 +1251,12 @@
 
     function toggleTrackPlayer(title, artist, youtubeId, playerId) {
       console.log('toggleTrackPlayer called with:', { title, artist, youtubeId, playerId });
-      
+
       // Remove playing class from all cards
       document.querySelectorAll('.recommendation-card.playing').forEach(card => {
         card.classList.remove('playing');
       });
-      
+
       // ALWAYS hide all other players first (this ensures only one plays at a time)
       document.querySelectorAll('.track-player.show').forEach(p => {
         p.classList.remove('show');
@@ -1256,37 +1269,37 @@
           p.remove();
         }, 500); // Wait for animation to complete
       });
-      
+
       // Find the card that was clicked
       const clickedButton = event.target;
       const card = clickedButton.closest('.recommendation-card');
-      
+
       // Check if this card already has a player
       let player = card.querySelector('.track-player');
-      
+
       if (player && player.classList.contains('show')) {
         // If player is already showing, hide it and remove it
         player.remove();
         card.classList.remove('playing');
         return;
       }
-      
+
       // Add playing class to the clicked card
       card.classList.add('playing');
-      
+
       // Create new player div only for the clicked card
       const playerDiv = document.createElement('div');
       playerDiv.className = 'track-player';
       playerDiv.id = playerId;
       playerDiv.innerHTML = '<iframe src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
-      
+
       // Insert player after the button
       clickedButton.parentNode.insertBefore(playerDiv, clickedButton.nextSibling);
-      
+
       // Show the player with animation
       setTimeout(() => {
         playerDiv.classList.add('show');
-        
+
         // Load the YouTube video
         if (youtubeId) {
           const iframe = playerDiv.querySelector('iframe');
@@ -1301,7 +1314,7 @@
     function searchAndPlayTrack(title, artist, player) {
       const iframe = player.querySelector('iframe');
       iframe.src = 'about:blank'; // Clear first
-      
+
       fetch(`/api/search-youtube/${encodeURIComponent(title + ' ' + artist)}`)
         .then(response => response.json())
         .then(data => {
@@ -1338,7 +1351,7 @@
       const moreBtn = document.getElementById('moreBtn');
       moreBtn.disabled = true;
       moreBtn.textContent = 'Loading...';
-      
+
       fetch(`/api/enhanced-recommendations/${currentUserId}?offset=${recommendationOffset}&limit=5`)
         .then(response => response.json())
         .then(data => {
@@ -1361,31 +1374,31 @@
     function appendRecommendations(recommendations) {
       const grid = document.getElementById('recommendationsGrid');
       console.log('Appending recommendations:', recommendations);
-      
+
       // Sort recommendations by similarity score (highest first)
       const sortedRecommendations = recommendations.sort((a, b) => {
         const scoreA = a.similarity_score || 0;
         const scoreB = b.similarity_score || 0;
         return scoreB - scoreA; // Descending order (highest first)
       });
-      
+
       sortedRecommendations.forEach((track, index) => {
         const card = document.createElement('div');
         card.className = 'recommendation-card';
-        
+
         // Create unique ID using index and random number to avoid conflicts
         const uniqueId = `player-${track.title.replace(/[^a-zA-Z0-9]/g, '')}-${index}-${Math.random().toString(36).substr(2, 9)}`;
-        
+
         // Calculate display percentage
         const displayPercentage = track.similarity_score ? (track.similarity_score * 100).toFixed(1) : (Math.random() * 30 + 50).toFixed(1);
-        
+
         // Format duration from seconds to minutes:seconds
         const formatDuration = (seconds) => {
           const mins = Math.floor(seconds / 60);
           const secs = seconds % 60;
           return `${mins}:${secs.toString().padStart(2, '0')}`;
         };
-        
+
         card.innerHTML = `
           <div class="track-title">${track.title}</div>
           <div class="track-artist">by ${track.artist}</div>
@@ -1414,7 +1427,7 @@
             🎵 Play Track
           </button>
         `;
-        
+
         console.log('Created card for:', track.title, 'with score:', displayPercentage);
         grid.appendChild(card);
       });
@@ -1438,33 +1451,33 @@
         method: 'POST',
         body: formData
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          showStatus(`✅ ${data.message}`, 'success');
-          
-          // Show loading screen
-          loadingScreen.style.display = 'flex';
-          
-          // Simulate processing time
-          setTimeout(() => {
-            loadingScreen.style.display = 'none';
-            uploadSection.style.display = 'none';
-            recommendationsSection.style.display = 'block';
-            loadRecommendations();
-          }, 3000);
-          
-        } else {
-          showStatus(`❌ ${data.error}`, 'error');
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showStatus(`✅ ${data.message}`, 'success');
+
+            // Show loading screen
+            loadingScreen.style.display = 'flex';
+
+            // Simulate processing time
+            setTimeout(() => {
+              loadingScreen.style.display = 'none';
+              uploadSection.style.display = 'none';
+              recommendationsSection.style.display = 'block';
+              loadRecommendations();
+            }, 3000);
+
+          } else {
+            showStatus(`❌ ${data.error}`, 'error');
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = 'Upload Music Data';
+          }
+        })
+        .catch(error => {
+          showStatus(`❌ Upload failed: ${error.message}`, 'error');
           uploadBtn.disabled = false;
           uploadBtn.textContent = 'Upload Music Data';
-        }
-      })
-      .catch(error => {
-        showStatus(`❌ Upload failed: ${error.message}`, 'error');
-        uploadBtn.disabled = false;
-        uploadBtn.textContent = 'Upload Music Data';
-      });
+        });
     }
 
     function showStatus(message, type) {
@@ -1473,7 +1486,7 @@
       uploadStatus.style.display = 'block';
     }
 
-    document.addEventListener('DOMContentLoaded', async function() {
+    document.addEventListener('DOMContentLoaded', async function () {
       // Get current user ID from session
       // Don't block page load if this fails - let the server-side auth handle it
       try {
@@ -1503,7 +1516,7 @@
       if (recommendationsSection) {
         recommendationsSection.style.display = 'none'; // Hide recommendations initially
       }
-      
+
       // If we don't have a user ID yet, try to get it again after a short delay
       if (!currentUserId) {
         setTimeout(async () => {
@@ -1524,7 +1537,7 @@
       }
 
       if (fileInput) {
-        fileInput.addEventListener('change', function() {
+        fileInput.addEventListener('change', function () {
           if (this.files.length > 0) {
             uploadBtn.disabled = false;
             uploadBtn.textContent = `Upload ${this.files[0].name}`;
@@ -1543,18 +1556,18 @@
       const historyFileInput = document.getElementById('historyFile');
       const historyUploadBtn = document.getElementById('uploadHistoryBtn');
       const historyFileLabel = document.querySelector('label[for="historyFile"]');
-      
+
       if (historyFileLabel) {
-        historyFileLabel.addEventListener('click', function(e) {
+        historyFileLabel.addEventListener('click', function (e) {
           e.preventDefault();
           if (historyFileInput) {
             historyFileInput.click();
           }
         });
       }
-      
+
       if (historyFileInput) {
-        historyFileInput.addEventListener('change', function() {
+        historyFileInput.addEventListener('change', function () {
           if (this.files.length > 0) {
             historyUploadBtn.disabled = false;
             historyUploadBtn.textContent = `Upload ${this.files[0].name}`;
@@ -1580,7 +1593,7 @@
       const historyFileInput = document.getElementById('historyFile');
       const historyUploadBtn = document.getElementById('uploadHistoryBtn');
       const historyUploadStatus = document.getElementById('historyUploadStatus');
-      
+
       const file = historyFileInput.files[0];
       if (!file) {
         showHistoryStatus('Please select a CSV file', 'error');
@@ -1599,47 +1612,47 @@
         body: formData,
         credentials: 'include'
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          const tracksMsg = data.tracksCreated > 0 ? ` Created ${data.tracksCreated} music tracks.` : '';
-          showHistoryStatus(`✅ ${data.message}${tracksMsg} Analyzed ${data.patterns?.topGenres?.length || 0} genres, ${data.patterns?.topArtists?.length || 0} artists. Processing your recommendations...`, 'success');
-          
-          // Hide upload sections
-          if (uploadSection) uploadSection.style.display = 'none';
-          const historySection = document.getElementById('listeningHistorySection');
-          if (historySection) {
-            historySection.style.display = 'none';
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const tracksMsg = data.tracksCreated > 0 ? ` Created ${data.tracksCreated} music tracks.` : '';
+            showHistoryStatus(`✅ ${data.message}${tracksMsg} Analyzed ${data.patterns?.topGenres?.length || 0} genres, ${data.patterns?.topArtists?.length || 0} artists. Processing your recommendations...`, 'success');
+
+            // Hide upload sections
+            if (uploadSection) uploadSection.style.display = 'none';
+            const historySection = document.getElementById('listeningHistorySection');
+            if (historySection) {
+              historySection.style.display = 'none';
+            }
+
+            // Show recommendations section
+            if (recommendationsSection) {
+              recommendationsSection.style.display = 'block';
+            }
+
+            // Show loading message
+            const grid = document.getElementById('recommendationsGrid');
+            if (grid) {
+              grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem;"><div style="font-size: 2rem; margin-bottom: 1rem;">🎵</div><p style="font-size: 1.2rem; color: #333; margin-bottom: 0.5rem;">Processing your listening history...</p><p style="color: #666;">Analyzing your preferences and generating personalized recommendations with YouTube links...</p><div style="margin-top: 2rem;"><div class="loading-spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div></div></div>';
+            }
+
+            // Load recommendations with YouTube links after processing delay
+            setTimeout(() => {
+              loadRecommendationsWithYouTube();
+            }, 3000); // Give more time for processing
+
+          } else {
+            showHistoryStatus(`❌ ${data.error || 'Upload failed'}`, 'error');
+            historyUploadBtn.disabled = false;
+            historyUploadBtn.textContent = 'Upload Listening History';
           }
-          
-          // Show recommendations section
-          if (recommendationsSection) {
-            recommendationsSection.style.display = 'block';
-          }
-          
-          // Show loading message
-          const grid = document.getElementById('recommendationsGrid');
-          if (grid) {
-            grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem;"><div style="font-size: 2rem; margin-bottom: 1rem;">🎵</div><p style="font-size: 1.2rem; color: #333; margin-bottom: 0.5rem;">Processing your listening history...</p><p style="color: #666;">Analyzing your preferences and generating personalized recommendations with YouTube links...</p><div style="margin-top: 2rem;"><div class="loading-spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div></div></div>';
-          }
-          
-          // Load recommendations with YouTube links after processing delay
-          setTimeout(() => {
-            loadRecommendationsWithYouTube();
-          }, 3000); // Give more time for processing
-          
-        } else {
-          showHistoryStatus(`❌ ${data.error || 'Upload failed'}`, 'error');
+        })
+        .catch(error => {
+          console.error('Error uploading listening history:', error);
+          showHistoryStatus(`❌ Upload failed: ${error.message}`, 'error');
           historyUploadBtn.disabled = false;
           historyUploadBtn.textContent = 'Upload Listening History';
-        }
-      })
-      .catch(error => {
-        console.error('Error uploading listening history:', error);
-        showHistoryStatus(`❌ Upload failed: ${error.message}`, 'error');
-        historyUploadBtn.disabled = false;
-        historyUploadBtn.textContent = 'Upload Listening History';
-      });
+        });
     }
 
     function showHistoryStatus(message, type) {
@@ -1651,12 +1664,12 @@
 
     function toggleTrackPlayer(title, artist, youtubeId, playerId) {
       console.log('toggleTrackPlayer called with:', { title, artist, youtubeId, playerId });
-      
+
       // Remove playing class from all cards
       document.querySelectorAll('.recommendation-card.playing').forEach(card => {
         card.classList.remove('playing');
       });
-      
+
       // ALWAYS hide all other players first (this ensures only one plays at a time)
       document.querySelectorAll('.track-player.show').forEach(p => {
         p.classList.remove('show');
@@ -1669,38 +1682,38 @@
           p.remove();
         }, 500); // Wait for animation to complete
       });
-      
+
       // Find the card that was clicked
       const clickedButton = event.target;
       const card = clickedButton.closest('.recommendation-card');
-      
+
       // Check if this card already has a player
       let player = card.querySelector('.track-player');
-      
+
       if (player && player.classList.contains('show')) {
         // If player is already showing, hide it and remove it
         player.remove();
         card.classList.remove('playing');
         return;
       }
-      
+
       // Add playing class to the clicked card
       card.classList.add('playing');
-      
+
       // Create new player div only for the clicked card
       const playerDiv = document.createElement('div');
       playerDiv.className = 'track-player';
       playerDiv.id = playerId;
       playerDiv.innerHTML = '<iframe src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
-      
+
       // Insert player after the button
       clickedButton.parentNode.insertBefore(playerDiv, clickedButton.nextSibling);
-      
+
       // Trigger smooth animation
       setTimeout(() => {
         playerDiv.classList.add('show');
       }, 10);
-      
+
       if (youtubeId && youtubeId !== '' && youtubeId !== 'undefined') {
         // Load YouTube video
         const iframe = playerDiv.querySelector('iframe');
@@ -1717,10 +1730,10 @@
     function searchAndPlayTrack(title, artist, player) {
       const iframe = player.querySelector('iframe');
       iframe.src = 'about:blank'; // Clear first
-      
+
       // Show loading animation
       iframe.src = 'data:text/html,<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;font-family:Arial;background:#f8f9fa;"><div style="width:40px;height:40px;border:4px solid #e9ecef;border-top:4px solid #667eea;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px;"></div><div style="color:#666;font-size:14px;">Loading video...</div><style>@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}</style></div>';
-      
+
       // Search for YouTube video
       fetch(`/api/search-youtube/${encodeURIComponent(title + ' ' + artist)}`)
         .then(response => response.json())
@@ -1740,9 +1753,9 @@
       const moreBtn = document.getElementById('moreBtn');
       moreBtn.disabled = true;
       moreBtn.textContent = 'Loading...';
-      
+
       recommendationOffset += 5;
-      
+
       fetch(`/api/enhanced-recommendations/${currentUserId}?offset=${recommendationOffset}&limit=5`)
         .then(response => response.json())
         .then(data => {
@@ -1766,32 +1779,32 @@
     function appendRecommendations(recommendations) {
       const grid = document.getElementById('recommendationsGrid');
       console.log('Appending recommendations:', recommendations);
-      
+
       // Sort new recommendations by similarity score (highest first)
       const sortedRecommendations = recommendations.sort((a, b) => {
         const scoreA = a.similarity_score || 0;
         const scoreB = b.similarity_score || 0;
         return scoreB - scoreA; // Descending order (highest first)
       });
-      
+
       sortedRecommendations.forEach((track, index) => {
         const card = document.createElement('div');
         card.className = 'recommendation-card';
-        
+
         // Create unique ID using current total count and random number to avoid conflicts
         const currentCount = grid.children.length;
         const uniqueId = `player-${track.title.replace(/[^a-zA-Z0-9]/g, '')}-${currentCount + index}-${Math.random().toString(36).substr(2, 9)}`;
-        
+
         // Calculate display percentage
         const displayPercentage = track.similarity_score ? (track.similarity_score * 100).toFixed(1) : (Math.random() * 30 + 50).toFixed(1);
-        
+
         // Format duration from seconds to minutes:seconds
         const formatDuration = (seconds) => {
           const mins = Math.floor(seconds / 60);
           const secs = seconds % 60;
           return `${mins}:${secs.toString().padStart(2, '0')}`;
         };
-        
+
         card.innerHTML = `
           <div class="track-title">${track.title}</div>
           <div class="track-artist">by ${track.artist}</div>
@@ -1820,16 +1833,17 @@
             🎵 Play Track
           </button>
         `;
-        
+
         console.log('Appended card for:', track.title, 'with score:', displayPercentage);
         grid.appendChild(card);
       });
     }
 
     // Add event listener for more button
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('moreBtn').addEventListener('click', loadMoreRecommendations);
     });
   </script>
 </body>
+
 </html>
