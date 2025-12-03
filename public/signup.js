@@ -1,7 +1,7 @@
 // signup.js
 import { auth, db } from './firebase-config.js';
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
 
 // --- Form Validation ---

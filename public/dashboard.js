@@ -9,7 +9,7 @@ onAuthStateChanged(auth, (user) => {
         return;
     }
 
-    const userDisplayName = user.userDisplayName
+    const userDisplayName = user.displayName
     const email = user.email;
 
     if (userDisplayName && userDisplayName.trim()){
@@ -66,7 +66,7 @@ async function logout(){
         await signOut(auth);
         window.location.href = "login.html";
     } catch (error) {
-        console.error("Logout error:", err);
+        console.error("Logout error:", error);
     }
 }
 window.logout = logout;

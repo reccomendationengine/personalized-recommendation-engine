@@ -19,7 +19,7 @@
     "express": "^4.19.2",
     "express-session": "^1.18.2",
     "firebase": "^12.3.0",
-    "firebase-admin": "^13.5.0",
+    "firebase-admin": "^13.6.0",
     "multer": "^2.0.2",
     "sqlite3": "^5.1.7",
     "youtube-search-without-api-key": "^2.0.7",
