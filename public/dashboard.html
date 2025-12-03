@@ -16,7 +16,7 @@
     }
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: linear-gradient(135deg, darkcyan 0%, darkorchid 100%);
       min-height: 100vh;
       display: flex;
@@ -245,9 +245,9 @@
         window.location.href = 'movie-recommendations.html';
       }
     }
-    
+
     // Verify session on page load
-    window.addEventListener('DOMContentLoaded', async function() {
+    window.addEventListener('DOMContentLoaded', async function () {
       try {
         const response = await fetch('/api/current-user', {
           credentials: 'include',
