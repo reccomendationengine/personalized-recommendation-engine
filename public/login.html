@@ -60,42 +60,8 @@
       </div>
     </main>
   </div>
-
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const emailError = document.getElementById('emailError');
-      const passwordError = document.getElementById('passwordError');
-
-      emailError.style.display = 'none';
-      passwordError.style.display = 'none';
-
-      let isValid = true;
-
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!email || !emailPattern.test(email)) {
-        emailError.style.display = 'block';
-        isValid = false;
-      }
-
-      if (!password || password.length < 6) {
-        passwordError.style.display = 'block';
-        isValid = false;
-      }
-
-      if (!isValid) return;
-
-      // ✅ Simulated successful login (no backend needed)
-      localStorage.setItem('userEmail', email);
-      localStorage.setItem('userName', email.split('@')[0]);
-
-      alert('Login successful! Redirecting to dashboard...');
-      window.location.href = 'dashboard.html';
-    });
-  </script>
+  <script type="module" src="login.js"></script>
+  
 </body>
 
 </html>
