@@ -58,9 +58,7 @@ body {
   align-items: center;
 }
 
-#link-text:hover {
-  color: darkcyan;
-}
+
 .justify-center {
   justify-content: center;
 }
