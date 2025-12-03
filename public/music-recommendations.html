@@ -896,6 +896,7 @@
     <div class="recommendations-section" id="recommendationsSection" style="display: none;">
       <h2>Your Personalized Music Recommendations</h2>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       <p style="text-align: center; color: #666; margin-bottom: 2rem;">Based on your listening history analysis - perfectly matched songs for you</p>
       <div class="recommendations-grid" id="recommendationsGrid" style="max-width: 1200px; margin: 0 auto;">
         <!-- Recommendations will be loaded here -->
@@ -929,6 +930,14 @@
         style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); max-width: 1400px; margin: 0 auto;">
         <!-- Recommendations will be loaded here -->
       </div>
+=======
+      <p style="text-align: center; color: #666; margin-bottom: 2rem;">Based on your listening history analysis -
+        perfectly matched songs for you</p>
+      <div class="recommendations-grid" id="recommendationsGrid"
+        style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); max-width: 1400px; margin: 0 auto;">
+        <!-- Recommendations will be loaded here -->
+      </div>
+>>>>>>> Stashed changes
       <button id="moreBtn" class="more-btn"
         style="display: none; margin: 2rem auto; padding: 1rem 2rem; font-size: 1.1rem;">
         Load 4 More Recommendations
@@ -1019,11 +1028,14 @@
 
         console.log('Behavioral patterns check result:', data);
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         
         // Always show upload section first - recommendations come after upload
         console.log('User logged in - showing upload section only');
         
 =======
+=======
+>>>>>>> Stashed changes
 
         // Check if patterns exist (more lenient check)
         const hasPatterns = data.patterns && (
@@ -1044,8 +1056,11 @@
           listeningHistorySection.style.display = 'block';
         }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         
 =======
+=======
+>>>>>>> Stashed changes
 
         // Hide recommendations section initially - it will show after upload
 >>>>>>> Stashed changes
@@ -1183,6 +1198,9 @@
 
     let currentOffset = 0; // Track pagination offset
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     function loadRecommendationsWithYouTube(offset = 0) {
       if (!currentUserId) {
@@ -1267,6 +1285,7 @@
       const grid = document.getElementById('recommendationsGrid');
       console.log('Displaying recommendations with YouTube:', recommendations);
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       
       // Show category panel when recommendations are available
       showCategoryPanel();
@@ -1279,6 +1298,9 @@
       
       console.log(`Filtered ${recommendations.length} recommendations to ${filteredRecs.length} (removed ${recommendations.length - filteredRecs.length} below 1.0%)`);
       
+=======
+
+>>>>>>> Stashed changes
 =======
 
 >>>>>>> Stashed changes
@@ -1402,6 +1424,7 @@
           percentageColor = '#ffc107';
         }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         
         card.style.background = bgColor;
         card.style.color = borderColor;
@@ -1429,6 +1452,8 @@
     }
     
 =======
+=======
+>>>>>>> Stashed changes
 
         // Build explanation text - displayed above YouTube player
         const explanation = track.explanation ? `
@@ -1963,6 +1988,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', async function () {
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
       // Get current user ID from session
       // Don't block page load if this fails - let the server-side auth handle it
@@ -2084,6 +2112,7 @@
         credentials: 'include'
       })
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       .then(response => response.json())
       .then(data => {
         if (data.success) {
@@ -2095,6 +2124,8 @@
           if (historySection) {
             historySection.style.display = 'none';
 =======
+=======
+>>>>>>> Stashed changes
         .then(response => response.json())
         .then(data => {
           if (data.success) {
@@ -2128,6 +2159,9 @@
             showHistoryStatus(`❌ ${data.error || 'Upload failed'}`, 'error');
             historyUploadBtn.disabled = false;
             historyUploadBtn.textContent = 'Upload Listening History';
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
           }
         })
