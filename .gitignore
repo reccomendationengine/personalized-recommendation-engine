@@ -72,3 +72,6 @@ jspm_packages/
 # OS
 .DS_Store
 Thumbs.dbpersonalizedreceng-firebase-adminsdk-fbsvc-21cc18d3fc.json
+
+# Tests
+test-results/
