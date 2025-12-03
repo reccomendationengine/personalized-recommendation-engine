@@ -79,3 +79,5 @@ test-results/
 # Firebase Admin SDK private key
 personal-recommendation-engine-firebase-adminsdk.json
 
+# Local env file (do NOT commit)
+.env
