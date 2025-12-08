@@ -2,6 +2,7 @@
 require('dotenv').config();
 const path = require('path');
 const express = require('express');
+const multer = require('multer');
 
 const admin = require('firebase-admin');
 const media_search = require('youtube-search-without-api-key');
@@ -9,36 +10,42 @@ const MusicRecommendationSystem = require('./musicrec.js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const upload = multer({ storage: multer.memoryStorage() });
 
-// Middleware
+// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// --- FIREBASE INITIALIZATION ---
+// -------------------------------------------------------
+// FIREBASE ADMIN INITIALIZATION
+// -------------------------------------------------------
 let serviceAccount;
 try {
-  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-  } else {
-    serviceAccount = require('./personal-recommendation-engine-firebase-adminsdk.json');
-  }
-} catch (error) {
-  console.error('Firebase service account configuration not found or invalid.');
+  serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
+    ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+    : require('./personal-recommendation-engine-firebase-adminsdk.json');
+} catch (err) {
+  console.error("ERROR loading Firebase service account:", err);
   serviceAccount = null;
 }
 
-let db;
-if (serviceAccount) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    projectId: "personal-recommendation-engine"
-  });
+let db = null;
 
-  db = admin.firestore();
-  console.log('Firebase Admin SDK initialized successfully.');
+if (serviceAccount) {
+  try {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      projectId: "personal-recommendation-engine"
+    });
+
+    db = admin.firestore();
+    console.log("Firebase Admin initialized.");
+  } catch (err) {
+    console.error("Firebase Admin initialization failed:", err);
+  }
 } else {
-  console.error('SERVER ERROR: Firebase Admin SDK not initialized.');
+  console.error("Firebase Admin SDK not initialized.");
 }
 
 // -------------------------------------------------------
@@ -47,57 +54,108 @@ if (serviceAccount) {
 async function authenticateFirebaseUser(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Missing or invalid Authorization header" });
+    return res.status(401).json({ error: "Missing Authorization header" });
   }
 
-  const idToken = authHeader.split(" ")[1];
+  const token = authHeader.split(" ")[1];
 
   try {
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const decoded = await admin.auth().verifyIdToken(token);
 
     req.user = {
-      userId: decodedToken.uid,
-      email: decodedToken.email,
-      name: decodedToken.name || null
+      userId: decoded.uid,
+      email: decoded.email,
+      name: decoded.name || null,
     };
 
     next();
   } catch (error) {
-    return res.status(401).json({ error: "Invalid or expired token" });
+    return res.status(401).json({ error: "Invalid or expired Firebase token" });
   }
 }
 
 const requireAuth = authenticateFirebaseUser;
 
 // -------------------------------------------------------
-// GLOBAL TWO-TOWER RECOMMENDATION SYSTEM INSTANCE
+// GLOBAL Two-Tower RECOMMENDATION INSTANCE
 // -------------------------------------------------------
 const recSystem = new MusicRecommendationSystem(db);
 
 // -------------------------------------------------------
 // BASIC ENDPOINTS
 // -------------------------------------------------------
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/health', (req, res) => res.json({ status: "ok" }));
 
 app.get('/api/current-user', requireAuth, (req, res) => {
   res.json({
     userID: req.user.userId,
-    username: req.user.name || req.user.email.split('@')[0],
-    email: req.user.email
+    username: req.user.name || req.user.email.split("@")[0],
+    email: req.user.email,
   });
 });
 
-// Serve HTML
+// HTML routes
 app.get('/dashboard.html', (req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'))
 );
-
 app.get('/music-recommendations.html', (req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'music-recommendations.html'))
 );
 
 // -------------------------------------------------------
-// UPLOAD LISTENING HISTORY (CSV RAW TEXT EXPECTED)
+// UPLOAD MUSIC CSV — User provides master songs dataset
+// -------------------------------------------------------
+app.post('/api/upload-music-data', requireAuth, upload.single("musicFile"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: "No CSV uploaded." });
+    }
+
+    const userId = req.user.userId;
+    const csvText = req.file.buffer.toString("utf-8");
+
+    const lines = csvText.trim().split("\n");
+    const header = lines[0].split(",");
+
+    const songs = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(",");
+      if (cols.length !== header.length) continue;
+
+      const row = {};
+      header.forEach((key, idx) => {
+        row[key.trim()] = cols[idx].trim();
+      });
+
+      songs.push(row);
+    }
+
+    // Save songs INTO recSystem.songs
+    recSystem.songs = songs;
+
+    // Train embeddings from uploaded user CSV
+    recSystem.trainSongEmbeddings();
+
+    // Save raw listening records also into Firestore (optional)
+    await recSystem.saveListeningHistory(userId, songs);
+
+    console.log(`Uploaded & processed ${songs.length} songs for user ${userId}`);
+
+    res.json({
+      success: true,
+      message: "Music CSV uploaded successfully.",
+      songsLoaded: songs.length
+    });
+
+  } catch (err) {
+    console.error("upload-music-data error:", err);
+    res.status(500).json({ success: false, error: "Upload processing failed." });
+  }
+});
+
+// -------------------------------------------------------
+// UPLOAD LISTENING HISTORY CSV (2-week log)
 // -------------------------------------------------------
 app.post('/api/upload-listening-history', requireAuth, async (req, res) => {
   try {
@@ -108,13 +166,14 @@ app.post('/api/upload-listening-history', requireAuth, async (req, res) => {
       return res.status(400).json({ error: "Missing csvText in request body." });
     }
 
-    const historyRef = db
-      .collection("user_interactions")
-      .doc(userId)
-      .collection("history");
+    const lines = csvText.trim().split("\n");
+    if (lines.length < 2) {
+      return res.status(400).json({ error: "CSV appears empty" });
+    }
 
-    const lines = csvText.split("\n");
     const header = lines[0].split(",");
+
+    const records = [];
 
     for (let i = 1; i < lines.length; i++) {
       const cols = lines[i].split(",");
@@ -122,60 +181,97 @@ app.post('/api/upload-listening-history', requireAuth, async (req, res) => {
 
       const row = {};
       header.forEach((key, idx) => (row[key.trim()] = cols[idx].trim()));
-
-      await historyRef.add({
-        contentId: row.track_id || row.song_id || "unknown",
-        title: row.title || null,
-        artist: row.artist || null,
-        genre: row.genre || null,
-        timestamp: new Date(),
-      });
+      records.push(row);
     }
 
-    res.json({ message: "Listening history uploaded to Firestore." });
+    await recSystem.saveListeningHistory(userId, records);
+
+    res.json({
+      success: true,
+      message: "Listening history uploaded to Firestore.",
+      count: records.length
+    });
+
   } catch (error) {
     console.error("Upload history error:", error);
     res.status(500).json({ error: "Failed to upload listening history" });
   }
 });
 
+
 // -------------------------------------------------------
-// RECOMMENDATION ENDPOINT
+// RECOMMENDATIONS (No YouTube fallback)
 // -------------------------------------------------------
 app.get('/api/recommendations', requireAuth, async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    // Load item tower
-    await recSystem.initializeTwoTowerModel();
+    if (!recSystem.songs.length) {
+      return res.json({ recommendations: [] });
+    }
 
-    // Compute recommendations
-    const recs = await recSystem.recommendForUser(userId, 10);
+    const recs = await recSystem.recommendSongs(userId, 10);
 
     res.json({ recommendations: recs });
-  } catch (error) {
-    console.error("Recommendation error:", error);
+  } catch (err) {
+    console.error("Recommendation Error:", err);
     res.status(500).json({ error: "Failed to compute recommendations" });
   }
 });
 
 // -------------------------------------------------------
-// YOUTUBE SEARCH API
+// ENHANCED Recommendations w/ YouTube
 // -------------------------------------------------------
-app.get("/api/search-video", requireAuth, async (req, res) => {
+app.get('/api/recommendations-with-youtube/:userId', requireAuth, async (req, res) => {
   try {
-    const query = req.query.q;
+    const { userId } = req.params;
 
-    if (!query) {
-      return res.status(400).json({ error: "Missing ?q= search query" });
+    if (!recSystem.songs.length) {
+      return res.json({ recommendations: [], hasMore: false });
     }
 
+    const recs = await recSystem.recommendSongs(userId, 10);
+
+    const enriched = await Promise.all(
+      recs.map(async (track) => {
+        const q = `${track.title} ${track.artist}`;
+        const yt = await media_search.search(q);
+
+        return {
+          ...track,
+          youtube: yt?.[0]
+            ? { id: yt[0].id.videoId, url: yt[0].link }
+            : null
+        };
+      })
+    );
+
+    res.json({
+      recommendations: enriched,
+      hasMore: false
+    });
+
+  } catch (err) {
+    console.error("YouTube recommendation error:", err);
+    res.status(500).json({ error: "Failed to fetch YouTube recommendations" });
+  }
+});
+
+// -------------------------------------------------------
+// YouTube search endpoint
+// -------------------------------------------------------
+app.get("/api/search-youtube/:query", requireAuth, async (req, res) => {
+  try {
+    const query = decodeURIComponent(req.params.query);
     const results = await media_search.search(query);
 
-    res.json({ results });
-  } catch (error) {
-    console.error("YouTube search error:", error);
-    res.status(500).json({ error: "Failed to search YouTube" });
+    res.json({
+      videoId: results?.[0]?.id?.videoId || null
+    });
+
+  } catch (err) {
+    console.error("❌ search-youtube error:", err);
+    res.status(500).json({ error: "Failed YouTube search" });
   }
 });
 
