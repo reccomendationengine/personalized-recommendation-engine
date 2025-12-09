@@ -46,13 +46,12 @@
     }
 
     .upload-section {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
+      background: #ffffff;
       border-radius: 20px;
       padding: 3rem;
       text-align: center;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(0, 0, 0, 0.05);
       margin-bottom: 2rem;
     }
 
@@ -240,12 +239,11 @@
 
     .recommendations-section {
       display: none;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
+      background: #ffffff;
       border-radius: 20px;
       padding: 3rem;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(0, 0, 0, 0.05);
     }
 
     .recommendations-section h2 {
@@ -264,12 +262,12 @@
     }
 
     .recommendation-card {
-      background: white;
-      border-radius: 15px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      transition: all 0.5s ease;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 1.25rem;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      border: 1px solid #eaeaea;
+      transition: all 0.3s ease;
       position: relative;
       height: fit-content;
       align-self: start;
@@ -286,12 +284,7 @@
       margin: 0 auto;
     }
 
-    .recommendation-card:not(.playing) {
-      transform: translateY(50px);
-      opacity: 0.6;
-    }
-
-    .recommendation-card:hover:not(.playing) {
+    .recommendation-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     }
@@ -485,21 +478,21 @@
     }
 
     .play-btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #a8b4f0 0%, #b794c6 100%);
       color: white;
       border: none;
-      padding: 0.8rem 1.5rem;
-      border-radius: 25px;
+      padding: 0.6rem 1rem;
+      border-radius: 20px;
       cursor: pointer;
       font-weight: 500;
+      font-size: 0.9rem;
       transition: all 0.3s ease;
-      width: 100%;
-      margin-top: 1rem;
     }
 
     .play-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
 
     @media (max-width: 768px) {
@@ -526,31 +519,32 @@
   <div class="container">
     <div class="header">
       <h1>🎵 Music Recommendations</h1>
-      <p>Upload your music data to get personalized recommendations</p>
+      <p>Get personalized recommendations based on your listening history</p>
     </div>
 
-
-    <div class="upload-section" id="uploadSection">
-      <div class="upload-icon">📁</div>
-      <h2>Upload Your Music Data</h2>
-      <p>We don't have your music data yet. Please upload a CSV file with your music preferences so we can recommend
-        personalized songs for you.</p>
-
-      <div class="file-input-container">
-        <input type="file" id="musicFile" class="file-input" accept=".csv" required>
-        <label for="musicFile" class="file-input-label">
-          <span class="file-input-icon">📁</span>
-          <span>Choose CSV File</span>
-        </label>
+    <!-- Choice Section: Continue with existing or upload new -->
+    <div class="upload-section" id="choiceSection"
+      style="background: #ffffff; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); display: none;">
+      <div class="upload-icon">🎶</div>
+      <h2>Welcome Back!</h2>
+      <p>We found your previously uploaded listening history. Would you like to continue with your existing data or upload a new file?</p>
+      
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+        <button id="continueExistingBtn" class="upload-btn" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+          ✅ Continue with Existing Data
+        </button>
+        <button id="uploadNewBtn" class="upload-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          📤 Upload New CSV File
+        </button>
       </div>
-
-      <button id="uploadBtn" class="upload-btn" disabled>Upload Music Data</button>
-      <div id="uploadStatus" class="upload-status" style="display: none;"></div>
+      <p style="margin-top: 1.5rem; font-size: 0.9rem; color: #888;">
+        Note: Uploading a new file will replace your existing listening history.
+      </p>
     </div>
 
     <!-- Listening History Upload Section -->
     <div class="upload-section" id="listeningHistorySection"
-      style="margin-top: 2rem; background: rgba(255, 255, 255, 0.95); padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
+      style="background: #ffffff; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); display: none;">
       <div class="upload-icon">📊</div>
       <h2>Upload Your Listening History</h2>
       <p>Upload your 2-week listening history CSV file to get personalized recommendations based on your listening
@@ -597,7 +591,6 @@
   
       Backend endpoints actually available in your index.js:
         ✅ GET  /api/current-user
-        ✅ POST /api/upload-music-data        (field name: "musicFile", multipart)
         ✅ POST /api/upload-listening-history (expects JSON: { csvText })
         ✅ GET  /api/recommendations
         ✅ GET  /api/recommendations-with-youtube/:userId
@@ -661,13 +654,14 @@
     }
 
     // -------------------- DOM refs & state --------------------
-    let fileInput, uploadBtn, uploadStatus, uploadSection;
+    let choiceSection, continueExistingBtn, uploadNewBtn;
     let historyFileInput, historyUploadBtn, historyUploadStatus, listeningHistorySection;
     let recommendationsSection, recommendationsGrid, loadingScreen, moreBtn;
 
     let currentUserId = null;
     let currentOffset = 0;
     let currentlyPlayingIndex = null;
+    let hasExistingData = false;
 
     // -------------------- Tiny helpers --------------------
     function escapeHtml(s) {
@@ -681,11 +675,17 @@
       })[ch]);
     }
 
-    function showStatus(msg, type = 'info') {
-      if (!uploadStatus) return;
-      uploadStatus.textContent = msg;
-      uploadStatus.className = 'upload-status ' + type;
-      uploadStatus.style.display = 'block';
+    // Check if user has existing listening history
+    async function checkExistingHistory() {
+      try {
+        const res = await authFetch('/api/recommendations', { method: 'GET' });
+        if (!res.ok) return false;
+        const data = await res.json();
+        return data.recommendations && data.recommendations.length > 0;
+      } catch (err) {
+        console.error('checkExistingHistory error:', err);
+        return false;
+      }
     }
 
     function showHistoryStatus(msg, type = 'info') {
@@ -693,52 +693,6 @@
       historyUploadStatus.textContent = msg;
       historyUploadStatus.className = 'upload-status ' + type;
       historyUploadStatus.style.display = 'block';
-    }
-
-    // -------------------- Upload: Music CSV (content) --------------------
-    async function uploadMusicData() {
-      if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-        showStatus('Please choose a CSV file first', 'error');
-        return;
-      }
-
-      const file = fileInput.files[0];
-      uploadBtn.disabled = true;
-      showStatus('Uploading and processing your music data...', 'loading');
-
-      const formData = new FormData();
-      formData.append('musicFile', file); // matches multer single('musicFile')
-
-      try {
-        const res = await authFetch('/api/upload-music-data', {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!res.ok) {
-          const text = await res.text().catch(() => '');
-          showStatus(`Upload failed: ${res.status} ${text}`, 'error');
-          uploadBtn.disabled = false;
-          return;
-        }
-
-        const json = await res.json().catch(() => ({}));
-        showStatus(json.message || 'Music data uploaded successfully.', 'success');
-
-        // Show loading overlay, then go to recommendations
-        if (loadingScreen) loadingScreen.style.display = 'flex';
-        setTimeout(() => {
-          if (loadingScreen) loadingScreen.style.display = 'none';
-          if (uploadSection) uploadSection.style.display = 'none';
-          if (listeningHistorySection) listeningHistorySection.style.display = 'none';
-          if (recommendationsSection) recommendationsSection.style.display = 'block';
-          loadRecommendationsWithYouTube(0);
-        }, 2000);
-      } catch (err) {
-        console.error('uploadMusicData error:', err);
-        showStatus('Upload failed: ' + (err.message || err), 'error');
-        uploadBtn.disabled = false;
-      }
     }
 
     // -------------------- Upload: Listening History CSV --------------------
@@ -777,7 +731,6 @@
 
         setTimeout(() => {
           loadingScreen.style.display = "none";
-          uploadSection.style.display = "none";
           listeningHistorySection.style.display = "none";
           recommendationsSection.style.display = "block";
 
@@ -899,48 +852,62 @@
           '';
         const hasYouTube = !!youtubeId;
 
-        const explanationHtml = track.explanation
-          ? `<div style="margin-top:0.5rem;font-size:0.9rem;color:#555;">${escapeHtml(track.explanation)}</div>`
-          : '';
+        const thumbnailUrl = track.youtube?.thumbnail || 
+          (youtubeId ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg` : null);
 
         card.innerHTML = `
-        <div style="font-weight:700;font-size:1.05rem;margin-bottom:4px;">
-          ${escapeHtml(track.title || 'Untitled')}
-        </div>
-        <div style="color:#666;margin-bottom:4px;">
-          by ${escapeHtml(track.artist || 'Unknown')}
-        </div>
-        ${track.album ? `<div style="color:#777;font-size:0.9rem;margin-bottom:4px;">Album: ${escapeHtml(track.album)}</div>` : ''}
-        ${track.genre ? `<div style="color:#777;font-size:0.9rem;margin-bottom:4px;">Genre: ${escapeHtml(track.genre)}</div>` : ''}
-        <div style="margin:6px 0;font-weight:600;">Match: ${similarityPercent}%</div>
-        ${explanationHtml}
-        ${hasYouTube
-            ? `
-          <div id="youtube-player-${index}" style="display:none;position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;margin-top:0.75rem;background:#000;">
-            <iframe
-              id="youtube-iframe-${index}"
-              style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-              src="">
-            </iframe>
+        <div style="display:flex;gap:1rem;align-items:flex-start;">
+          <!-- Left: Song Info -->
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:1.1rem;margin-bottom:6px;color:#1a1a2e;">
+              ${escapeHtml(track.title || 'Untitled')}
+            </div>
+            <div style="color:#555;margin-bottom:6px;font-size:0.95rem;">
+              by ${escapeHtml(track.artist || 'Unknown')}
+            </div>
+            ${track.genre ? `<div style="color:#888;font-size:0.85rem;margin-bottom:4px;">🎵 ${escapeHtml(track.genre)}</div>` : ''}
+            <div style="margin-top:8px;font-weight:700;font-size:1rem;color:#667eea;">
+              ${similarityPercent}% Match
+            </div>
           </div>
-          <button id="play-btn-${index}" class="play-btn" style="margin-top:0.75rem;width:100%;">
-            ▶️ Play in Card
+          <!-- Right: Thumbnail -->
+          ${thumbnailUrl ? `
+          <div style="flex-shrink:0;width:120px;height:90px;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+            <img src="${thumbnailUrl}" alt="${escapeHtml(track.title)}" 
+                 style="width:100%;height:100%;object-fit:cover;"
+                 onerror="this.parentElement.style.display='none'">
+          </div>
+          ` : ''}
+        </div>
+        
+        <!-- YouTube Player (hidden by default) -->
+        ${hasYouTube ? `
+        <div id="youtube-player-${index}" style="display:none;position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;margin-top:1rem;background:#000;">
+          <iframe id="youtube-iframe-${index}"
+            style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen src="">
+          </iframe>
+        </div>
+        ` : ''}
+        
+        <!-- Buttons -->
+        <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+          ${hasYouTube ? `
+          <button id="play-btn-${index}" class="play-btn" style="flex:1;">
+            ▶️ Play
           </button>
-          <a href="${track.youtube && track.youtube.url ? track.youtube.url : `https://www.youtube.com/results?search_query=${encodeURIComponent((track.title || '') + ' ' + (track.artist || ''))}`}"
-             target="_blank"
-             class="play-btn"
-             style="display:block;text-align:center;margin-top:0.5rem;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);">
-            🔗 Open on YouTube
+          <a href="${track.youtube?.url || `https://www.youtube.com/results?search_query=${encodeURIComponent((track.title || '') + ' ' + (track.artist || ''))}`}"
+             target="_blank" class="play-btn"
+             style="flex:1;text-align:center;text-decoration:none;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);">
+            🔗 YouTube
           </a>
-        `
-            : `
-          <button id="search-btn-${index}" class="play-btn" style="margin-top:0.75rem;width:100%;">
+          ` : `
+          <button id="search-btn-${index}" class="play-btn" style="flex:1;">
             🔍 Search on YouTube
           </button>
-        `
-          }
+          `}
+        </div>
       `;
 
         recommendationsGrid.appendChild(card);
@@ -1028,10 +995,9 @@
     // -------------------- DOMContentLoaded --------------------
     document.addEventListener('DOMContentLoaded', async () => {
       // Grab all elements
-      fileInput = document.getElementById('musicFile');
-      uploadBtn = document.getElementById('uploadBtn');
-      uploadStatus = document.getElementById('uploadStatus');
-      uploadSection = document.getElementById('uploadSection');
+      choiceSection = document.getElementById('choiceSection');
+      continueExistingBtn = document.getElementById('continueExistingBtn');
+      uploadNewBtn = document.getElementById('uploadNewBtn');
 
       historyFileInput = document.getElementById('historyFile');
       historyUploadBtn = document.getElementById('uploadHistoryBtn');
@@ -1042,20 +1008,6 @@
       recommendationsGrid = document.getElementById('recommendationsGrid');
       loadingScreen = document.getElementById('loadingScreen');
       moreBtn = document.getElementById('moreBtn');
-
-      // File input behavior for main music CSV
-      if (fileInput && uploadBtn) {
-        fileInput.addEventListener('change', () => {
-          if (fileInput.files && fileInput.files.length) {
-            uploadBtn.disabled = false;
-            uploadBtn.textContent = `Upload ${fileInput.files[0].name}`;
-          } else {
-            uploadBtn.disabled = true;
-            uploadBtn.textContent = 'Upload Music Data';
-          }
-        });
-        uploadBtn.addEventListener('click', uploadMusicData);
-      }
 
       // File input behavior for listening history CSV
       if (historyFileInput && historyUploadBtn) {
@@ -1071,22 +1023,59 @@
         historyUploadBtn.addEventListener('click', uploadListeningHistory);
       }
 
+      // Choice section button handlers
+      if (continueExistingBtn) {
+        continueExistingBtn.addEventListener('click', async () => {
+          // User wants to continue with existing data
+          choiceSection.style.display = 'none';
+          loadingScreen.style.display = 'flex';
+          
+          setTimeout(async () => {
+            loadingScreen.style.display = 'none';
+            recommendationsSection.style.display = 'block';
+            await loadRecommendationsWithYouTube(0);
+          }, 1500);
+        });
+      }
+
+      if (uploadNewBtn) {
+        uploadNewBtn.addEventListener('click', () => {
+          // User wants to upload new file
+          choiceSection.style.display = 'none';
+          listeningHistorySection.style.display = 'block';
+        });
+      }
+
       // "Load more" button (disabled)
       if (moreBtn) {
         moreBtn.style.display = 'none';
         moreBtn.addEventListener('click', loadMoreRecommendations);
       }
 
-      // Initial layout: show upload sections, hide recommendations
-      if (uploadSection) uploadSection.style.display = 'block';
-      if (listeningHistorySection) listeningHistorySection.style.display = 'block';
-      if (recommendationsSection) recommendationsSection.style.display = 'none';
-
-      // Get user ID (non-blocking; server endpoints still protected)
+      // Get user ID first
       currentUserId = await getCurrentUserId();
       if (!currentUserId) {
         console.warn('User not resolved yet. When they upload, server will enforce auth.');
+        // Show upload section for new users
+        if (listeningHistorySection) listeningHistorySection.style.display = 'block';
+        return;
       }
+
+      // Check if user has existing listening history
+      loadingScreen.style.display = 'flex';
+      hasExistingData = await checkExistingHistory();
+      loadingScreen.style.display = 'none';
+
+      if (hasExistingData) {
+        // Show choice section
+        if (choiceSection) choiceSection.style.display = 'block';
+        if (listeningHistorySection) listeningHistorySection.style.display = 'none';
+      } else {
+        // Show upload section for first-time users
+        if (choiceSection) choiceSection.style.display = 'none';
+        if (listeningHistorySection) listeningHistorySection.style.display = 'block';
+      }
+      if (recommendationsSection) recommendationsSection.style.display = 'none';
     });
   </script>
 

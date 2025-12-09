@@ -108,57 +108,93 @@
     </div>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const userEmail = localStorage.getItem('userEmail');
-      const userName = localStorage.getItem('userName');
-      const userDOB = localStorage.getItem('userDOB');
-      const userPhone = localStorage.getItem('userPhone');
-      const userProfilePic = localStorage.getItem('userProfilePic');
-      const profilePicElement = document.getElementById('profilePic');
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, deleteUser, signOut } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
+    import { doc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-      // Redirect to signup if not logged in
-      if (!userEmail) {
-        window.location.href = 'signup.html';
+    const profilePicElement = document.getElementById('profilePic');
+    const changePicBtn = document.getElementById('changePicBtn');
+    const changePicInput = document.getElementById('changePicInput');
+    const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+
+    let currentUser = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
         return;
       }
 
-      // Display saved user info
-      document.getElementById('profileName').textContent = userName || 'Not provided';
-      document.getElementById('profileEmail').textContent = userEmail || 'Not provided';
-      document.getElementById('profileDOB').textContent = userDOB || 'Not provided';
-      document.getElementById('profilePhone').textContent = userPhone || 'Not provided';
-      profilePicElement.src = userProfilePic || 'https://via.placeholder.com/120?text=Profile';
+      currentUser = user;
 
-      // Change picture functionality
-      const changePicBtn = document.getElementById('changePicBtn');
-      const changePicInput = document.getElementById('changePicInput');
+      // Get user data from Firestore
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        const userData = userDoc.exists() ? userDoc.data() : {};
 
-      changePicBtn.addEventListener('click', () => {
-        changePicInput.click();
-      });
+        document.getElementById('profileName').textContent = userData.username || user.displayName || user.email.split('@')[0];
+        document.getElementById('profileEmail').textContent = user.email;
+        document.getElementById('profileDOB').textContent = userData.dateOfBirth || 'Not provided';
+        document.getElementById('profilePhone').textContent = userData.phoneNumber || 'Not provided';
+        profilePicElement.src = userData.profilePic || 'https://via.placeholder.com/120?text=Profile';
+      } catch (err) {
+        console.error("Error loading profile:", err);
+        document.getElementById('profileName').textContent = user.displayName || user.email.split('@')[0];
+        document.getElementById('profileEmail').textContent = user.email;
+        document.getElementById('profileDOB').textContent = 'Not provided';
+        document.getElementById('profilePhone').textContent = 'Not provided';
+        profilePicElement.src = 'https://via.placeholder.com/120?text=Profile';
+      }
+    });
 
-      changePicInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+    // Change picture functionality
+    changePicBtn.addEventListener('click', () => {
+      changePicInput.click();
+    });
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const newPic = e.target.result;
-          profilePicElement.src = newPic;
-          localStorage.setItem('userProfilePic', newPic);
+    changePicInput.addEventListener('change', async (event) => {
+      const file = event.target.files[0];
+      if (!file || !currentUser) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const newPic = e.target.result;
+        profilePicElement.src = newPic;
+
+        // Save to Firestore
+        try {
+          await updateDoc(doc(db, "users", currentUser.uid), { profilePic: newPic });
           alert('Profile picture updated successfully!');
-        };
-        reader.readAsDataURL(file);
-      });
+        } catch (err) {
+          console.error("Error updating profile pic:", err);
+          alert('Failed to save profile picture.');
+        }
+      };
+      reader.readAsDataURL(file);
     });
 
     // Delete account
-    document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+    deleteAccountBtn.addEventListener('click', async function() {
+      if (!currentUser) return;
+
       if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
-        localStorage.clear();
-        alert('Your account has been deleted.');
-        window.location.href = 'signup.html';
+        try {
+          // Delete Firestore user document
+          await deleteDoc(doc(db, "users", currentUser.uid));
+          // Delete Firebase Auth user
+          await deleteUser(currentUser);
+          alert('Your account has been deleted.');
+          window.location.href = 'signup.html';
+        } catch (err) {
+          console.error("Error deleting account:", err);
+          // If requires recent login
+          if (err.code === 'auth/requires-recent-login') {
+            alert('Please log out and log back in, then try deleting again.');
+          } else {
+            alert('Failed to delete account: ' + err.message);
+          }
+        }
       }
     });
   </script>
