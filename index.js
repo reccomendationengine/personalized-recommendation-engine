@@ -138,14 +138,19 @@ app.post('/api/upload-music-data', requireAuth, upload.single("musicFile"), asyn
     recSystem.trainSongEmbeddings();
 
     // Save raw listening records also into Firestore (optional)
-    await recSystem.saveListeningHistory(userId, songs);
-
-    console.log(`Uploaded & processed ${songs.length} songs for user ${userId}`);
+    try {
+      await recSystem.saveListeningHistory(userId, songs);
+      console.log(`Uploaded & processed ${songs.length} songs for user ${userId}`);
+    } catch (dbError) {
+      console.warn("Warning: Could not save to Firestore:", dbError.message);
+      // Continue anyway - songs are loaded in memory for recommendations
+    }
 
     res.json({
       success: true,
       message: "Music CSV uploaded successfully.",
-      songsLoaded: songs.length
+      songsLoaded: songs.length,
+      warning: !db ? "Firebase not configured - data saved in memory only" : undefined
     });
 
   } catch (err) {
@@ -176,7 +181,8 @@ app.post('/api/upload-listening-history', requireAuth, async (req, res) => {
     const records = [];
 
     for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(",");
+      // Handle CSV with quoted fields (e.g., "Artist, feat. Other")
+      const cols = parseCSVLine(lines[i], header.length);
       if (cols.length !== header.length) continue;
 
       const row = {};
@@ -184,13 +190,27 @@ app.post('/api/upload-listening-history', requireAuth, async (req, res) => {
       records.push(row);
     }
 
-    await recSystem.saveListeningHistory(userId, records);
+    // Load deduplicated songs into catalog and train embeddings
+    recSystem.songs = deduplicateSongs(records);
+    recSystem.trainSongEmbeddings();
 
-    res.json({
-      success: true,
-      message: "Listening history uploaded to Firestore.",
-      count: records.length
-    });
+    try {
+      await recSystem.saveListeningHistory(userId, records);
+      res.json({
+        success: true,
+        message: "Listening history uploaded successfully.",
+        count: records.length
+      });
+    } catch (dbError) {
+      console.error("Failed to save listening history to Firestore:", dbError.message);
+      // Still return success since songs are loaded in memory
+      res.json({ 
+        success: true,
+        message: "Listening history processed (saved in memory).",
+        count: records.length,
+        warning: "Database save failed: " + dbError.message
+      });
+    }
 
   } catch (error) {
     console.error("Upload history error:", error);
@@ -198,20 +218,66 @@ app.post('/api/upload-listening-history', requireAuth, async (req, res) => {
   }
 });
 
+// Helper: Deduplicate songs by title + artist
+function deduplicateSongs(records) {
+  const seen = new Map();
+  
+  records.forEach(r => {
+    const title = (r.title || r.track_name || r.Song_Title || "").trim().toLowerCase();
+    const artist = (r.artist || r.artist_name || r.Artist_Name || "").trim().toLowerCase();
+    const key = `${title}::${artist}`;
+    
+    if (!seen.has(key)) {
+      seen.set(key, r);
+    }
+  });
+  
+  return Array.from(seen.values());
+}
+
+// Helper: Parse CSV line handling quoted fields
+function parseCSVLine(line, expectedCols) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.replace(/^"|"$/g, ''));
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.replace(/^"|"$/g, ''));
+  
+  return result;
+}
+
 
 // -------------------------------------------------------
-// RECOMMENDATIONS (No YouTube fallback)
+// RECOMMENDATIONS
 // -------------------------------------------------------
 app.get('/api/recommendations', requireAuth, async (req, res) => {
   try {
     const userId = req.user.userId;
 
+    // Load from Firestore if catalog empty
     if (!recSystem.songs.length) {
-      return res.json({ recommendations: [] });
+      const history = await recSystem.getListeningHistory(userId);
+      if (history?.length) {
+        recSystem.songs = deduplicateSongs(history);
+        recSystem.trainSongEmbeddings();
+      } else {
+        return res.json({ recommendations: [] });
+      }
     }
 
     const recs = await recSystem.recommendSongs(userId, 10);
-
     res.json({ recommendations: recs });
   } catch (err) {
     console.error("Recommendation Error:", err);
@@ -220,14 +286,21 @@ app.get('/api/recommendations', requireAuth, async (req, res) => {
 });
 
 // -------------------------------------------------------
-// ENHANCED Recommendations w/ YouTube
+// RECOMMENDATIONS WITH YOUTUBE
 // -------------------------------------------------------
 app.get('/api/recommendations-with-youtube/:userId', requireAuth, async (req, res) => {
   try {
     const { userId } = req.params;
 
+    // Load from Firestore if catalog empty
     if (!recSystem.songs.length) {
-      return res.json({ recommendations: [], hasMore: false });
+      const history = await recSystem.getListeningHistory(userId);
+      if (history?.length) {
+        recSystem.songs = deduplicateSongs(history);
+        recSystem.trainSongEmbeddings();
+      } else {
+        return res.json({ recommendations: [], hasMore: false });
+      }
     }
 
     const recs = await recSystem.recommendSongs(userId, 10);
@@ -236,12 +309,17 @@ app.get('/api/recommendations-with-youtube/:userId', requireAuth, async (req, re
       recs.map(async (track) => {
         const q = `${track.title} ${track.artist}`;
         const yt = await media_search.search(q);
+        const video = yt?.[0];
 
         return {
           ...track,
-          youtube: yt?.[0]
-            ? { id: yt[0].id.videoId, url: yt[0].link }
-            : null
+          youtube: video ? {
+            id: video.id?.videoId || video.id,
+            url: video.link || `https://www.youtube.com/watch?v=${video.id?.videoId || video.id}`,
+            thumbnail: video.snippet?.thumbnails?.high?.url || 
+                       video.snippet?.thumbnails?.medium?.url ||
+                       `https://img.youtube.com/vi/${video.id?.videoId || video.id}/hqdefault.jpg`
+          } : null
         };
       })
     );
