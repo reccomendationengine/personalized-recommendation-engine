@@ -85,7 +85,8 @@ document.getElementById('signupForm').addEventListener('submit', async function 
 
         // --- Firestore User Document ---
         await setDoc(doc(db, "users", user.uid), {
-            username: username || email.split('@')[0],
+            username: email,
+            fullName: username || "",
             email,
             createdAt: new Date(),
             preferences: {},
