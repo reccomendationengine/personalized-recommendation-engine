@@ -17,12 +17,3 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-
-// Analytics is optional - only load if needed
-export let analytics = null;
-try {
-  const { getAnalytics } = await import("https://www.gstatic.com/firebasejs/10.7.2/firebase-analytics.js");
-  analytics = getAnalytics(app);
-} catch (e) {
-  console.log("Analytics not available");
-}
