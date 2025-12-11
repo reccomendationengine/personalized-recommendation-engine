@@ -48,8 +48,8 @@ document.addEventListener("DOMContentLoaded", verifyBackendSession);
 function selectOption(type) {
     if (type === "music") {
         window.location.href = "music-recommendations.html";
-    } else if (type === "movies") {
-        alert("Movie recommendations coming soon!");
+    } else if (type === "movie") {
+        window.location.href = "movie-recommendations.html";
     }
 }
 

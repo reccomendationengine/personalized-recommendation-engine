@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Recommendations - Personalized Recommendations Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, darkcyan 0%, darkorchid 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Existing Data Section */
+    .existing-section {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+      display: none;
+    }
+
+    .existing-section.visible {
+      display: block;
+    }
+
+    .existing-content {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .existing-icon {
+      font-size: 3rem;
+    }
+
+    .existing-info {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .existing-info h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .existing-info p {
+      color: #666;
+      margin-bottom: 1rem;
+    }
+
+    .existing-stats {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-badge {
+      background: #f8f9fa;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .stat-badge span {
+      color: #667eea;
+      font-weight: 700;
+    }
+
+    .existing-action {
+      flex-shrink: 0;
+    }
+
+    .use-existing-btn {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+    }
+
+    .use-existing-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(17, 153, 142, 0.6);
+    }
+
+    /* Divider */
+    .divider {
+      text-align: center;
+      margin: 2rem 0;
+      position: relative;
+      display: none;
+    }
+
+    .divider.visible {
+      display: block;
+    }
+
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .divider span {
+      background: transparent;
+      padding: 0 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
+      position: relative;
+      background: linear-gradient(135deg, darkcyan 0%, darkorchid 100%);
+    }
+
+    /* Upload Section */
+    .upload-section {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 3rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+    }
+
+    .upload-section-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .upload-section-header .icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .upload-section-header h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .upload-section-header p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .upload-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .upload-card {
+      background: #f8f9fa;
+      border-radius: 16px;
+      padding: 2rem;
+      border: 2px dashed #e0e0e0;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .upload-card:hover {
+      border-color: #667eea;
+      background: #f0f2ff;
+    }
+
+    .upload-card.has-file {
+      border-color: #28a745;
+      border-style: solid;
+      background: #e8f5e9;
+    }
+
+    .upload-card-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .upload-card h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .upload-card h3 .required {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .upload-card p {
+      color: #666;
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .drop-zone {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid #e0e0e0;
+    }
+
+    .drop-zone:hover {
+      background: #f8f9fa;
+      border-color: #667eea;
+    }
+
+    .drop-zone.dragover {
+      background: #e8f0ff;
+      border-color: #667eea;
+      border-style: dashed;
+    }
+
+    .drop-zone-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .drop-zone p {
+      color: #666;
+      margin-bottom: 0.25rem;
+    }
+
+    .drop-zone small {
+      color: #999;
+      font-size: 0.85rem;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: #d4edda;
+      border-radius: 10px;
+      margin-top: 1rem;
+      border: 1px solid #c3e6cb;
+    }
+
+    .file-info-icon {
+      font-size: 1.5rem;
+    }
+
+    .file-info-text {
+      flex: 1;
+      text-align: left;
+    }
+
+    .file-info-name {
+      font-weight: 600;
+      color: #155724;
+    }
+
+    .file-info-size {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .remove-file {
+      background: none;
+      border: none;
+      color: #dc3545;
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 0.5rem;
+      border-radius: 50%;
+      transition: background 0.3s;
+    }
+
+    .remove-file:hover {
+      background: rgba(220, 53, 69, 0.1);
+    }
+
+    .expected-format {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: white;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      border: 1px solid #e0e0e0;
+    }
+
+    .expected-format code {
+      font-family: 'Monaco', 'Consolas', monospace;
+      color: #667eea;
+      background: #f0f2ff;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    /* Submit Button */
+    .submit-section {
+      text-align: center;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 1.25rem 3rem;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+
+    .submit-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .submit-btn .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+
+    .submit-btn.loading .spinner {
+      display: block;
+    }
+
+    .submit-btn.loading .btn-text {
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Results Section */
+    .results-section {
+      display: none;
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 3rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .results-section.visible {
+      display: block;
+    }
+
+    .results-section h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .results-section > p {
+      text-align: center;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      border: 1px solid #e0e0e0;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    /* User Select */
+    .user-select-section {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid #e0e0e0;
+    }
+
+    .user-select-wrapper {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .user-select-label {
+      color: #333;
+      font-weight: 500;
+    }
+
+    .user-select {
+      background: white;
+      color: #333;
+      border: 1px solid #e0e0e0;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      min-width: 200px;
+    }
+
+    .user-select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .get-recs-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      padding: 0.75rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .get-recs-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
+    }
+
+    /* Movie Grid */
+    .movie-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .movie-card {
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      border: 1px solid #eaeaea;
+      transition: all 0.3s ease;
+    }
+
+    .movie-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .movie-thumbnail-container {
+      position: relative;
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      overflow: hidden;
+    }
+
+    .movie-thumbnail {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .movie-card:hover .movie-thumbnail {
+      transform: scale(1.05);
+    }
+
+    .movie-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+    }
+
+    .movie-rank {
+      position: absolute;
+      top: 0.75rem;
+      left: 0.75rem;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .movie-score {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .play-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      width: 60px;
+      height: 60px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .play-overlay svg {
+      width: 24px;
+      height: 24px;
+      fill: #667eea;
+      margin-left: 4px;
+    }
+
+    .movie-card:hover .play-overlay {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .movie-content {
+      padding: 1.25rem;
+    }
+
+    .movie-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 0.5rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .movie-genres {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .genre-tag {
+      background: #667eea;
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .movie-details {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 1rem;
+      border-top: 1px solid #eaeaea;
+      font-size: 0.85rem;
+    }
+
+    .detail-item {
+      text-align: center;
+    }
+
+    .detail-value {
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .detail-label {
+      color: #666;
+      font-size: 0.75rem;
+    }
+
+    .watch-trailer-btn {
+      display: block;
+      text-align: center;
+      margin-top: 1rem;
+      padding: 0.6rem 1rem;
+      background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .watch-trailer-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+    }
+
+    /* Status Messages */
+    .status-message {
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      font-weight: 500;
+      display: none;
+      text-align: center;
+    }
+
+    .status-message.visible {
+      display: block;
+    }
+
+    .status-message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status-message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-message.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    /* Loading Screen */
+    .loading-screen {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading-screen.visible {
+      display: flex;
+    }
+
+    .loading-content {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+
+    .loading-content h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+
+    .loading-content p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      .header h1 { font-size: 2rem; }
+      .upload-section, .results-section { padding: 2rem; }
+      .upload-grid { grid-template-columns: 1fr; }
+      .existing-content { flex-direction: column; text-align: center; }
+      .existing-stats { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+
+  <div class="container">
+    <div class="header">
+      <h1>🎬 Movie Recommendations</h1>
+      <p>Get personalized movie recommendations using Two-Tower neural matching</p>
+    </div>
+
+    <div id="statusMessage" class="status-message"></div>
+
+    <!-- Existing Data Section -->
+    <div class="existing-section" id="existingSection">
+      <div class="existing-content">
+        <div class="existing-icon">📂</div>
+        <div class="existing-info">
+          <h3>Continue with Existing Data</h3>
+          <p>Use your previously uploaded ratings and movies data to get recommendations instantly</p>
+          <div class="existing-stats">
+            <div class="stat-badge">📊 <span id="existingRatings">0</span> ratings</div>
+            <div class="stat-badge">🎬 <span id="existingMovies">0</span> movies</div>
+            <div class="stat-badge">👥 <span id="existingUsers">0</span> users</div>
+          </div>
+        </div>
+        <div class="existing-action">
+          <button class="use-existing-btn" onclick="useExistingData()">✅ Use Existing Data</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="divider" id="divider">
+      <span>OR upload new files</span>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="upload-section" id="uploadSection">
+      <div class="upload-section-header">
+        <span class="icon">📤</span>
+        <h2>Upload Movie Data</h2>
+        <p>Upload your ratings and movies CSV files to train the recommendation model</p>
+      </div>
+
+      <div class="upload-grid">
+        <!-- Ratings File -->
+        <div class="upload-card" id="ratingsCard">
+          <div class="upload-card-icon">📊</div>
+          <h3>Ratings File <span class="required">Required</span></h3>
+          <p>User ratings data (CSV)</p>
+          
+          <div class="drop-zone" id="ratingsDropZone">
+            <div class="drop-zone-icon">📁</div>
+            <p>Drag & drop your ratings CSV here</p>
+            <small>or click to browse files</small>
+            <input type="file" class="file-input" id="ratingsInput" accept=".csv">
+          </div>
+          
+          <div class="file-info" id="ratingsFileInfo" style="display: none;">
+            <span class="file-info-icon">✅</span>
+            <div class="file-info-text">
+              <div class="file-info-name" id="ratingsFileName"></div>
+              <div class="file-info-size" id="ratingsFileSize"></div>
+            </div>
+            <button class="remove-file" id="removeRatings">✕</button>
+          </div>
+          
+          <div class="expected-format">
+            Expected: <code>userId,movieId,rating,timestamp</code>
+          </div>
+        </div>
+
+        <!-- Movies File -->
+        <div class="upload-card" id="moviesCard">
+          <div class="upload-card-icon">🎬</div>
+          <h3>Movies File <span class="required">Required</span></h3>
+          <p>Movie metadata (CSV)</p>
+          
+          <div class="drop-zone" id="moviesDropZone">
+            <div class="drop-zone-icon">📁</div>
+            <p>Drag & drop your movies CSV here</p>
+            <small>or click to browse files</small>
+            <input type="file" class="file-input" id="moviesInput" accept=".csv">
+          </div>
+          
+          <div class="file-info" id="moviesFileInfo" style="display: none;">
+            <span class="file-info-icon">✅</span>
+            <div class="file-info-text">
+              <div class="file-info-name" id="moviesFileName"></div>
+              <div class="file-info-size" id="moviesFileSize"></div>
+            </div>
+            <button class="remove-file" id="removeMovies">✕</button>
+          </div>
+          
+          <div class="expected-format">
+            Expected: <code>movieId,title,genres</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="submit-section">
+        <button class="submit-btn" id="processBtn" disabled>
+          <span class="btn-text">🚀 Process & Train Model</span>
+          <span class="spinner"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-section" id="resultsSection">
+      <h2>🎯 Your Movie Recommendations</h2>
+      <p>Based on Two-Tower neural matching analysis</p>
+      
+      <div class="stats-grid" id="statsGrid"></div>
+
+      <div class="user-select-section">
+        <div class="user-select-wrapper">
+          <span class="user-select-label">Select a user to get recommendations:</span>
+          <select class="user-select" id="userSelect">
+            <option value="">Choose a user...</option>
+          </select>
+          <button class="get-recs-btn" id="getRecsBtn">Get Recommendations</button>
+        </div>
+      </div>
+
+      <div class="movie-grid" id="movieGrid"></div>
+    </div>
+  </div>
+
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <h3 id="loadingTitle">Processing Movie Data</h3>
+      <p id="loadingText">Please wait while we analyze your data and train the recommendation model...</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth } from './firebase-config.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
+
+    let currentUser = null;
+    let ratingsFile = null;
+    let moviesFile = null;
+    let authToken = null;
+    let existingData = null;
+
+    // Auth check
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+      currentUser = user;
+      authToken = await user.getIdToken();
+      checkExistingData();
+    });
+
+    // Check if existing data is available
+    async function checkExistingData() {
+      try {
+        const response = await fetch('/api/movie-stats', {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.stats && data.stats.totalRatings > 0) {
+            existingData = data.stats;
+            showExistingDataSection(data.stats);
+          }
+        }
+      } catch (error) {
+        console.log('No existing data available');
+      }
+    }
+
+    function showExistingDataSection(stats) {
+      document.getElementById('existingSection').classList.add('visible');
+      document.getElementById('divider').classList.add('visible');
+      
+      document.getElementById('existingRatings').textContent = stats.totalRatings.toLocaleString();
+      document.getElementById('existingMovies').textContent = stats.uniqueMovies.toLocaleString();
+      document.getElementById('existingUsers').textContent = stats.uniqueUsers.toLocaleString();
+    }
+
+    // Use existing data
+    window.useExistingData = async function() {
+      showLoading('Loading existing model...');
+      
+      try {
+        const response = await fetch('/api/movie-stats', {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        const data = await response.json();
+        
+        if (data.stats) {
+          displayStats(data.stats);
+          
+          const usersResponse = await fetch('/api/movie-users', {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+          });
+          
+          if (usersResponse.ok) {
+            const usersData = await usersResponse.json();
+            populateUserSelect(usersData.users || []);
+          }
+          
+          document.getElementById('uploadSection').style.display = 'none';
+          document.getElementById('existingSection').style.display = 'none';
+          document.getElementById('divider').style.display = 'none';
+          document.getElementById('resultsSection').classList.add('visible');
+          showStatus('✓ Loaded existing model! Select a user to get recommendations.', 'success');
+        }
+        
+        hideLoading();
+      } catch (error) {
+        hideLoading();
+        showStatus('Failed to load existing data: ' + error.message, 'error');
+      }
+    }
+
+    // DOM Elements
+    const ratingsDropZone = document.getElementById('ratingsDropZone');
+    const moviesDropZone = document.getElementById('moviesDropZone');
+    const ratingsInput = document.getElementById('ratingsInput');
+    const moviesInput = document.getElementById('moviesInput');
+    const ratingsCard = document.getElementById('ratingsCard');
+    const moviesCard = document.getElementById('moviesCard');
+    const processBtn = document.getElementById('processBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const userSelect = document.getElementById('userSelect');
+    const getRecsBtn = document.getElementById('getRecsBtn');
+    const movieGrid = document.getElementById('movieGrid');
+    const statsGrid = document.getElementById('statsGrid');
+
+    function setupDropZone(dropZone, input, type) {
+      dropZone.addEventListener('click', () => input.click());
+      
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+      
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+      });
+      
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file && file.name.endsWith('.csv')) {
+          handleFile(file, type);
+        } else {
+          showStatus('Please upload a CSV file', 'error');
+        }
+      });
+      
+      input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) handleFile(file, type);
+      });
+    }
+
+    function handleFile(file, type) {
+      if (type === 'ratings') {
+        ratingsFile = file;
+        updateFileInfo('ratings', file);
+        ratingsCard.classList.add('has-file');
+      } else {
+        moviesFile = file;
+        updateFileInfo('movies', file);
+        moviesCard.classList.add('has-file');
+      }
+      updateSubmitButton();
+    }
+
+    function updateFileInfo(type, file) {
+      const fileInfo = document.getElementById(`${type}FileInfo`);
+      const fileName = document.getElementById(`${type}FileName`);
+      const fileSize = document.getElementById(`${type}FileSize`);
+      const dropZone = document.getElementById(`${type}DropZone`);
+      
+      fileName.textContent = file.name;
+      fileSize.textContent = formatFileSize(file.size);
+      fileInfo.style.display = 'flex';
+      dropZone.style.display = 'none';
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function removeFile(type) {
+      if (type === 'ratings') {
+        ratingsFile = null;
+        ratingsCard.classList.remove('has-file');
+        ratingsInput.value = '';
+      } else {
+        moviesFile = null;
+        moviesCard.classList.remove('has-file');
+        moviesInput.value = '';
+      }
+      
+      document.getElementById(`${type}FileInfo`).style.display = 'none';
+      document.getElementById(`${type}DropZone`).style.display = 'block';
+      updateSubmitButton();
+    }
+
+    function updateSubmitButton() {
+      processBtn.disabled = !(ratingsFile && moviesFile);
+    }
+
+    function showStatus(message, type) {
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message visible ${type}`;
+      setTimeout(() => statusMessage.classList.remove('visible'), 5000);
+    }
+
+    function showLoading(text) {
+      document.getElementById('loadingText').textContent = text;
+      document.getElementById('loadingScreen').classList.add('visible');
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingScreen').classList.remove('visible');
+    }
+
+    async function processFiles() {
+      if (!ratingsFile || !moviesFile) {
+        showStatus('Please upload both ratings and movies files', 'error');
+        return;
+      }
+
+      processBtn.classList.add('loading');
+      showLoading('Reading files...');
+
+      try {
+        const ratingsText = await readFileAsText(ratingsFile);
+        showLoading('Processing ratings data...');
+
+        const moviesText = await readFileAsText(moviesFile);
+        showLoading('Processing movies metadata...');
+
+        showLoading('Training Two-Tower Model...');
+        
+        const response = await fetch('/api/upload-movie-data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ ratingsText, moviesText })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Upload failed');
+        }
+
+        hideLoading();
+        processBtn.classList.remove('loading');
+        
+        showStatus(`✓ Model trained! ${data.stats.totalRatings} ratings processed`, 'success');
+        
+        displayStats(data.stats);
+        populateUserSelect(data.users);
+        
+        document.getElementById('uploadSection').style.display = 'none';
+        document.getElementById('existingSection').style.display = 'none';
+        document.getElementById('divider').style.display = 'none';
+        document.getElementById('resultsSection').classList.add('visible');
+
+        existingData = data.stats;
+
+      } catch (error) {
+        hideLoading();
+        processBtn.classList.remove('loading');
+        showStatus(error.message, 'error');
+        console.error('Processing error:', error);
+      }
+    }
+
+    function readFileAsText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (e) => reject(new Error('Failed to read file'));
+        reader.readAsText(file);
+      });
+    }
+
+    function displayStats(stats) {
+      statsGrid.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-value">${stats.totalRatings.toLocaleString()}</div>
+          <div class="stat-label">Total Ratings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.uniqueUsers.toLocaleString()}</div>
+          <div class="stat-label">Unique Users</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.uniqueMovies.toLocaleString()}</div>
+          <div class="stat-label">Unique Movies</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.avgRatingsPerUser}</div>
+          <div class="stat-label">Avg Ratings/User</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.moviesWithMetadata}</div>
+          <div class="stat-label">Movies w/ Metadata</div>
+        </div>
+      `;
+    }
+
+    function populateUserSelect(users) {
+      userSelect.innerHTML = '<option value="">Choose a user...</option>';
+      users.slice(0, 100).forEach(userId => {
+        const option = document.createElement('option');
+        option.value = userId;
+        option.textContent = `User ${userId}`;
+        userSelect.appendChild(option);
+      });
+    }
+
+    async function getRecommendations() {
+      const selectedUser = userSelect.value;
+      if (!selectedUser) {
+        showStatus('Please select a user', 'error');
+        return;
+      }
+
+      showLoading('Generating recommendations & fetching trailers...');
+
+      try {
+        const response = await fetch(`/api/movie-recommendations-with-youtube/${selectedUser}?limit=15`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to get recommendations');
+        }
+
+        hideLoading();
+        displayRecommendations(data.recommendations);
+        showStatus(`✓ Found ${data.recommendations.length} movie recommendations!`, 'success');
+
+      } catch (error) {
+        hideLoading();
+        showStatus(error.message, 'error');
+        console.error('Recommendations error:', error);
+      }
+    }
+
+    function displayRecommendations(recommendations) {
+      movieGrid.innerHTML = recommendations.map((movie, index) => {
+        const hasYouTube = movie.youtube && movie.youtube.id;
+        const thumbnailUrl = hasYouTube ? movie.youtube.thumbnail : null;
+        
+        return `
+        <div class="movie-card">
+          <div class="movie-thumbnail-container">
+            ${thumbnailUrl ? `
+              <img src="${thumbnailUrl}" alt="${movie.title}" class="movie-thumbnail" 
+                   onerror="this.parentElement.innerHTML='<div class=movie-placeholder>🎬</div>'">
+              <a href="${movie.youtube.url}" target="_blank" class="play-overlay">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </a>
+            ` : '<div class="movie-placeholder">🎬</div>'}
+            <span class="movie-rank">#${index + 1}</span>
+            <span class="movie-score">${(movie.similarity_score * 100).toFixed(0)}% match</span>
+          </div>
+          <div class="movie-content">
+            <h3 class="movie-title" title="${movie.title}">${movie.title}</h3>
+            <div class="movie-genres">
+              ${(movie.genres || 'Unknown').split('|').slice(0, 3).map(g => 
+                `<span class="genre-tag">${g.trim()}</span>`
+              ).join('')}
+            </div>
+            <div class="movie-details">
+              <div class="detail-item">
+                <div class="detail-value">⭐ ${movie.avgRating}</div>
+                <div class="detail-label">Avg Rating</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-value">${movie.ratingCount}</div>
+                <div class="detail-label">Reviews</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-value">${movie.predicted_rating}</div>
+                <div class="detail-label">Predicted</div>
+              </div>
+            </div>
+            ${hasYouTube ? `<a href="${movie.youtube.url}" target="_blank" class="watch-trailer-btn">▶ Watch Trailer</a>` : ''}
+          </div>
+        </div>
+      `}).join('');
+    }
+
+    // Initialize
+    setupDropZone(ratingsDropZone, ratingsInput, 'ratings');
+    setupDropZone(moviesDropZone, moviesInput, 'movies');
+    
+    document.getElementById('removeRatings').addEventListener('click', () => removeFile('ratings'));
+    document.getElementById('removeMovies').addEventListener('click', () => removeFile('movies'));
+    
+    processBtn.addEventListener('click', processFiles);
+    getRecsBtn.addEventListener('click', getRecommendations);
+  </script>
+</body>
+</html>
