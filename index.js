@@ -104,6 +104,12 @@ if (serviceAccount) {
  * Extracts user info and attaches to req.user
  */
 async function authenticateFirebaseUser(req, res, next) {
+  // Check if Firebase Admin SDK is initialized
+  if (!serviceAccount) {
+    console.error("Auth failed: Firebase Admin SDK not initialized (no credentials)");
+    return res.status(500).json({ error: "Server configuration error: Firebase not initialized" });
+  }
+
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -121,6 +127,7 @@ async function authenticateFirebaseUser(req, res, next) {
     };
     next();
   } catch (error) {
+    console.error("Token verification failed:", error.code, error.message);
     return res.status(401).json({ error: "Invalid or expired Firebase token" });
   }
 }
@@ -216,8 +223,15 @@ function deduplicateSongs(records) {
 // BASIC ENDPOINTS
 // =============================================================================
 
-/** Health check endpoint */
-app.get('/health', (req, res) => res.json({ status: "ok" }));
+/** Health check endpoint with Firebase status */
+app.get('/health', (req, res) => res.json({ 
+  status: "ok",
+  firebase: {
+    initialized: !!serviceAccount,
+    projectId: serviceAccount?.project_id || "not loaded",
+    dbReady: !!db
+  }
+}));
 
 /** Get current authenticated user info */
 app.get('/api/current-user', requireAuth, (req, res) => {
