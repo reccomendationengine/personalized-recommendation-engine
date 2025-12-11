@@ -63,12 +63,18 @@ app.use(express.json({ limit: '50mb' }));
 
 let serviceAccount;
 try {
-  // Load Firebase credentials from environment or local file
-  serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
-    ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-    : require('./personal-recommendation-engine-firebase-adminsdk.json');
+  // Load Firebase credentials from environment variable first
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    console.log("Loading Firebase credentials from environment variable");
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } else {
+    // Fallback to local JSON file
+    console.log("Loading Firebase credentials from JSON file");
+    serviceAccount = require(path.join(__dirname, 'personal-recommendation-engine-firebase-adminsdk.json'));
+  }
+  console.log("Firebase credentials loaded successfully, project:", serviceAccount?.project_id);
 } catch (err) {
-  console.error("ERROR loading Firebase service account:", err);
+  console.error("ERROR loading Firebase service account:", err.message);
   serviceAccount = null;
 }
 
