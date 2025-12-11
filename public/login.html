@@ -119,6 +119,10 @@
   </style>
 
   <script type="module">
+    // Import Firebase Auth - MUST be at the top of the module
+    import { auth } from "./firebase-config.js";
+    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
+
     // Password visibility toggle with 5-second auto-hide
     let passwordVisibilityTimeout = null;
     const passwordInput = document.getElementById('password');
@@ -168,10 +172,6 @@
         clearTimeout(passwordVisibilityTimeout);
       }
     });
-
-    // Import Firebase Auth
-    import { auth } from "./firebase-config.js";
-    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
 
     document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
