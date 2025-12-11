@@ -34,7 +34,7 @@
           <p class="card-description">Enter your credentials to access your account</p>
         </div>
         <div class="card-content">
-          <form id="loginForm" class="space-y-4">
+          <form id="loginForm" class="space-y-4" onsubmit="return false;">
             <div class="form-group">
               <label for="email" class="label">Email</label>
               <input id="email" name="email" type="email" placeholder="Enter your email address" class="input" required>
@@ -119,9 +119,21 @@
   </style>
 
   <script type="module">
-    // Import Firebase Auth - MUST be at the top of the module
-    import { auth } from "./firebase-config.js";
-    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
+    // Initialize Firebase directly inline (no external module import)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA1-L2WLdKYKxIOvE0Uk4HZafTI_ji7sho",
+      authDomain: "personal-recommendation-engine.firebaseapp.com",
+      projectId: "personal-recommendation-engine",
+      storageBucket: "personal-recommendation-engine.firebasestorage.app",
+      messagingSenderId: "540660260722",
+      appId: "1:540660260722:web:6ff903df8a5fef942a47eb"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
     // Password visibility toggle with 5-second auto-hide
     let passwordVisibilityTimeout = null;
@@ -137,34 +149,33 @@
     `;
     
     // Add eye-off icon to the button
-    passwordToggle.innerHTML = `
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-on">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-        <circle cx="12" cy="12" r="3"></circle>
-      </svg>
-      ${eyeOffSVG}
-    `;
-    
-    passwordToggle.addEventListener('click', function() {
-      // Clear any existing timeout
-      if (passwordVisibilityTimeout) {
-        clearTimeout(passwordVisibilityTimeout);
-      }
+    if (passwordToggle) {
+      passwordToggle.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-on">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        ${eyeOffSVG}
+      `;
       
-      // Toggle password visibility
-      const isPassword = passwordInput.type === 'password';
-      passwordInput.type = isPassword ? 'text' : 'password';
-      passwordToggle.classList.toggle('showing', isPassword);
-      passwordToggle.classList.toggle('active', isPassword);
-      
-      // If showing password, set 5-second auto-hide
-      if (isPassword) {
-        passwordVisibilityTimeout = setTimeout(() => {
-          passwordInput.type = 'password';
-          passwordToggle.classList.remove('showing', 'active');
-        }, 5000); // 5 seconds
-      }
-    });
+      passwordToggle.addEventListener('click', function() {
+        if (passwordVisibilityTimeout) {
+          clearTimeout(passwordVisibilityTimeout);
+        }
+        
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        passwordToggle.classList.toggle('showing', isPassword);
+        passwordToggle.classList.toggle('active', isPassword);
+        
+        if (isPassword) {
+          passwordVisibilityTimeout = setTimeout(() => {
+            passwordInput.type = 'password';
+            passwordToggle.classList.remove('showing', 'active');
+          }, 5000);
+        }
+      });
+    }
 
     // Cleanup timeout on page unload
     window.addEventListener('beforeunload', function() {
@@ -173,14 +184,16 @@
       }
     });
 
+    // Form submission handler
     document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
+      e.stopPropagation();
       
       // Clear password visibility timeout if active
       if (passwordVisibilityTimeout) {
         clearTimeout(passwordVisibilityTimeout);
         passwordInput.type = 'password';
-        passwordToggle.classList.remove('showing', 'active');
+        if (passwordToggle) passwordToggle.classList.remove('showing', 'active');
       }
 
       const email = document.getElementById('email').value.trim();
@@ -204,7 +217,7 @@
         isValid = false;
       }
 
-      if (!isValid) return;
+      if (!isValid) return false;
 
       // Show loading state
       const submitButton = document.querySelector('button[type="submit"]');
@@ -248,10 +261,9 @@
         passwordError.style.display = 'block';
         submitButton.disabled = false;
         submitButton.textContent = originalText;
-        
-        // Also show alert for debugging
-        alert('Login Error: ' + errorMessage);
       }
+      
+      return false;
     });
   </script>
 </body>
