@@ -235,14 +235,22 @@
           errorMessage = 'Incorrect password';
         } else if (error.code === 'auth/invalid-email') {
           errorMessage = 'Invalid email address';
+        } else if (error.code === 'auth/invalid-credential') {
+          errorMessage = 'Invalid email or password';
         } else if (error.code === 'auth/too-many-requests') {
           errorMessage = 'Too many failed attempts. Please try again later.';
+        } else {
+          errorMessage = error.message || 'Login failed. Please try again.';
         }
         
+        // Show error visually
         passwordError.textContent = errorMessage;
         passwordError.style.display = 'block';
         submitButton.disabled = false;
         submitButton.textContent = originalText;
+        
+        // Also show alert for debugging
+        alert('Login Error: ' + errorMessage);
       }
     });
   </script>
