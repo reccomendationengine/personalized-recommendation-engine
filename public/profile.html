@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,30 +8,41 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background: linear-gradient(135deg, darkcyan 0%, darkorchid 100%);
       color: white;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 2rem;
     }
+
+    .profile-wrapper {
+      display: flex;
+      gap: 2rem;
+      width: 100%;
+      max-width: 1100px;
+    }
+
     .profile-container {
+      flex: 2;
       background: rgba(255, 255, 255, 0.1);
       padding: 3rem;
       border-radius: 20px;
-      width: 90%;
-      max-width: 600px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
       backdrop-filter: blur(10px);
+      text-align: center;
     }
+
     h1 {
       font-size: 2.5rem;
       margin-bottom: 1rem;
     }
+
     .profile-pic {
       width: 120px;
       height: 120px;
@@ -39,15 +51,18 @@
       border: 3px solid rgba(255, 255, 255, 0.5);
       margin-top: 1rem;
     }
+
     .profile-info {
       margin-top: 2rem;
       text-align: left;
       font-size: 1.2rem;
       line-height: 2rem;
     }
+
     .profile-info strong {
-      color: #ffd6ff;
+      color: black;
     }
+
     .btn-container {
       margin-top: 2.5rem;
       display: flex;
@@ -55,6 +70,7 @@
       gap: 1rem;
       flex-wrap: wrap;
     }
+
     .btn {
       flex: 1;
       text-align: center;
@@ -68,173 +84,141 @@
       transition: all 0.3s ease;
       cursor: pointer;
     }
+
     .btn:hover {
       background: rgba(255, 255, 255, 0.3);
       transform: translateY(-2px);
     }
+
     .delete-btn {
       background: rgba(255, 0, 0, 0.3);
       border-color: rgba(255, 0, 0, 0.5);
     }
+
     .delete-btn:hover {
       background: rgba(255, 0, 0, 0.5);
     }
+
+    .password-box {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 2rem;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      text-align: left;
+      height: fit-content;
+    }
+
+    .password-box h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
     #changePicInput {
       display: none;
+    }
+
+    @media (max-width: 900px) {
+      .profile-wrapper {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="profile-container">
-    <h1>Your Profile</h1>
-    <img id="profilePic" src="" alt="Profile Picture" class="profile-pic">
-    <br>
-    <button id="changePicBtn" class="btn" style="margin-top: 1rem;">📸 Change Picture</button>
-    <input type="file" id="changePicInput" accept="image/*">
 
-    <p>View and manage your personal information.</p>
+  <div class="profile-wrapper">
 
-    <div class="profile-info">
-      <p><strong>Name:</strong> <span id="profileName">Loading...</span></p>
-      <p><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
-      <p><strong>Date of Birth:</strong> <span id="profileDOB">Loading...</span></p>
-      <p><strong>Phone:</strong> <span id="profilePhone">Loading...</span></p>
+    <!-- LEFT MAIN PROFILE BOX -->
+    <div class="profile-container">
+      <h1>Your Profile</h1>
+
+      <img id="profilePic" src="" alt="Profile Picture" class="profile-pic">
+      <br>
+      <button id="changePicBtn" class="btn" style="margin-top: 1rem;">📸 Change Picture</button>
+      <input type="file" id="changePicInput" accept="image/*">
+
+      <p>View and manage your personal information.</p>
+
+      <div class="profile-info">
+        <p><strong>Name:</strong> <span id="profileName">Loading...</span></p>
+        <p><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
+        <p><strong>Date of Birth:</strong> <span id="profileDOB">Loading...</span></p>
+        <p><strong>Phone:</strong> <span id="profilePhone">Loading...</span></p>
+      </div>
+
+      <div class="btn-container">
+        <a href="dashboard.html" class="btn">⬅ Back to Dashboard</a>
+        <button id="deleteAccountBtn" class="btn delete-btn">🗑 Delete Account</button>
+      </div>
     </div>
 
-    <div class="btn-container">
-      <a href="dashboard.html" class="btn">⬅ Back to Dashboard</a>
-      <button id="deleteAccountBtn" class="btn delete-btn">🗑 Delete Account</button>
+    <!-- RIGHT PASSWORD BOX -->
+    <div class="password-box">
+      <h2>Change Password</h2>
+
+      <p>To change your password, click below to receive a secure verification email.</p>
+
+      <button id="sendVerificationBtn" class="btn" style="width:100%;">📧 Send Password Reset Email</button>
+
     </div>
+
   </div>
 
-  <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import { onAuthStateChanged, deleteUser, signOut } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
-    import { doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+  <!-- MAIN SCRIPT -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const userEmail = localStorage.getItem('userEmail');
+      const userName = localStorage.getItem('userName');
+      const userDOB = localStorage.getItem('userDOB');
+      const userPhone = localStorage.getItem('userPhone');
+      const userProfilePic = localStorage.getItem('userProfilePic');
+      const profilePicElement = document.getElementById('profilePic');
 
-    const profilePicElement = document.getElementById('profilePic');
-    const changePicBtn = document.getElementById('changePicBtn');
-    const changePicInput = document.getElementById('changePicInput');
-    const deleteAccountBtn = document.getElementById('deleteAccountBtn');
-
-    let currentUser = null;
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = 'login.html';
+      if (!userEmail) {
+        window.location.href = 'signup.html';
         return;
       }
 
-      currentUser = user;
+      document.getElementById('profileName').textContent = userName || 'Not provided';
+      document.getElementById('profileEmail').textContent = userEmail || 'Not provided';
+      document.getElementById('profileDOB').textContent = userDOB || 'Not provided';
+      document.getElementById('profilePhone').textContent = userPhone || 'Not provided';
+      profilePicElement.src = userProfilePic || 'https://via.placeholder.com/120?text=Profile';
 
-      // Get user data from Firestore
-      try {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        const userData = userDoc.exists() ? userDoc.data() : {};
+      const changePicBtn = document.getElementById('changePicBtn');
+      const changePicInput = document.getElementById('changePicInput');
 
-        document.getElementById('profileName').textContent = userData.fullName || userData.username || user.displayName || user.email.split('@')[0];
-        document.getElementById('profileEmail').textContent = user.email;
-        document.getElementById('profileDOB').textContent = userData.dateOfBirth || 'Not provided';
-        document.getElementById('profilePhone').textContent = userData.phoneNumber || 'Not provided';
-        profilePicElement.src = userData.profilePic || 'https://via.placeholder.com/120?text=Profile';
-      } catch (err) {
-        console.error("Error loading profile:", err);
-        document.getElementById('profileName').textContent = user.displayName || user.email.split('@')[0];
-        document.getElementById('profileEmail').textContent = user.email;
-        document.getElementById('profileDOB').textContent = 'Not provided';
-        document.getElementById('profilePhone').textContent = 'Not provided';
-        profilePicElement.src = 'https://via.placeholder.com/120?text=Profile';
-      }
-    });
+      changePicBtn.addEventListener('click', () => {
+        changePicInput.click();
+      });
 
-    // Change picture functionality
-    changePicBtn.addEventListener('click', () => {
-      changePicInput.click();
-    });
+      changePicInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    changePicInput.addEventListener('change', async (event) => {
-      const file = event.target.files[0];
-      if (!file || !currentUser) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const newPic = e.target.result;
+          profilePicElement.src = newPic;
+          localStorage.setItem('userProfilePic', newPic);
+          alert('Profile picture updated successfully!');
+        };
+        reader.readAsDataURL(file);
+      });
 
-      // Compress image before uploading
-      const compressImage = (file, maxWidth = 400, quality = 0.7) => {
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-              const canvas = document.createElement('canvas');
-              let width = img.width;
-              let height = img.height;
-              
-              // Scale down if larger than maxWidth
-              if (width > maxWidth) {
-                height = (height * maxWidth) / width;
-                width = maxWidth;
-              }
-              
-              canvas.width = width;
-              canvas.height = height;
-              
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(img, 0, 0, width, height);
-              
-              // Convert to compressed base64
-              resolve(canvas.toDataURL('image/jpeg', quality));
-            };
-            img.src = e.target.result;
-          };
-          reader.readAsDataURL(file);
-        });
-      };
-
-      try {
-        // Show loading state
-        changePicBtn.textContent = '⏳ Uploading...';
-        changePicBtn.disabled = true;
-
-        const compressedPic = await compressImage(file);
-        profilePicElement.src = compressedPic;
-
-        // Save to Firestore
-        await setDoc(doc(db, "users", currentUser.uid), { profilePic: compressedPic }, { merge: true });
-        alert('Profile picture updated successfully!');
-      } catch (err) {
-        console.error("Error updating profile pic:", err);
-        alert('Failed to save profile picture: ' + err.message);
-      } finally {
-        changePicBtn.textContent = '📸 Change Picture';
-        changePicBtn.disabled = false;
-      }
-    });
-
-    // Delete account
-    deleteAccountBtn.addEventListener('click', async function() {
-      if (!currentUser) return;
-
-      if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
-        try {
-          // Delete Firestore user document
-          await deleteDoc(doc(db, "users", currentUser.uid));
-          // Delete Firebase Auth user
-          await deleteUser(currentUser);
+      document.getElementById('deleteAccountBtn').addEventListener('click', function () {
+        if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+          localStorage.clear();
           alert('Your account has been deleted.');
           window.location.href = 'signup.html';
-        } catch (err) {
-          console.error("Error deleting account:", err);
-          // If requires recent login
-          if (err.code === 'auth/requires-recent-login') {
-            alert('Please log out and log back in, then try deleting again.');
-          } else {
-            alert('Failed to delete account: ' + err.message);
-          }
         }
-      }
+      });
     });
   </script>
+
 </body>
+
 </html>
-
-
-
