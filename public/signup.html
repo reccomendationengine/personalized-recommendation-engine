@@ -55,13 +55,6 @@
       color: #28a745;
       content: "✓";
     }
-
-    .error-message {
-      display: none;
-      color: red;
-      font-size: 0.8rem;
-      margin-top: 0.25rem;
-    }
   </style>
 </head>
 
@@ -70,12 +63,12 @@
     <!-- Header -->
     <header class="border-b border-border">
       <div class="container mx-auto px-4 py-4">
-        <a href="index.html" class="flex items-center gap-2 w-fit">
-          <svg class="icon text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <a href="index.html" class="flex items-center gap-2 w-fit" style="text-decoration: none;">
+          <svg class="icon text-primary" fill="none" viewBox="0 0 24 24" style="stroke: white">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
           </svg>
-          <span class="text-xl font-bold font-sans">Personalized Recommendations Engine</span>
+          <span class="text-xl font-bold font-sans" style="color: white">Personalized Recommendations Engine</span>
         </a>
       </div>
     </header>
@@ -90,7 +83,8 @@
           </p>
         </div>
         <div class="card-content">
-          <form id="signupForm" class="space-y-4">
+          <!-- <form id="signupForm" action="/signup" method="POST" class="space-y-4"> -->
+          <form id="signupForm" class="space-y-4"> <!--added this-->
             <div class="form-group">
               <label for="username" class="label">Full Name</label>
               <input id="username" name="username" type="text" placeholder="Enter your full name" class="input">
@@ -142,7 +136,7 @@
 
             <div class="form-group">
               <label for="dateOfBirth" class="label">Date of Birth (Optional)</label>
-              <input id="dateOfBirth" name="dateOfBirth" type="date" class="input">
+              <input id="dateOfBirth" name="dateOfBirth" type="text" class="input" placeholder="dd-mm-yyyy">
             </div>
 
             <div class="form-group">
@@ -150,12 +144,12 @@
               <input id="phoneNumber" name="phoneNumber" type="tel" placeholder="+1 (555) 123-4567" class="input">
             </div>
 
-            <div class="form-group">
+            <div clas="form-group">
               <label for="profilePic" class="label">Profile Picture (Optional)</label>
               <input id="profilePic" name="profilePic" type="file" accept="image/*" class="input">
             </div>
 
-            <button id="submit" type="submit" class="btn btn-primary w-full btn-lg">Create Account</button>
+            <button type="submit" class="btn btn-primary w-full btn-lg">Create Account</button>
           </form>
 
           <div class="mt-6 text-center text-sm">
@@ -170,7 +164,151 @@
       </div>
     </main>
   </div>
-  <script type="module" src="./signup.js"></script>
+
+  <script>
+    // Password validation function
+    function validatePassword(password) {
+      const requirements = {
+        length: password.length >= 6,
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        number: /\d/.test(password)
+      };
+
+      // Update requirement indicators
+      updateRequirement('req-length', requirements.length);
+      updateRequirement('req-uppercase', requirements.uppercase);
+      updateRequirement('req-lowercase', requirements.lowercase);
+      updateRequirement('req-number', requirements.number);
+
+      return Object.values(requirements).every(req => req);
+    }
+
+    function updateRequirement(id, met) {
+      const element = document.getElementById(id);
+      const icon = element.querySelector('.requirement-icon');
+
+      if (met) {
+        element.classList.add('met');
+        icon.textContent = '✓';
+      } else {
+        element.classList.remove('met');
+        icon.textContent = '✗';
+      }
+    }
+
+    // Phone number formatting
+    function formatPhoneNumber(input) {
+      let value = input.value.replace(/\D/g, '');
+      if (value.length >= 6) {
+        value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+      } else if (value.length >= 3) {
+        value = value.replace(/(\d{3})(\d{0,3})/, '($1) $2');
+      }
+      input.value = value;
+    }
+
+    // Real-time password validation
+    document.getElementById('password').addEventListener('input', function () {
+      validatePassword(this.value);
+    });
+
+    // Phone number formatting
+    document.getElementById('phoneNumber').addEventListener('input', function () {
+      formatPhoneNumber(this);
+    });
+
+    // Date of birth formatting (dd-mm-yyyy)
+    document.getElementById('dateOfBirth').addEventListener('input', function () {
+      let value = this.value.replace(/\D/g, '');
+
+      if (value.length >= 5) {
+        value = value.replace(/(\d{2})(\d{2})(\d{0,4})/, '$1-$2-$3');
+      } else if (value.length >= 3) {
+        value = value.replace(/(\d{2})(\d{0,2})/, '$1-$2');
+      }
+
+      this.value = value;
+    });
+
+
+    // Enhanced client-side validation for signup form
+    document.getElementById('signupForm').addEventListener('submit', function (e) {
+      e.preventDefault(); //stop normal form submission
+
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const confirmPassword = document.getElementById('confirmPassword').value.trim();
+      const dateOfBirth = document.getElementById('dateOfBirth').value;
+      const phoneNumber = document.getElementById('phoneNumber').value.trim();
+      const profilePicInput = document.getElementById('profilePic');
+
+      const usernameError = document.getElementById('usernameError');
+      const emailError = document.getElementById('emailError');
+      const passwordError = document.getElementById('passwordError');
+      const confirmError = document.getElementById('confirmError');
+
+      usernameError.style.display = 'none';
+      emailError.style.display = 'none';
+      passwordError.style.display = 'none';
+      confirmError.style.display = 'none';
+
+      let isValid = true;
+
+      // Email validation (required)
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailPattern.test(email)) {
+        emailError.style.display = 'block';
+        isValid = false;
+      }
+
+      // Username validation (optional, but if provided must be valid)
+      if (username.length > 0 && username.length < 2) {
+        usernameError.style.display = 'block';
+        isValid = false;
+      }
+
+      // Enhanced password validation
+      const passwordValid = validatePassword(password);
+      if (!password || !passwordValid) {
+        passwordError.style.display = 'block';
+        passwordError.textContent = 'Password must meet all requirements above.';
+        isValid = false;
+      }
+
+      // Password confirmation
+      if (password !== confirmPassword) {
+        confirmError.style.display = 'block';
+        isValid = false;
+      }
+
+      if (!isValid) {
+        e.preventDefault();
+      } else {
+        // Save user info to localStorage
+        const userNameToSave = username.trim() || email.split('@')[0];
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('userName', userNameToSave);
+        localStorage.setItem('userDOB', dateOfBirth || '');
+        localStorage.setItem('userPhone', phoneNumber || '');
+
+        // if a user uploaded a picture, save it
+        if (profilePicInput.files && profilePicInput.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            localStorage.setItem('userProfilePic', e.target.result);
+            window.location.href = 'dashboard.html';
+          };
+          reader.readAsDataURL(profilePicInput.files[0]);
+        } else {
+          localStorage.setItem('userProfilePic', '');
+          window.location.href = 'dashboard.html'
+        }
+
+      }
+    });
+  </script>
 </body>
 
 </html>
