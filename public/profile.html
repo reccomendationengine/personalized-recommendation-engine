@@ -233,22 +233,43 @@
   </div>
 
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const userEmail = localStorage.getItem('userEmail');
-      const userName = localStorage.getItem('userName');
+  <script type="module">
+    // Import Firebase Auth
+    import { auth } from "./firebase-config.js";
+    import { 
+      onAuthStateChanged, 
+      signOut, 
+      deleteUser, 
+      sendPasswordResetEmail,
+      updateProfile 
+    } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
+
+    let currentUser = null;
+
+    // Wait for Firebase auth state
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      currentUser = user;
+
+      // Get data from Firebase user and localStorage
+      const userEmail = user.email;
+      const userName = user.displayName || localStorage.getItem('userName') || userEmail.split('@')[0];
       const userDOB = localStorage.getItem('userDOB');
       const userPhone = localStorage.getItem('userPhone');
       const userProfilePic = localStorage.getItem('userProfilePic');
-
-      if (!userEmail) window.location.href = 'signup.html';
 
       document.getElementById('profileName').textContent = userName || 'Not provided';
       document.getElementById('profileEmail').textContent = userEmail || 'Not provided';
       document.getElementById('profileDOB').textContent = userDOB || 'Not provided';
       document.getElementById('profilePhone').textContent = userPhone || 'Not provided';
       document.getElementById('profilePic').src = userProfilePic || 'https://via.placeholder.com/120?text=Profile';
+    });
 
+    document.addEventListener('DOMContentLoaded', function () {
       /* Change Picture */
       document.getElementById('changePicBtn').onclick = () => document.getElementById('changePicInput').click();
 
@@ -265,19 +286,38 @@
         reader.readAsDataURL(file);
       });
 
-      /* Logout */
-      document.getElementById('logoutBtn').addEventListener('click', () => {
+      /* Logout - Using Firebase */
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
         if (confirm('Log out?')) {
-          localStorage.removeItem('userEmail');
-          window.location.href = 'login.html';
+          try {
+            await signOut(auth);
+            localStorage.clear();
+            window.location.href = 'login.html';
+          } catch (error) {
+            console.error('Logout error:', error);
+            alert('Failed to log out. Please try again.');
+          }
         }
       });
 
-      /* Delete Account */
-      document.getElementById('deleteAccountBtn').addEventListener('click', () => {
-        if (confirm('Are you sure you want to delete your account?')) {
-          localStorage.clear();
-          window.location.href = 'signup.html';
+      /* Delete Account - Using Firebase */
+      document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
+        if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+          try {
+            if (currentUser) {
+              await deleteUser(currentUser);
+              localStorage.clear();
+              alert('Account deleted successfully.');
+              window.location.href = 'signup.html';
+            }
+          } catch (error) {
+            console.error('Delete account error:', error);
+            if (error.code === 'auth/requires-recent-login') {
+              alert('For security reasons, please log out and log in again before deleting your account.');
+            } else {
+              alert('Failed to delete account: ' + error.message);
+            }
+          }
         }
       });
 
@@ -285,56 +325,61 @@
       const editModal = document.getElementById('editModal');
       document.getElementById('editBtn').onclick = () => {
         editModal.style.display = 'flex';
-        document.getElementById('editName').value = userName || '';
-        document.getElementById('editDOB').value = userDOB || '';
-        document.getElementById('editPhone').value = userPhone || '';
+        document.getElementById('editName').value = localStorage.getItem('userName') || '';
+        document.getElementById('editDOB').value = localStorage.getItem('userDOB') || '';
+        document.getElementById('editPhone').value = localStorage.getItem('userPhone') || '';
       };
 
       document.getElementById('closeEditModal').onclick = () => editModal.style.display = 'none';
 
-      document.getElementById('saveEditBtn').onclick = () => {
+      document.getElementById('saveEditBtn').onclick = async () => {
         const newName = document.getElementById('editName').value;
         const newDOB = document.getElementById('editDOB').value;
         const newPhone = document.getElementById('editPhone').value;
 
-        localStorage.setItem('userName', newName);
-        localStorage.setItem('userDOB', newDOB);
-        localStorage.setItem('userPhone', newPhone);
+        try {
+          // Update Firebase profile
+          if (currentUser && newName) {
+            await updateProfile(currentUser, { displayName: newName });
+          }
 
-        document.getElementById('profileName').textContent = newName;
-        document.getElementById('profileDOB').textContent = newDOB;
-        document.getElementById('profilePhone').textContent = newPhone;
+          // Save to localStorage
+          localStorage.setItem('userName', newName);
+          localStorage.setItem('userDOB', newDOB);
+          localStorage.setItem('userPhone', newPhone);
 
-        alert('Profile updated!');
-        editModal.style.display = 'none';
+          document.getElementById('profileName').textContent = newName || 'Not provided';
+          document.getElementById('profileDOB').textContent = newDOB || 'Not provided';
+          document.getElementById('profilePhone').textContent = newPhone || 'Not provided';
+
+          alert('Profile updated!');
+          editModal.style.display = 'none';
+        } catch (error) {
+          console.error('Update profile error:', error);
+          alert('Failed to update profile: ' + error.message);
+        }
       };
 
 
-      /* ----- PASSWORD RESET ----- */
+      /* ----- PASSWORD RESET - Using Firebase ----- */
+      document.getElementById('sendVerificationBtn').onclick = async () => {
+        if (!currentUser || !currentUser.email) {
+          alert('No user logged in.');
+          return;
+        }
+
+        try {
+          await sendPasswordResetEmail(auth, currentUser.email);
+          alert('Password reset email sent to ' + currentUser.email + '. Please check your inbox.');
+        } catch (error) {
+          console.error('Password reset error:', error);
+          alert('Failed to send password reset email: ' + error.message);
+        }
+      };
+
+      // Hide the old verification modal since we're using Firebase email reset
       const verifyModal = document.getElementById('verifyModal');
-      const generatedCode = Math.floor(100000 + Math.random() * 900000); // Fake code
-
-      document.getElementById('sendVerificationBtn').onclick = () => {
-        alert('Verification code sent: ' + generatedCode);
-        verifyModal.style.display = 'flex';
-      };
-
       document.getElementById('closeVerifyModal').onclick = () => verifyModal.style.display = 'none';
-
-      document.getElementById('submitVerification').onclick = () => {
-        const code = document.getElementById('verificationCode').value;
-        const pass1 = document.getElementById('newPassword').value;
-        const pass2 = document.getElementById('confirmPassword').value;
-
-        if (code != generatedCode) return alert('Incorrect verification code!');
-        if (pass1 !== pass2) return alert('Passwords do not match!');
-        if (pass1.length < 6) return alert('Password must be at least 6 characters!');
-
-        localStorage.setItem('userPassword', pass1);
-        alert('Password changed successfully!');
-        verifyModal.style.display = 'none';
-      };
-
     });
   </script>
 

@@ -118,7 +118,7 @@
     }
   </style>
 
-  <script>
+  <script type="module">
     // Password visibility toggle with 5-second auto-hide
     let passwordVisibilityTimeout = null;
     const passwordInput = document.getElementById('password');
@@ -169,6 +169,10 @@
       }
     });
 
+    // Import Firebase Auth
+    import { auth } from "./firebase-config.js";
+    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
+
     document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       
@@ -209,48 +213,33 @@
       submitButton.textContent = 'Logging in...';
 
       try {
-        // Make actual API call to backend
-        // Use URLSearchParams to send as application/x-www-form-urlencoded
-        const formData = new URLSearchParams();
-        formData.append('email', email);
-        formData.append('password', password);
-
-        const response = await fetch('/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          body: formData,
-          redirect: 'follow',
-          credentials: 'include' // Include cookies for session
-        });
-
-        if (response.ok || response.redirected) {
-          // Login successful - redirect to dashboard
-          try {
-            const data = await response.json();
-            if (data.user) {
-              localStorage.setItem('userEmail', data.user.email);
-              localStorage.setItem('userName', data.user.username || email.split('@')[0]);
-              localStorage.setItem('userId', data.user.id);
-            }
-          } catch (e) {
-            // If response is a redirect, just store basic info
-            localStorage.setItem('userEmail', email);
-            localStorage.setItem('userName', email.split('@')[0]);
-          }
-          window.location.href = '/dashboard.html';
-        } else {
-          // Login failed - show error
-          const errorText = await response.text();
-          passwordError.textContent = errorText || 'Invalid email or password';
-          passwordError.style.display = 'block';
-          submitButton.disabled = false;
-          submitButton.textContent = originalText;
-        }
+        // Use Firebase Authentication
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Store user info in localStorage
+        localStorage.setItem('userEmail', user.email);
+        localStorage.setItem('userName', user.displayName || email.split('@')[0]);
+        localStorage.setItem('userId', user.uid);
+        
+        console.log("User logged in:", user.email);
+        window.location.href = '/dashboard.html';
       } catch (error) {
         console.error('Login error:', error);
-        passwordError.textContent = 'Network error. Please try again.';
+        
+        // Show user-friendly error message
+        let errorMessage = 'Invalid email or password';
+        if (error.code === 'auth/user-not-found') {
+          errorMessage = 'No account found with this email';
+        } else if (error.code === 'auth/wrong-password') {
+          errorMessage = 'Incorrect password';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMessage = 'Invalid email address';
+        } else if (error.code === 'auth/too-many-requests') {
+          errorMessage = 'Too many failed attempts. Please try again later.';
+        }
+        
+        passwordError.textContent = errorMessage;
         passwordError.style.display = 'block';
         submitButton.disabled = false;
         submitButton.textContent = originalText;
