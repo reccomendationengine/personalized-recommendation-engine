@@ -16,7 +16,7 @@
     }
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: linear-gradient(135deg, darkcyan 0%, darkorchid 100%);
       min-height: 100vh;
       display: flex;
@@ -40,7 +40,6 @@
       font-size: 3rem;
       font-weight: 700;
       margin-bottom: 1rem;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .dashboard-header p {
@@ -208,7 +207,7 @@
 
     <div class="dashboard-header">
       <h1>Welcome to Your Dashboard</h1>
-      <p>Choose your recommendation type to get started</p>
+      <p style="color: #ffd6ff">Choose your recommendation type to get started</p>
     </div>
 
     <div class="recommendation-options">
@@ -234,7 +233,74 @@
       </a>
     </div>
   </div>
-<script type="module" src="dashboard.js"></script>
+
+  <script>
+    function selectOption(type) {
+      if (type === 'music') {
+        // Use window.location to ensure cookies are sent
+        window.location.href = 'music-recommendations.html';
+      } else if (type === 'movie') {
+        // Navigate to movie recommendations page
+        window.location.href = 'movie-recommendations.html';
+      }
+    }
+
+    // Verify session on page load
+    window.addEventListener('DOMContentLoaded', async function () {
+      try {
+        const response = await fetch('/api/current-user', {
+          credentials: 'include',
+          method: 'GET'
+        });
+        if (!response.ok) {
+          console.warn('Session check failed, redirecting to login');
+          window.location.href = '/login.html';
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      }
+    });
+
+    function viewProfile() {
+      window.location.href = 'profile.html';
+    }
+
+    function logout() {
+      // Clear localStorage
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userName');
+
+      // Redirect to login page
+      window.location.href = 'login.html';
+    }
+
+    // Load user info
+    document.addEventListener('DOMContentLoaded', function () {
+      // Check if user is logged in
+      const userEmail = localStorage.getItem('userEmail');
+
+      if (!userEmail) {
+        // User not logged in, redirect to login
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Load user information from localStorage
+      const userName = localStorage.getItem('userName');
+
+      if (userName && userName.trim()) {
+        document.getElementById('userDisplayName').textContent = userName;
+      } else if (userEmail) {
+        // Use email username part if no name is available
+        const emailUsername = userEmail.split('@')[0];
+        document.getElementById('userDisplayName').textContent = emailUsername;
+      } else {
+        document.getElementById('userDisplayName').textContent = 'Profile';
+      }
+
+      console.log('Dashboard loaded');
+    });
+  </script>
 </body>
 
 </html>
