@@ -16,12 +16,12 @@
     <!-- Header -->
     <header class="border-b border-border">
       <div class="container mx-auto px-4 py-4">
-        <a href="index.html" class="flex items-center gap-2 w-fit">
-          <svg class="icon text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <a href="index.html" class="flex items-center gap-2 w-fit" style="text-decoration: none;">
+          <svg class="icon text-primary" fill="none" viewBox="0 0 24 24" style="stroke: white">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
           </svg>
-          <span class="text-xl font-bold font-sans">Personalized Recommendations Engine</span>
+          <span class="text-xl font-bold font-sans" style="color: white">Personalized Recommendations Engine</span>
         </a>
       </div>
     </header>
@@ -43,10 +43,15 @@
             <div class="form-group">
               <div class="flex items-center justify-between">
                 <label for="password" class="label">Password</label>
-                <a href="#" class="text-sm text-primary hover:underline">Forgot password?</a>
+                <a href="forgotPassword.html" class="text-sm text-primary hover:underline">Forgot password?</a>
               </div>
-              <input id="password" name="password" type="password" placeholder="Enter your password" class="input"
-                required>
+              <div class="password-input-wrapper" style="position: relative;">
+                <input id="password" name="password" type="password" placeholder="Enter your password" class="input"
+                  required style="padding-right: 2.5rem;">
+                <button type="button" id="passwordToggle" class="password-toggle-btn" aria-label="Show password" title="Click to show password for 5 seconds">
+                  <!-- Icons will be added by JavaScript -->
+                </button>
+              </div>
               <div id="passwordError" class="error-message">Password must be at least 6 characters.</div>
             </div>
             <button type="submit" class="btn btn-primary w-full btn-lg">Log in</button>
@@ -60,8 +65,199 @@
       </div>
     </main>
   </div>
-  <script type="module" src="login.js"></script>
-  
+
+  <style>
+    .password-input-wrapper {
+      position: relative;
+    }
+    
+    .password-toggle-btn {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem;
+      color: var(--muted-foreground);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+      z-index: 10;
+    }
+    
+    .password-toggle-btn:hover {
+      color: var(--primary);
+    }
+    
+    .password-toggle-btn:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+    
+    .password-toggle-btn svg {
+      display: block;
+    }
+    
+    .password-toggle-btn.active {
+      color: var(--primary);
+    }
+    
+    /* Eye-off icon (hidden state) */
+    .password-toggle-btn .eye-off {
+      display: none;
+    }
+    
+    .password-toggle-btn.showing .eye-off {
+      display: block;
+    }
+    
+    .password-toggle-btn.showing .eye-on {
+      display: none;
+    }
+  </style>
+
+  <script>
+    // Password visibility toggle with 5-second auto-hide
+    let passwordVisibilityTimeout = null;
+    const passwordInput = document.getElementById('password');
+    const passwordToggle = document.getElementById('passwordToggle');
+    
+    // Create eye-off icon SVG
+    const eyeOffSVG = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-off">
+        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+      </svg>
+    `;
+    
+    // Add eye-off icon to the button
+    passwordToggle.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-on">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+      ${eyeOffSVG}
+    `;
+    
+    passwordToggle.addEventListener('click', function() {
+      // Clear any existing timeout
+      if (passwordVisibilityTimeout) {
+        clearTimeout(passwordVisibilityTimeout);
+      }
+      
+      // Toggle password visibility
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      passwordToggle.classList.toggle('showing', isPassword);
+      passwordToggle.classList.toggle('active', isPassword);
+      
+      // If showing password, set 5-second auto-hide
+      if (isPassword) {
+        passwordVisibilityTimeout = setTimeout(() => {
+          passwordInput.type = 'password';
+          passwordToggle.classList.remove('showing', 'active');
+        }, 5000); // 5 seconds
+      }
+    });
+
+    // Cleanup timeout on page unload
+    window.addEventListener('beforeunload', function() {
+      if (passwordVisibilityTimeout) {
+        clearTimeout(passwordVisibilityTimeout);
+      }
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      
+      // Clear password visibility timeout if active
+      if (passwordVisibilityTimeout) {
+        clearTimeout(passwordVisibilityTimeout);
+        passwordInput.type = 'password';
+        passwordToggle.classList.remove('showing', 'active');
+      }
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const emailError = document.getElementById('emailError');
+      const passwordError = document.getElementById('passwordError');
+
+      emailError.style.display = 'none';
+      passwordError.style.display = 'none';
+
+      let isValid = true;
+
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailPattern.test(email)) {
+        emailError.style.display = 'block';
+        isValid = false;
+      }
+
+      if (!password || password.length < 6) {
+        passwordError.style.display = 'block';
+        isValid = false;
+      }
+
+      if (!isValid) return;
+
+      // Show loading state
+      const submitButton = document.querySelector('button[type="submit"]');
+      const originalText = submitButton.textContent;
+      submitButton.disabled = true;
+      submitButton.textContent = 'Logging in...';
+
+      try {
+        // Make actual API call to backend
+        // Use URLSearchParams to send as application/x-www-form-urlencoded
+        const formData = new URLSearchParams();
+        formData.append('email', email);
+        formData.append('password', password);
+
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: formData,
+          redirect: 'follow',
+          credentials: 'include' // Include cookies for session
+        });
+
+        if (response.ok || response.redirected) {
+          // Login successful - redirect to dashboard
+          try {
+            const data = await response.json();
+            if (data.user) {
+              localStorage.setItem('userEmail', data.user.email);
+              localStorage.setItem('userName', data.user.username || email.split('@')[0]);
+              localStorage.setItem('userId', data.user.id);
+            }
+          } catch (e) {
+            // If response is a redirect, just store basic info
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('userName', email.split('@')[0]);
+          }
+          window.location.href = '/dashboard.html';
+        } else {
+          // Login failed - show error
+          const errorText = await response.text();
+          passwordError.textContent = errorText || 'Invalid email or password';
+          passwordError.style.display = 'block';
+          submitButton.disabled = false;
+          submitButton.textContent = originalText;
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        passwordError.textContent = 'Network error. Please try again.';
+        passwordError.style.display = 'block';
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
+      }
+    });
+  </script>
 </body>
 
 </html>
+
