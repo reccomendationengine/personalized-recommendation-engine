@@ -8,26 +8,34 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background: linear-gradient(135deg, darkcyan 0%, darkorchid 100%);
       color: white;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 2rem;
+    }
+
+    .profile-wrapper {
+      display: flex;
+      gap: 2rem;
+      width: 100%;
+      max-width: 1100px;
     }
 
     .profile-container {
+      flex: 2;
       background: rgba(255, 255, 255, 0.1);
       padding: 3rem;
       border-radius: 20px;
-      width: 90%;
-      max-width: 600px;
-      text-align: center;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
       backdrop-filter: blur(10px);
+      text-align: center;
     }
 
     h1 {
@@ -52,7 +60,7 @@
     }
 
     .profile-info strong {
-      color: peachpuff;
+      color: black;
     }
 
     .btn-container {
@@ -91,51 +99,75 @@
       background: rgba(255, 0, 0, 0.5);
     }
 
+    .password-box {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 2rem;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      text-align: left;
+      height: fit-content;
+    }
+
+    .password-box h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
     #changePicInput {
       display: none;
+    }
+
+    @media (max-width: 900px) {
+      .profile-wrapper {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="profile-container">
-    <h1>Your Profile</h1>
-    <img id="profilePic" src="" alt="Profile Picture" class="profile-pic">
-    <br>
-    <button id="changePicBtn" class="btn" style="margin-top: 1rem;">📸 Change Picture</button>
-    <input type="file" id="changePicInput" accept="image/*">
 
-    <p>View and manage your personal information.</p>
+  <div class="profile-wrapper">
 
-    <div class="profile-info">
-      <p><strong>Name:</strong> <span id="profileName">Loading...</span></p>
-      <p><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
-      <p><strong>Date of Birth:</strong> <span id="profileDOB">Loading...</span></p>
-      <p><strong>Phone:</strong> <span id="profilePhone">Loading...</span></p>
+    <!-- LEFT MAIN PROFILE BOX -->
+    <div class="profile-container">
+      <h1>Your Profile</h1>
+
+      <img id="profilePic" src="" alt="Profile Picture" class="profile-pic">
+      <br>
+      <button id="changePicBtn" class="btn" style="margin-top: 1rem;">📸 Change Picture</button>
+      <input type="file" id="changePicInput" accept="image/*">
+
+      <p>View and manage your personal information.</p>
+
+      <div class="profile-info">
+        <p><strong>Name:</strong> <span id="profileName">Loading...</span></p>
+        <p><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
+        <p><strong>Date of Birth:</strong> <span id="profileDOB">Loading...</span></p>
+        <p><strong>Phone:</strong> <span id="profilePhone">Loading...</span></p>
+      </div>
+
+      <div class="btn-container">
+        <a href="dashboard.html" class="btn">⬅ Back to Dashboard</a>
+        <button id="deleteAccountBtn" class="btn delete-btn">🗑 Delete Account</button>
+      </div>
     </div>
 
-    <!-- Change password button -->
+    <!-- RIGHT PASSWORD BOX -->
     <div class="password-box">
       <h2>Change Password</h2>
 
+      <p>To change your password, click below to receive a secure verification email.</p>
 
-      <label for="newPassword">New Password</label>
-      <input type="password" id="newPassword" placeholder="Enter new password">
+      <button id="sendVerificationBtn" class="btn" style="width:100%;">📧 Send Password Reset Email</button>
 
-
-      <label for="confirmPassword">Confirm Password</label>
-      <input type="password" id="confirmPassword" placeholder="Confirm new password">
-
-
-      <button id="changePasswordBtn" class="btn" style="margin-top: 20px;">🔒 Update Password</button>
     </div>
 
-    <div class="btn-container">
-      <a href="dashboard.html" class="btn">⬅ Back to Dashboard</a>
-      <button id="deleteAccountBtn" class="btn delete-btn">🗑 Delete Account</button>
-    </div>
   </div>
 
+  <!-- MAIN SCRIPT -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const userEmail = localStorage.getItem('userEmail');
@@ -145,20 +177,17 @@
       const userProfilePic = localStorage.getItem('userProfilePic');
       const profilePicElement = document.getElementById('profilePic');
 
-      // Redirect to signup if not logged in
       if (!userEmail) {
         window.location.href = 'signup.html';
         return;
       }
 
-      // Display saved user info
       document.getElementById('profileName').textContent = userName || 'Not provided';
       document.getElementById('profileEmail').textContent = userEmail || 'Not provided';
       document.getElementById('profileDOB').textContent = userDOB || 'Not provided';
       document.getElementById('profilePhone').textContent = userPhone || 'Not provided';
       profilePicElement.src = userProfilePic || 'https://via.placeholder.com/120?text=Profile';
 
-      // Change picture functionality
       const changePicBtn = document.getElementById('changePicBtn');
       const changePicInput = document.getElementById('changePicInput');
 
@@ -179,43 +208,55 @@
         };
         reader.readAsDataURL(file);
       });
+
+      document.getElementById('deleteAccountBtn').addEventListener('click', function () {
+        if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+          localStorage.clear();
+          alert('Your account has been deleted.');
+          window.location.href = 'signup.html';
+        }
+      });
     });
+  </script>
 
-    document.getElementById('changePasswordBtn').addEventListener('click', () => {
-      const newPass = document.getElementById('newPassword').value;
-      const confirmPass = document.getElementById('confirmPassword').value;
+  <!-- FIREBASE PASSWORD RESET -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-      if (!newPass || !confirmPass) {
-        alert('Please fill out both password fields');
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.getElementById("sendVerificationBtn").addEventListener("click", async () => {
+      const email = localStorage.getItem("userEmail");
+
+      if (!email) {
+        alert("No email found for this account.");
         return;
       }
 
-      if (newPass !== confirmPass) {
-        alert('Passwords do not match');
-        return;
-      }
-
-      // Simulate password update (for demo purposes)
-      localStorage.setItem('userPassword', newPass); // optional, just for storage
-      alert('Your password has been updated successfully!');
-
-      // Clear the input fields
-      document.getElementById('newPassword').value = '';
-      document.getElementById('confirmPassword').value = '';
-    });
-
-
-    // Delete account
-    document.getElementById('deleteAccountBtn').addEventListener('click', function () {
-      if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
-        localStorage.clear();
-        alert('Your account has been deleted.');
-        window.location.href = 'signup.html';
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alert("Password reset email sent! Check your inbox.");
+      } catch (err) {
+        console.error(err);
+        alert("Error sending email: " + err.message);
       }
     });
   </script>
+
 </body>
 
 </html>
+
 
 
