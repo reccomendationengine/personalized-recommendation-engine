@@ -34,7 +34,7 @@
           <p class="card-description">Enter your credentials to access your account</p>
         </div>
         <div class="card-content">
-          <form id="loginForm" class="space-y-4">
+          <form id="loginForm" class="space-y-4" onsubmit="return false;">
             <div class="form-group">
               <label for="email" class="label">Email</label>
               <input id="email" name="email" type="email" placeholder="Enter your email address" class="input" required>
@@ -118,7 +118,23 @@
     }
   </style>
 
-  <script>
+  <script type="module">
+    // Initialize Firebase directly inline (no external module import)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA1-L2WLdKYKxIOvE0Uk4HZafTI_ji7sho",
+      authDomain: "personal-recommendation-engine.firebaseapp.com",
+      projectId: "personal-recommendation-engine",
+      storageBucket: "personal-recommendation-engine.firebasestorage.app",
+      messagingSenderId: "540660260722",
+      appId: "1:540660260722:web:6ff903df8a5fef942a47eb"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
     // Password visibility toggle with 5-second auto-hide
     let passwordVisibilityTimeout = null;
     const passwordInput = document.getElementById('password');
@@ -133,34 +149,33 @@
     `;
     
     // Add eye-off icon to the button
-    passwordToggle.innerHTML = `
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-on">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-        <circle cx="12" cy="12" r="3"></circle>
-      </svg>
-      ${eyeOffSVG}
-    `;
-    
-    passwordToggle.addEventListener('click', function() {
-      // Clear any existing timeout
-      if (passwordVisibilityTimeout) {
-        clearTimeout(passwordVisibilityTimeout);
-      }
+    if (passwordToggle) {
+      passwordToggle.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-on">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        ${eyeOffSVG}
+      `;
       
-      // Toggle password visibility
-      const isPassword = passwordInput.type === 'password';
-      passwordInput.type = isPassword ? 'text' : 'password';
-      passwordToggle.classList.toggle('showing', isPassword);
-      passwordToggle.classList.toggle('active', isPassword);
-      
-      // If showing password, set 5-second auto-hide
-      if (isPassword) {
-        passwordVisibilityTimeout = setTimeout(() => {
-          passwordInput.type = 'password';
-          passwordToggle.classList.remove('showing', 'active');
-        }, 5000); // 5 seconds
-      }
-    });
+      passwordToggle.addEventListener('click', function() {
+        if (passwordVisibilityTimeout) {
+          clearTimeout(passwordVisibilityTimeout);
+        }
+        
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        passwordToggle.classList.toggle('showing', isPassword);
+        passwordToggle.classList.toggle('active', isPassword);
+        
+        if (isPassword) {
+          passwordVisibilityTimeout = setTimeout(() => {
+            passwordInput.type = 'password';
+            passwordToggle.classList.remove('showing', 'active');
+          }, 5000);
+        }
+      });
+    }
 
     // Cleanup timeout on page unload
     window.addEventListener('beforeunload', function() {
@@ -169,14 +184,16 @@
       }
     });
 
+    // Form submission handler
     document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
+      e.stopPropagation();
       
       // Clear password visibility timeout if active
       if (passwordVisibilityTimeout) {
         clearTimeout(passwordVisibilityTimeout);
         passwordInput.type = 'password';
-        passwordToggle.classList.remove('showing', 'active');
+        if (passwordToggle) passwordToggle.classList.remove('showing', 'active');
       }
 
       const email = document.getElementById('email').value.trim();
@@ -200,7 +217,7 @@
         isValid = false;
       }
 
-      if (!isValid) return;
+      if (!isValid) return false;
 
       // Show loading state
       const submitButton = document.querySelector('button[type="submit"]');
@@ -209,52 +226,44 @@
       submitButton.textContent = 'Logging in...';
 
       try {
-        // Make actual API call to backend
-        // Use URLSearchParams to send as application/x-www-form-urlencoded
-        const formData = new URLSearchParams();
-        formData.append('email', email);
-        formData.append('password', password);
-
-        const response = await fetch('/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          body: formData,
-          redirect: 'follow',
-          credentials: 'include' // Include cookies for session
-        });
-
-        if (response.ok || response.redirected) {
-          // Login successful - redirect to dashboard
-          try {
-            const data = await response.json();
-            if (data.user) {
-              localStorage.setItem('userEmail', data.user.email);
-              localStorage.setItem('userName', data.user.username || email.split('@')[0]);
-              localStorage.setItem('userId', data.user.id);
-            }
-          } catch (e) {
-            // If response is a redirect, just store basic info
-            localStorage.setItem('userEmail', email);
-            localStorage.setItem('userName', email.split('@')[0]);
-          }
-          window.location.href = '/dashboard.html';
-        } else {
-          // Login failed - show error
-          const errorText = await response.text();
-          passwordError.textContent = errorText || 'Invalid email or password';
-          passwordError.style.display = 'block';
-          submitButton.disabled = false;
-          submitButton.textContent = originalText;
-        }
+        // Use Firebase Authentication
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Store user info in localStorage
+        localStorage.setItem('userEmail', user.email);
+        localStorage.setItem('userName', user.displayName || email.split('@')[0]);
+        localStorage.setItem('userId', user.uid);
+        
+        console.log("User logged in:", user.email);
+        window.location.href = '/dashboard.html';
       } catch (error) {
         console.error('Login error:', error);
-        passwordError.textContent = 'Network error. Please try again.';
+        
+        // Show user-friendly error message
+        let errorMessage = 'Invalid email or password';
+        if (error.code === 'auth/user-not-found') {
+          errorMessage = 'No account found with this email';
+        } else if (error.code === 'auth/wrong-password') {
+          errorMessage = 'Incorrect password';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMessage = 'Invalid email address';
+        } else if (error.code === 'auth/invalid-credential') {
+          errorMessage = 'Invalid email or password';
+        } else if (error.code === 'auth/too-many-requests') {
+          errorMessage = 'Too many failed attempts. Please try again later.';
+        } else {
+          errorMessage = error.message || 'Login failed. Please try again.';
+        }
+        
+        // Show error visually
+        passwordError.textContent = errorMessage;
         passwordError.style.display = 'block';
         submitButton.disabled = false;
         submitButton.textContent = originalText;
       }
+      
+      return false;
     });
   </script>
 </body>

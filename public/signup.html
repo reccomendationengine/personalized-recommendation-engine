@@ -165,7 +165,11 @@
     </main>
   </div>
 
-  <script>
+  <script type="module">
+    // Import Firebase Auth
+    import { auth } from "./firebase-config.js";
+    import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
+
     // Password validation function
     function validatePassword(password) {
       const requirements = {
@@ -233,7 +237,7 @@
 
 
     // Enhanced client-side validation for signup form
-    document.getElementById('signupForm').addEventListener('submit', function (e) {
+    document.getElementById('signupForm').addEventListener('submit', async function (e) {
       e.preventDefault(); //stop normal form submission
 
       const username = document.getElementById('username').value.trim();
@@ -283,17 +287,31 @@
         isValid = false;
       }
 
-      if (!isValid) {
-        e.preventDefault();
-      } else {
-        // Save user info to localStorage
-        const userNameToSave = username.trim() || email.split('@')[0];
+      if (!isValid) return;
+
+      // Show loading state
+      const submitButton = document.querySelector('button[type="submit"]');
+      const originalText = submitButton.textContent;
+      submitButton.disabled = true;
+      submitButton.textContent = 'Creating Account...';
+
+      try {
+        // Create user with Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Update profile with display name
+        const displayName = username.trim() || email.split('@')[0];
+        await updateProfile(user, { displayName: displayName });
+
+        // Save additional info to localStorage
         localStorage.setItem('userEmail', email);
-        localStorage.setItem('userName', userNameToSave);
+        localStorage.setItem('userName', displayName);
+        localStorage.setItem('userId', user.uid);
         localStorage.setItem('userDOB', dateOfBirth || '');
         localStorage.setItem('userPhone', phoneNumber || '');
 
-        // if a user uploaded a picture, save it
+        // Handle profile picture
         if (profilePicInput.files && profilePicInput.files[0]) {
           const reader = new FileReader();
           reader.onload = function (e) {
@@ -303,9 +321,32 @@
           reader.readAsDataURL(profilePicInput.files[0]);
         } else {
           localStorage.setItem('userProfilePic', '');
-          window.location.href = 'dashboard.html'
+          window.location.href = 'dashboard.html';
         }
 
+      } catch (error) {
+        console.error('Signup error:', error);
+        
+        // Show user-friendly error message
+        let errorMessage = 'Failed to create account. Please try again.';
+        if (error.code === 'auth/email-already-in-use') {
+          errorMessage = 'An account with this email already exists.';
+          emailError.textContent = errorMessage;
+          emailError.style.display = 'block';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMessage = 'Please enter a valid email address.';
+          emailError.textContent = errorMessage;
+          emailError.style.display = 'block';
+        } else if (error.code === 'auth/weak-password') {
+          errorMessage = 'Password is too weak. Please choose a stronger password.';
+          passwordError.textContent = errorMessage;
+          passwordError.style.display = 'block';
+        } else {
+          alert(errorMessage);
+        }
+        
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
       }
     });
   </script>

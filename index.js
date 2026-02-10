@@ -29,11 +29,20 @@ const path = require('path');
 const express = require('express');
 const multer = require('multer');
 const admin = require('firebase-admin');
-const media_search = require('youtube-search-without-api-key');
 
 // Import recommendation system modules
 const MusicRecommendationSystem = require('./musicrec.js');
 const MovieRecommendationSystem = require('./movierec.js');
+
+// Dynamic import for ESM module (youtube-search-without-api-key)
+let media_search = null;
+async function getYouTubeSearch() {
+  if (!media_search) {
+    const module = await import('youtube-search-without-api-key');
+    media_search = module.default || module;
+  }
+  return media_search;
+}
 
 // =============================================================================
 // SERVER INITIALIZATION
@@ -54,12 +63,18 @@ app.use(express.json({ limit: '50mb' }));
 
 let serviceAccount;
 try {
-  // Load Firebase credentials from environment or local file
-  serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
-    ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-    : require('./personal-recommendation-engine-firebase-adminsdk.json');
+  // Load Firebase credentials from environment variable first
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    console.log("Loading Firebase credentials from environment variable");
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } else {
+    // Fallback to local JSON file
+    console.log("Loading Firebase credentials from JSON file");
+    serviceAccount = require(path.join(__dirname, 'personal-recommendation-engine-firebase-adminsdk.json'));
+  }
+  console.log("Firebase credentials loaded successfully, project:", serviceAccount?.project_id);
 } catch (err) {
-  console.error("ERROR loading Firebase service account:", err);
+  console.error("ERROR loading Firebase service account:", err.message);
   serviceAccount = null;
 }
 
@@ -89,6 +104,12 @@ if (serviceAccount) {
  * Extracts user info and attaches to req.user
  */
 async function authenticateFirebaseUser(req, res, next) {
+  // Check if Firebase Admin SDK is initialized
+  if (!serviceAccount) {
+    console.error("Auth failed: Firebase Admin SDK not initialized (no credentials)");
+    return res.status(500).json({ error: "Server configuration error: Firebase not initialized" });
+  }
+
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -106,6 +127,7 @@ async function authenticateFirebaseUser(req, res, next) {
     };
     next();
   } catch (error) {
+    console.error("Token verification failed:", error.code, error.message);
     return res.status(401).json({ error: "Invalid or expired Firebase token" });
   }
 }
@@ -201,8 +223,15 @@ function deduplicateSongs(records) {
 // BASIC ENDPOINTS
 // =============================================================================
 
-/** Health check endpoint */
-app.get('/health', (req, res) => res.json({ status: "ok" }));
+/** Health check endpoint with Firebase status */
+app.get('/health', (req, res) => res.json({ 
+  status: "ok",
+  firebase: {
+    initialized: !!serviceAccount,
+    projectId: serviceAccount?.project_id || "not loaded",
+    dbReady: !!db
+  }
+}));
 
 /** Get current authenticated user info */
 app.get('/api/current-user', requireAuth, (req, res) => {
@@ -394,10 +423,11 @@ app.get('/api/recommendations-with-youtube/:userId', requireAuth, async (req, re
     const recs = await recSystem.recommendSongs(userId, 10);
 
     // Enrich with YouTube data
+    const ytSearch = await getYouTubeSearch();
     const enriched = await Promise.all(
       recs.map(async (track) => {
         const q = `${track.title} ${track.artist}`;
-        const yt = await media_search.search(q);
+        const yt = await ytSearch.search(q);
         const video = yt?.[0];
 
         return {
@@ -428,7 +458,8 @@ app.get('/api/recommendations-with-youtube/:userId', requireAuth, async (req, re
 app.get("/api/search-youtube/:query", requireAuth, async (req, res) => {
   try {
     const query = decodeURIComponent(req.params.query);
-    const results = await media_search.search(query);
+    const ytSearch = await getYouTubeSearch();
+    const results = await ytSearch.search(query);
     res.json({ videoId: results?.[0]?.id?.videoId || null });
   } catch (err) {
     console.error("search-youtube error:", err);
@@ -601,11 +632,12 @@ app.get('/api/movie-recommendations-with-youtube/:userId', requireAuth, async (r
     const recommendations = movieRecSystem.getRecommendations(userId, limit);
 
     // Enrich with YouTube trailers
+    const ytSearch = await getYouTubeSearch();
     const enriched = await Promise.all(
       recommendations.map(async (movie) => {
         try {
           const searchQuery = `${movie.title} official trailer`;
-          const ytResults = await media_search.search(searchQuery);
+          const ytResults = await ytSearch.search(searchQuery);
           const video = ytResults?.[0];
 
           return {

@@ -949,6 +949,16 @@
     let authToken = null;
     let existingData = null;
 
+    // Helper function to get fresh token (forces refresh if needed)
+    async function getFreshToken() {
+      if (!currentUser) {
+        throw new Error('No user logged in');
+      }
+      // Force refresh token to ensure it's not expired
+      authToken = await currentUser.getIdToken(true);
+      return authToken;
+    }
+
     // Auth check
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
@@ -956,15 +966,16 @@
         return;
       }
       currentUser = user;
-      authToken = await user.getIdToken();
+      authToken = await user.getIdToken(true); // Force fresh token
       checkExistingData();
     });
 
     // Check if existing data is available
     async function checkExistingData() {
       try {
+        const token = await getFreshToken();
         const response = await fetch('/api/movie-stats', {
-          headers: { 'Authorization': `Bearer ${authToken}` }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
         
         if (response.ok) {
@@ -993,8 +1004,9 @@
       showLoading('Loading existing model...');
       
       try {
+        const token = await getFreshToken();
         const response = await fetch('/api/movie-stats', {
-          headers: { 'Authorization': `Bearer ${authToken}` }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
         
         const data = await response.json();
@@ -1003,7 +1015,7 @@
           displayStats(data.stats);
           
           const usersResponse = await fetch('/api/movie-users', {
-            headers: { 'Authorization': `Bearer ${authToken}` }
+            headers: { 'Authorization': `Bearer ${token}` }
           });
           
           if (usersResponse.ok) {
@@ -1144,6 +1156,9 @@
       showLoading('Reading files...');
 
       try {
+        // Get fresh token before API call
+        const token = await getFreshToken();
+        
         const ratingsText = await readFileAsText(ratingsFile);
         showLoading('Processing ratings data...');
 
@@ -1156,7 +1171,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({ ratingsText, moviesText })
         });
@@ -1244,8 +1259,9 @@
       showLoading('Generating recommendations & fetching trailers...');
 
       try {
+        const token = await getFreshToken();
         const response = await fetch(`/api/movie-recommendations-with-youtube/${selectedUser}?limit=15`, {
-          headers: { 'Authorization': `Bearer ${authToken}` }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
 
         const data = await response.json();
